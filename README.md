@@ -8,7 +8,8 @@ Make sure `RooGaussStepBernstein` is properly installed! In my case, it is insta
 # User Guide
 The minimization is highly integrated due to some problem with pyroot. It is defined in `Utilities/bkg_functions_fit.py`. The typical minimization of certain background pdf is like this:
 ```
-#PDF#Minimization(x = fit axis, gauss_mu = convolution gaussian mu, histogram, ...PDF specific parameters...,
+#PDF#Minimization(x = fit axis, gauss_mu = convolution gaussian mu, histogram, method, error = Poisson or SumW2, cat = categoty,
+                  ...PDF specific parameters...,
                   printLevel = fitter print level, eps = EDM, offSet = offset of test statistics, strategy = please use 0)
 ```
 Some default values are assigned already, but feel free to play around with them.
