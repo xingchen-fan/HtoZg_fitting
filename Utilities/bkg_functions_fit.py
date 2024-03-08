@@ -50,7 +50,7 @@ def Bern4Minization(x, gauss_mu, histogram, method = "Chi2", error = "Poisson", 
     b4p4 = ROOT.RooRealVar("b4p4_" + cat, "b4p4_" + cat, p_init,-bond,bond)
     sigma_bern4 = ROOT.RooRealVar("sigma_bern4_" + cat,"sigma_bern4_" + cat       ,sigma_init,  0.1, 15.)
     stepval_bern4 = ROOT.RooRealVar("stepval_bern4_" + cat, "stepval_bern4_" + cat, step_init, 95., 115.)
-    bern4_model = ROOT.RooGaussStepBernstein("bern4_" +cat + "_model", "Bernstein4 (X) gauss " + cat, x, gauss_mu, sigma_bern4, stepval_bern4, ROOT.RooArgList(b4p0,b4p1,b4p2,b4p3))
+    bern4_model = ROOT.RooGaussStepBernstein("bern4_" +cat + "_model", "Bernstein4 (X) gauss " + cat, x, gauss_mu, sigma_bern4, stepval_bern4, ROOT.RooArgList(b4p0,b4p1,b4p2,b4p3, b4p4))
     if method == "Chi2":
         if error == "Poisson": chi2 = ROOT.RooChi2Var("chi2_bern4_" + cat, "chi2 bern4 " + cat, bern4_model,  histogram, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
         elif error == "SumW2": chi2 = ROOT.RooChi2Var("chi2_bern4_" + cat, "chi2 bern4 " + cat, bern4_model,  histogram, ROOT.RooFit.DataError(ROOT.RooAbsData.SumwW2))
@@ -71,7 +71,7 @@ def Bern5Minization(x, gauss_mu, histogram, method = "Chi2", error = "Poisson", 
     b5p5 = ROOT.RooRealVar("b5p5_" + cat, "b5p5_" + cat, p_init,-bond,bond)
     sigma_bern5 = ROOT.RooRealVar("sigma_bern5_" + cat,"sigma_bern5_" + cat       ,sigma_init,  0.1, 15.)
     stepval_bern5 = ROOT.RooRealVar("stepval_bern5_" + cat, "stepval_bern5_" + cat, step_init, 95., 115.)
-    bern5_model = ROOT.RooGaussStepBernstein("bern5_" +cat + "_model", "Bernstein5 (X) gauss " + cat, x, gauss_mu, sigma_bern5, stepval_bern5, ROOT.RooArgList(b5p0,b5p1,b5p2,b5p3))
+    bern5_model = ROOT.RooGaussStepBernstein("bern5_" +cat + "_model", "Bernstein5 (X) gauss " + cat, x, gauss_mu, sigma_bern5, stepval_bern5, ROOT.RooArgList(b5p0,b5p1,b5p2,b5p3, b5p4, b5p5))
     if method == "Chi2":
         if error == "Poisson": chi2 = ROOT.RooChi2Var("chi2_bern5_" + cat, "chi2 bern5 " + cat, bern5_model,  histogram, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
         elif error == "SumW2": chi2 = ROOT.RooChi2Var("chi2_bern5_" + cat, "chi2 bern5 " + cat, bern5_model,  histogram, ROOT.RooFit.DataError(ROOT.RooAbsData.SumwW2))
