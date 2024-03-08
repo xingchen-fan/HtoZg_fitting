@@ -17,5 +17,5 @@ Some default values are assigned already, but feel free to play around with them
 ## F Test
 In the `F_test.py`, please change the sample directory. F test of multiple categories can happen in one run, and the print out will become messy. So please modify the file so that you do one category at a time. When calling the F test, please specify the fitting method (Chi2 or NLL).
 ```
-#bash: python3 F_test.py Chi2
+bash$ python3 F_test.py Chi2
 ```
