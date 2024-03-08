@@ -45,3 +45,13 @@ def Minimizer_NLL(nll, printLevel = -1, eps = 100, offSet = False, strategy = 0)
     r = mini.save()
     return r
 
+def Minimizer_Chi2(chi2, printLevel = -1, eps = 100, offSet = False, strategy = 0):
+    mini = ROOT.RooMinimizer(chi2)
+    mini.setPrintLevel(printLevel)
+    mini.setEps(eps)
+    mini.setOffsetting(offSet)
+    mini.setStrategy(strategy)
+    mini.minimize("Minuit2","migrad")
+    mini.hesse()
+    r = mini.save()
+    return r
