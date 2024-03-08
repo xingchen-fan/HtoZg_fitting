@@ -3,7 +3,7 @@ import os
 import sys
 import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
-from bkg_functions import *
+from bkg_functions_fit import *
 from Xc_Minimizer import *
 
 parser = argparse.ArgumentParser(description = "F test method (NLL or Chi2)")
@@ -13,71 +13,34 @@ if not(args.method == "Chi2" or args.method == "NLL") :
     print("Please use the correct method.")
     sys.exit(1)
 
-def errorType(e_type):
-    if e_type == "Poisson":
-        return ROOT.RooAbsData.Poisson
-    if e_type == "SumW2":
-        return ROOT.RooAbsData.SumW2
 
-def singleBernFTest_Chi2(x, gauss_mu, histogram, cat = "", e_type = "Poisson"):
-    bern2_model = Bern2(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern2chi2 = ROOT.RooChi2Var("bern2chi2_" + cat, "bern2chi2_" + cat, bern2_model, histogram, ROOT.RooFit.DataError(errorType(e_type)))
-    bern3_model = Bern3(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern3chi2 = ROOT.RooChi2Var("bern2chi2_" + cat, "bern2chi2_" + cat, bern3_model, histogram, ROOT.RooFit.DataError(errorType(e_type)))
-    bern4_model = Bern4(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern4chi2 = ROOT.RooChi2Var("bern2chi2_" + cat, "bern2chi2_" + cat, bern4_model, histogram, ROOT.RooFit.DataError(errorType(e_type)))
-    bern5_model = Bern5(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern5chi2 = ROOT.RooChi2Var("bern2chi2_" + cat, "bern2chi2_" + cat, bern5_model, histogram, ROOT.RooFit.DataError(errorType(e_type)))
+def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = "Poisson", offset = False):
+    bern2_model = Bern2Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 10, 7., 105., \
+                                  printLevel = -1, eps = 1, offSet = offset, strategy = 0)
+    bern2_model[0].Print("v")
+    bern3_model = Bern3Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 50, 7., 105.,\
+                                  printLevel = -1, eps = 1, offSet = offset, strategy = 0)
+    bern3_model[0].Print("v")
+    bern4_model = Bern4Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 50, 7., 105.,\
+                                  printLevel = -1, eps = 1, offSet = offset, strategy = 0)
+    bern4_model[0].Print("v")
+    bern5_model = Bern5Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 50, 7., 105.,\
+                                  printLevel = -1, eps = 1, offSet = offset, strategy = 0)
+    bern5_model[0].Print("v")
 
-    Minimizer_Chi2(bern2chi2, -1, 100, False, 0)
-    r1 = Minimizer_Chi2(bern2chi2, -1, 0.1, False, 0)
-    r1.Print("v")
-    Minimizer_Chi2(bern3chi2, -1, 100, False, 0)
-    r2 = Minimizer_Chi2(bern3chi2, -1, 0.1, False, 0)
-    r2.Print("v")
-    Minimizer_Chi2(bern4chi2, -1, 100, False, 0)
-    r3 = Minimizer_Chi2(bern4chi2, -1, 0.1, False, 0)
-    r3.Print("v")
-    Minimizer_Chi2(bern5chi2, -1, 100, False, 0)
-    r4 = Minimizer_Chi2(bern5chi2, -1, 0.1, False, 0)
-    r4.Print("v")
-    chi2s = [bern2chi2.geatVal(), bern3chi2.geatVal(), bern4chi2.geatVal(), bern5chi2.geatVal()]
-    fs = []
-    for i in range(len(chi2s) - 1):
-        fs.append(ROOT.Math.fdistribution_cdf_c((chi2s[i] - chi2s[i+1])*(260-5-i)/chi2s[i+1], 1, 260-5-i))
     
-    print("Chi2 = ", chi2s)
+    stat = [bern2_model[1], bern3_model[1], bern4_model[1], bern5_model[1]]
+    fs = []
+    if method == "Chi2":
+        for i in range(len(stat) - 1):
+            fs.append(ROOT.Math.fdistribution_cdf_c((stat[i] - stat[i+1])*(260-5-i)/stat[i+1], 1, 260-5-i))
+    elif method == "NLL":
+        for i in range(len(stat) - 1):
+            fs.append(ROOT.Math.chisquared_cdf_c(2*(stat[i] - stat[i+1]), 1))
+
+    print(method, " = ", stat)
     print("P-value = ", fs)
 
-def singleBernFTest_NLL(x, gauss_mu, histogram, cat = ""):
-    bern2_model = Bern2(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern2NLL = ROOT.RooNLLVar("bern2NLL_" + cat, "bern2NLL_" + cat, bern2_model, histogram)
-    bern3_model = Bern3(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern3NLL = ROOT.RooNLLVar("bern2NLL_" + cat, "bern2NLL_" + cat, bern3_model, histogram)
-    bern4_model = Bern4(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern4NLL = ROOT.RooNLLVar("bern2NLL_" + cat, "bern2NLL_" + cat, bern4_model, histogram)
-    bern5_model = Bern5(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern5NLL = ROOT.RooNLLVar("bern2NLL_" + cat, "bern2NLL_" + cat, bern5_model, histogram)
-
-    Minimizer_NLL(bern2NLL, -1, 100, False, 0)
-    r1 = Minimizer_NLL(bern2NLL, -1, 0.1, True, 0)
-    r1.Print("v")
-    Minimizer_NLL(bern3NLL, -1, 100, False, 0)
-    r2 = Minimizer_NLL(bern3NLL, -1, 0.1, True, 0)
-    r2.Print("v")
-    Minimizer_NLL(bern4NLL, -1, 100, False, 0)
-    r3 = Minimizer_NLL(bern4NLL, -1, 0.1, True, 0)
-    r3.Print("v")
-    Minimizer_NLL(bern5NLL, -1, 100, False, 0)
-    r4 = Minimizer_NLL(bern5NLL, -1, 0.1, True, 0)
-    r4.Print("v")
-    NLLs = [bern2NLL.geatVal(), bern3NLL.geatVal(), bern4NLL.geatVal(), bern5NLL.geatVal()]
-    fs = []
-    for i in range(len(NLLs) - 1):
-        fs.append(ROOT.Math.chisquared_cdf_c(2*(NLLs[i] - NLLs[i+1]), 1))
-    
-    print("NLL = ", NLLs)
-    print("P-value = ", fs)
 
 
 
@@ -181,18 +144,12 @@ data_hist_untagged3_sig = ROOT.RooDataHist("data_hist_untagged3_sig", "data_hist
 data_hist_untagged4_sig = ROOT.RooDataHist("data_hist_untagged4_sig", "data_hist_untagged4_sig", x, u4_sig_run2)
 
 
-if args.method == "Chi2":
-    singleBernFTest_Chi2(x, u_gauss, data_hist_untagged1_bkg, "u1", "Poisson")
-    singleBernFTest_Chi2(x, u_gauss, data_hist_untagged2_bkg, "u2", "Poisson")
-    singleBernFTest_Chi2(x, u_gauss, data_hist_untagged3_bkg, "u3", "Poisson")
-    singleBernFTest_Chi2(x, u_gauss, data_hist_untagged4_bkg, "u4", "Poisson")
 
+singleBernFTest(x, mu_gauss, data_hist_untagged1_bkg, "u1", args.method, "Poisson", False)
+# singleBernFTest(x, mu_gauss, data_hist_untagged2_bkg, "u2", args.method, "Poisson", False)
+# singleBernFTest(x, mu_gauss, data_hist_untagged3_bkg, "u3", args.method, "Poisson", False)
+# singleBernFTest(x, mu_gauss, data_hist_untagged4_bkg, "u4", args.method, "Poisson", False)
 
-elif args.method == "NLL":
-    singleBernFTest_NLL(x, u_gauss, data_hist_untagged1_bkg, "u1")
-    singleBernFTest_NLL(x, u_gauss, data_hist_untagged2_bkg, "u2")
-    singleBernFTest_NLL(x, u_gauss, data_hist_untagged3_bkg, "u3")
-    singleBernFTest_NLL(x, u_gauss, data_hist_untagged4_bkg, "u4") 
 
 
 

@@ -34,23 +34,23 @@ def SumW2Err (nll, mini):
     nll.applyWeightSquared(False)
     return err
 
-def Minimizer_NLL(nll, printLevel = -1, eps = 100, offSet = False, strategy = 0):
-    mini = ROOT.RooMinimizer(nll)
-    mini.setPrintLevel(printLevel)
-    mini.setEps(eps)
-    mini.setOffsetting(offSet)
-    mini.setStrategy(strategy)
+def Minimizer_NLL(nll_, printLevel_ = -1, eps_ = 100, offSet_ = False, strategy_ = 0):
+    mini = ROOT.RooMinimizer(nll_)
+    mini.setPrintLevel(printLevel_)
+    mini.setEps(eps_)
+    mini.setOffsetting(offSet_)
+    mini.setStrategy(strategy_)
     mini.minimize("Minuit2","migrad")
     mini.hesse()
     r = mini.save()
     return r
 
-def Minimizer_Chi2(chi2, printLevel = -1, eps = 100, offSet = False, strategy = 0):
-    mini = ROOT.RooMinimizer(chi2)
-    mini.setPrintLevel(printLevel)
-    mini.setEps(eps)
-    mini.setOffsetting(offSet)
-    mini.setStrategy(strategy)
+def Minimizer_Chi2(chi2_, printLevel_ = -1, eps_ = 100, offSet_ = False, strategy_ = 0):
+    mini = ROOT.RooMinimizer(chi2_)
+    mini.setPrintLevel(printLevel_)
+    mini.setEps(eps_)
+    mini.setOffsetting(offSet_)
+    mini.setStrategy(strategy_)
     mini.minimize("Minuit2","migrad")
     mini.hesse()
     r = mini.save()
