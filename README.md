@@ -3,7 +3,7 @@
 # Environment
 The code is tested unfer `CMSSW_12_6_0` with `ROOT 6.24` and `Python 3.9.14`. 
 
-Make sure `RooGaussStepBernstein` is properly installed! In my case, it is installed in the `combine`, specifiacally in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
+Make sure `RooGaussStepBernstein` is properly installed! In my case, it is installed in the `combine`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
 
 # User Guide
 The minimization is highly integrated due to some problem with pyroot. It is defined in `Utilities/bkg_functions_fit.py`. The typical minimization of certain background pdf is like this:
