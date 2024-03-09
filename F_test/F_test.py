@@ -68,12 +68,13 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
             Minimizer_Chi2(entry, -1, 100, False, strategy)
             r = Minimizer_Chi2(entry, -1, eps, offset, strategy)
             r.Print("V")
-            print("Cov q = ", r.covQual(), " status = ", r.status())
+            # print("Cov q = ", r.covQual(), " status = ", r.status(), end="\n\n")
     elif method == "NLL": 
         for entry in stats:
             print(entry.GetTitle())
             Minimizer_NLL(entry, -1, 100, False, strategy)
-            Minimizer_NLL(entry, -1, eps, offset, strategy).Print("V")
+            r = Minimizer_NLL(entry, -1, eps, offset, strategy).Print("V")
+            r.Print("V")
     output = [stat1.getVal(), stat2.getVal(), stat3.getVal(), stat4.getVal()]
     fs = []
     if method == "Chi2":
