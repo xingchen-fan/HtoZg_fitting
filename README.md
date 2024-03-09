@@ -30,3 +30,4 @@ When calling the F test, please specify the fitting method (Chi2 or NLL).
 ```
 bash$ python3 F_test.py Chi2
 ```
+Output has both the test statistics and the P-values.
