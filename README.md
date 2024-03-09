@@ -12,7 +12,7 @@ model = #PDF#Class(x, gauss_mu, cat, sigma_init, step_init, ...#PDF# specific ar
 ```
 where `x` is the fitting axis, `gauss_mu` is the mean of the convolution Gaussian, `cat` is the category name, `sigma_init` is the initial value of Gaussian sigma, and `step_init` is the step position initial value. Some default values are assigned already, but feel free to play around with them.
 
-Then define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. The typical minimization of certain test statistics is like this:
+Then define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. A typical minimization of certain test statistics is like this:
 ```
 Minimizer_#STAT#(STAT, printLevel, eps, offset, strategy)
 ```
