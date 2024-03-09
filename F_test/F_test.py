@@ -4,6 +4,7 @@ import sys
 import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 from bkg_functions_fit import *
+from bkg_functions_class import *
 from Xc_Minimizer import *
 
 parser = argparse.ArgumentParser(description = "F test method (NLL or Chi2)")
