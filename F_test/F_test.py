@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath("../Utilities/"))
 from bkg_functions_fit import *
 from bkg_functions_class import *
 from Xc_Minimizer import *
+from plot_utility import *
 
 parser = argparse.ArgumentParser(description = "F test method (NLL or Chi2)")
 parser.add_argument("method")
@@ -86,6 +87,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
 
     print(method, " = ", output)
     print("P-value = ", fs)
+    plotClass(x, histogram, bern2_model)
 
 
 

@@ -1,0 +1,48 @@
+import ROOT
+from bkg_functions_class import *
+
+def plotClass (x, datahist, someClass, title="Histogram"):
+    ROOT.gStyle.SetOptStat(0)
+    h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
+    model_hist = someClass.pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
+
+    ratio = ROOT.TH1D("ratio", "ratio", 65, 105, 170)
+    ratio.Divide(h_hist, model_hist)
+    ratio.SetMarkerColor(ROOT.kRed)
+    ratio.SetMarkerStyle(8)
+    ratio.SetMarkerSize(1)
+    ratio.SetTitle("")
+    ratio.GetYaxis().SetRangeUser(0.8, 1.2)
+    ratio.GetXaxis().SetTitleSize(0.1)
+    ratio.GetXaxis().SetTitle("m_{llg}")
+    ratio.GetXaxis().SetLabelSize(0.15)
+    ratio.GetYaxis().SetTitleSize(0.1)
+    ratio.GetYaxis().SetLabelSize(0.1)
+    ratio.GetYaxis().SetTitleOffset(0.2)
+    ratio.GetYaxis().SetTitle("Ratio")
+
+    line = ROOT.TLine( 105, 1, 170, 1)
+    line.SetLineColor(ROOT.kBlack)
+    line.SetLineStyle(7)
+    line.SetLineWidth(2)
+
+    x.setBins(65)
+    show_hist = ROOT.RooDataHist("show_hist", "show_hist", x, datahist)
+    ROOT.gStyle.SetOptStat(0)
+    can = ROOT.TCanvas()
+    pad1 = ROOT.TPad("pad1","",0,0.18,1,1)
+    pad2 = ROOT.TPad("pad2","",0,0,1,0.23)
+    pad1.Draw()
+    pad2.Draw()
+    pad1.cd()
+    plot = x.frame()
+    plot.SetTitle(title)
+
+    show_hist.plotOn( plot, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+    someClass.pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2))
+    plot.Draw()
+    pad2.cd()
+    ratio.Draw()
+    line.Draw("same")
+    can.Draw()
+    x.setBins(260)
