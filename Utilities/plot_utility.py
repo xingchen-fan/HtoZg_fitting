@@ -1,7 +1,7 @@
 import ROOT
 from bkg_functions_class import *
 
-def plotClass (x, datahist, someClass, title="Histogram"):
+def plotClass (x, datahist, someClass, title="Histogram", output_dir="plots/"):
     ROOT.gStyle.SetOptStat(0)
     h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
     model_hist = someClass.pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
@@ -52,5 +52,5 @@ def plotClass (x, datahist, someClass, title="Histogram"):
    # ROOT.gPad.SetBottomMargin(0.05)
     ratio.Draw()
     line.Draw("same")
-    can.SaveAs(title+".pdf")
+    can.SaveAs(output_dir + title+".pdf")
     x.setBins(260)
