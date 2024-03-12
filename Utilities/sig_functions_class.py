@@ -10,11 +10,11 @@ class DSCB_Class:
 
         self.pdf = ROOT.RooCrystalBall.RooCrystalBall("sig_model_DS_"+cat, "sig_model_DS_"+cat, x, MH, self.sigma, self.alphaL, self.nL, self.alphaR, self.nR)
 
-        def setConst(self, constant = True):
-            self.sigma.setConstant(constant)
-            self.nL.setConstant(constant)
-            self.nR.setConstant(constant)
-            self.alphaL.setConstant(constant)
-            self.alphaR.setConstant(constant)
+    def setConst(self, constant = True):
+        self.sigma.setConstant(constant)
+        self.nL.setConstant(constant)
+        self.nR.setConstant(constant)
+        self.alphaL.setConstant(constant)
+        self.alphaR.setConstant(constant)
 
 

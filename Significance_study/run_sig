@@ -1,0 +1,11 @@
+#!/bin/bash
+root -l -b -q 'range_signi_opt.c(100)' >../public/significance_output/output_bern5_100_u4.txt
+root -l -b -q 'range_signi_opt.c(102)' >../public/significance_output/output_bern5_102_u4.txt
+root -l -b -q 'range_signi_opt.c(104)' >../public/significance_output/output_bern5_104_u4.txt
+root -l -b -q 'range_signi_opt.c(106)' >../public/significance_output/output_bern5_106_u4.txt
+root -l -b -q 'range_signi_opt.c(108)' >../public/significance_output/output_bern5_108_u4.txt
+root -l -b -q 'range_signi_opt.c(110)' >../public/significance_output/output_bern5_110_u4.txt
+root -l -b -q 'range_signi_opt.c(112)' >../public/significance_output/output_bern5_112_u4.txt
+root -l -b -q 'range_signi_opt.c(114)' >../public/significance_output/output_bern5_114_u4.txt
+root -l -b -q 'range_signi_opt.c(116)' >../public/significance_output/output_bern5_116_u4.txt
+root -l -b -q 'range_signi_opt.c(118)' >../public/significance_output/output_bern5_118_u4.txt
