@@ -63,7 +63,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
         stat3 = ROOT.RooNLLVar("stat_bern4_" + cat, "stat bern4 " + cat, bern4_model.pdf,  histogram)
         stat4 = ROOT.RooNLLVar("stat_bern5_" + cat, "stat bern5 " + cat, bern5_model.pdf,  histogram)
 
-    stats = [stat1, stat2]
+    stats = [stat1, stat2, stat3, stat4]
     if method == "Chi2": 
         for entry in stats:
             print(entry.GetTitle())
@@ -116,32 +116,18 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 # expbkg_u3 = u3_bkg_run2.sumEntries()
 # expbkg_u4 =  u4_bkg_run2.sumEntries()
 
-# Dat reader
+# Cornell MC sample dat reader and make RooDataHist
+x.setBins(260)
 reader = readDat(list, "../../../../CMSSW_11_3_4/src/HToZg_combine/")
 
-# Make RooDataHist
-x.setBins(260)
-data_hist_untagged1 = ROOT.RooDataHist("data_hist_untagged1", "data_hist_untagged1", x, reader.u1_tot_run2)
-data_hist_untagged2 = ROOT.RooDataHist("data_hist_untagged2", "data_hist_untagged2", x, reader.u2_tot_run2)
-data_hist_untagged3 = ROOT.RooDataHist("data_hist_untagged3", "data_hist_untagged3", x, reader.u3_tot_run2)
-data_hist_untagged4 = ROOT.RooDataHist("data_hist_untagged4", "data_hist_untagged4", x, reader.u4_tot_run2)
+# Beijing data sample root reader and make RooDataHist
+#x.setBins(260)
+#reader = readRoot(x, "~/beijing_sample/data.root")
 
-data_hist_untagged1_bkg = ROOT.RooDataHist("data_hist_untagged1_bkg", "data_hist_untagged1_bkg", x, reader.u1_bkg_run2)
-data_hist_untagged2_bkg = ROOT.RooDataHist("data_hist_untagged2_bkg", "data_hist_untagged2_bkg", x, reader.u2_bkg_run2)
-data_hist_untagged3_bkg = ROOT.RooDataHist("data_hist_untagged3_bkg", "data_hist_untagged3_bkg", x, reader.u3_bkg_run2)
-data_hist_untagged4_bkg = ROOT.RooDataHist("data_hist_untagged4_bkg", "data_hist_untagged4_bkg", x, reader.u4_bkg_run2)
-
-data_hist_untagged1_sig = ROOT.RooDataHist("data_hist_untagged1_sig", "data_hist_untagged1_sig", x, reader.u1_sig_run2)
-data_hist_untagged2_sig = ROOT.RooDataHist("data_hist_untagged2_sig", "data_hist_untagged2_sig", x, reader.u2_sig_run2)
-data_hist_untagged3_sig = ROOT.RooDataHist("data_hist_untagged3_sig", "data_hist_untagged3_sig", x, reader.u3_sig_run2)
-data_hist_untagged4_sig = ROOT.RooDataHist("data_hist_untagged4_sig", "data_hist_untagged4_sig", x, reader.u4_sig_run2)
-
-
-
-singleBernFTest(x, mu_gauss, data_hist_untagged1_bkg, "u1", args.method, "Poisson", False)
-# singleBernFTest(x, mu_gauss, data_hist_untagged2_bkg, "u2", args.method, "Poisson", False)
-# singleBernFTest(x, mu_gauss, data_hist_untagged3_bkg, "u3", args.method, "Poisson", False)
-# singleBernFTest(x, mu_gauss, data_hist_untagged4_bkg, "u4", args.method, "Poisson", False)
+singleBernFTest(x, mu_gauss, reader.data_hist_untagged1_bkg, "u1", args.method, "Poisson", False)
+# singleBernFTest(x, mu_gauss, reader.data_hist_untagged2_bkg, "u2", args.method, "Poisson", False)
+# singleBernFTest(x, mu_gauss, reader.data_hist_untagged3_bkg, "u3", args.method, "Poisson", False)
+# singleBernFTest(x, mu_gauss, reader.data_hist_untagged4_bkg, "u4", args.method, "Poisson", False)
 
 
 

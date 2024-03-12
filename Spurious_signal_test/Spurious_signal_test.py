@@ -33,29 +33,17 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 # expbkg_u3 = u3_bkg_run2.sumEntries()
 # expbkg_u4 =  u4_bkg_run2.sumEntries()
 
-# Dat reader
-reader = readDat(list, "../../../../CMSSW_11_3_4/")
-
-# Make RooDataHist
+# Cornell MC sample dat reader and make RooDataHist
 x.setBins(260)
+reader = readDat(list, "../../../../CMSSW_11_3_4/src/HToZg_combine/")
 
-data_hist_untagged1 = ROOT.RooDataHist("data_hist_untagged1", "data_hist_untagged1", x, reader.u1_tot_run2)
-data_hist_untagged2 = ROOT.RooDataHist("data_hist_untagged2", "data_hist_untagged2", x, reader.u2_tot_run2)
-data_hist_untagged3 = ROOT.RooDataHist("data_hist_untagged3", "data_hist_untagged3", x, reader.u3_tot_run2)
-data_hist_untagged4 = ROOT.RooDataHist("data_hist_untagged4", "data_hist_untagged4", x, reader.u4_tot_run2)
+# Beijing data sample root reader and make RooDataHist
+#x.setBins(260)
+#reader = readRoot(x, "~/beijing_sample/data.root")
 
-data_hist_untagged1_bkg = ROOT.RooDataHist("data_hist_untagged1_bkg", "data_hist_untagged1_bkg", x, reader.u1_bkg_run2)
-data_hist_untagged2_bkg = ROOT.RooDataHist("data_hist_untagged2_bkg", "data_hist_untagged2_bkg", x, reader.u2_bkg_run2)
-data_hist_untagged3_bkg = ROOT.RooDataHist("data_hist_untagged3_bkg", "data_hist_untagged3_bkg", x, reader.u3_bkg_run2)
-data_hist_untagged4_bkg = ROOT.RooDataHist("data_hist_untagged4_bkg", "data_hist_untagged4_bkg", x, reader.u4_bkg_run2)
+hist_sig = reader.data_hist_untagged1_sig
+hist_bkg = reader.data_hist_untagged1_bkg
 
-data_hist_untagged1_sig = ROOT.RooDataHist("data_hist_untagged1_sig", "data_hist_untagged1_sig", x, reader.u1_sig_run2)
-data_hist_untagged2_sig = ROOT.RooDataHist("data_hist_untagged2_sig", "data_hist_untagged2_sig", x, reader.u2_sig_run2)
-data_hist_untagged3_sig = ROOT.RooDataHist("data_hist_untagged3_sig", "data_hist_untagged3_sig", x, reader.u3_sig_run2)
-data_hist_untagged4_sig = ROOT.RooDataHist("data_hist_untagged4_sig", "data_hist_untagged4_sig", x, reader.u4_sig_run2)
-
-hist_sig = data_hist_untagged1_sig
-hist_bkg = data_hist_untagged1_bkg
 # Define bkg and sig model
 cat = "u1"
 MH = ROOT.RooRealVar("MH","MH"       ,124.7, 120., 130.)
