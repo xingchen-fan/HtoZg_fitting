@@ -55,15 +55,15 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     if method == "Chi2": 
         stat1 = ROOT.RooChi2Var("stat_bern2_" + cat, "stat bern2 " + cat, bern2_model.pdf,  histogram, error)
         stat2 = ROOT.RooChi2Var("stat_bern3_" + cat, "stat bern3 " + cat, bern3_model.pdf,  histogram, error)
-        stat3 = ROOT.RooChi2Var("stat_bern4_" + cat, "stat bern4 " + cat, bern4_model.pdf,  histogram, error)
-        stat4 = ROOT.RooChi2Var("stat_bern5_" + cat, "stat bern5 " + cat, bern5_model.pdf,  histogram, error)
+       # stat3 = ROOT.RooChi2Var("stat_bern4_" + cat, "stat bern4 " + cat, bern4_model.pdf,  histogram, error)
+        #stat4 = ROOT.RooChi2Var("stat_bern5_" + cat, "stat bern5 " + cat, bern5_model.pdf,  histogram, error)
     elif method == "NLL":
         stat1 = ROOT.RooNLLVar("stat_bern2_" + cat, "stat bern2 " + cat, bern2_model.pdf,  histogram)
         stat2 = ROOT.RooNLLVar("stat_bern3_" + cat, "stat bern3 " + cat, bern3_model.pdf,  histogram)
         stat3 = ROOT.RooNLLVar("stat_bern4_" + cat, "stat bern4 " + cat, bern4_model.pdf,  histogram)
         stat4 = ROOT.RooNLLVar("stat_bern5_" + cat, "stat bern5 " + cat, bern5_model.pdf,  histogram)
 
-    stats = [stat1, stat2, stat3, stat4]
+    stats = [stat1, stat2]
     if method == "Chi2": 
         for entry in stats:
             print(entry.GetTitle())
@@ -77,7 +77,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
             Minimizer_NLL(entry, -1, 100, False, strategy)
             r = Minimizer_NLL(entry, -1, eps, offset, strategy).Print("V")
             r.Print("V")
-    output = [stat1.getVal(), stat2.getVal(), stat3.getVal(), stat4.getVal()]
+    output = [stat1.getVal(), stat2.getVal()]
     fs = []
     if method == "Chi2":
         for i in range(len(output) - 1):

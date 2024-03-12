@@ -3,7 +3,7 @@
 # Environment
 The code is tested unfer `CMSSW_12_6_0` with `ROOT 6.24` and `Python 3.9.14`. 
 
-Make sure `RooGaussStepBernstein` is properly installed! In my case, it is installed in the `combine`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
+Make sure `RooGaussStepBernstein` is properly installed! In my case, it is installed in the `combine v9.1.0`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
 
 # User Guide
 The functions are defined in `Utilities/bkg_functions_class.py`. A typical definition of a model is like this: 
