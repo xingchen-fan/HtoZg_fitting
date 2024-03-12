@@ -1,10 +1,10 @@
 import ROOT
 from bkg_functions_class import *
 
-def plotClass (x, datahist, someClass, title="Histogram", output_dir="plots/"):
+def plotClass (x, datahist, pdf, title="Histogram", output_dir="plots/"):
     ROOT.gStyle.SetOptStat(0)
     h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
-    model_hist = someClass.pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
+    model_hist = pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
 
     ratio = ROOT.TH1D("ratio", "ratio", 65, 105, 170)
     ratio.Divide(h_hist, model_hist)
@@ -44,7 +44,7 @@ def plotClass (x, datahist, someClass, title="Histogram", output_dir="plots/"):
     ROOT.gPad.SetPad(0.0, 0.3, 1.0, 1.0)
     ROOT.gPad.SetBottomMargin(0)
     show_hist.plotOn( plot, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-    someClass.pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2))
+    pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2))
     plot.Draw()
     can.cd(2)
     ROOT.gPad.SetPad(0.0, 0.1, 1.0, 0.3)

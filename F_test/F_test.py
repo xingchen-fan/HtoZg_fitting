@@ -87,7 +87,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
 
     print(method, " = ", output)
     print("P-value = ", fs)
-    plotClass(x, histogram, bern2_model)
+    plotClass(x, histogram, bern2_model.pdf)
 
 
 
