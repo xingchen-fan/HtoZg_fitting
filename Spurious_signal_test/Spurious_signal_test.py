@@ -34,7 +34,7 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 # expbkg_u4 =  u4_bkg_run2.sumEntries()
 
 # Dat reader
-reader = readDat(list)
+reader = readDat(list, "../../../../CMSSW_11_3_4/")
 
 # Make RooDataHist
 x.setBins(260)

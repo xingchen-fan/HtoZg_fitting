@@ -3,7 +3,7 @@ import ROOT
 # Cornell sample in dat format
 
 class readDat:
-    def __init__(self, list):
+    def __init__(self, list, dir=""):
         x = list[0]
         y = list[1]
         w = list[2]
@@ -15,9 +15,9 @@ class readDat:
         njet = list[8]
 
         # Read dat samples
-        bkg_run2 = ROOT.RooDataSet.read("../SMZg_deathvalley_v3_untagged.dat, ../DY_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet))
-        sig_run2 = ROOT.RooDataSet.read("../FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet))
-        tot_run2 = ROOT.RooDataSet.read("../SMZg_deathvalley_v3_untagged.dat, ../DY_deathvalley_v3_untagged.dat, ../FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet))
+        bkg_run2 = ROOT.RooDataSet.read(dir +"SMZg_deathvalley_v3_untagged.dat," + dir + "DY_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet))
+        sig_run2 = ROOT.RooDataSet.read(dir + "FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet))
+        tot_run2 = ROOT.RooDataSet.read(dir + "SMZg_deathvalley_v3_untagged.dat,"+ dir + "DY_deathvalley_v3_untagged.dat," + dir + "FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet))
 
         bdt1 = -0.36
         bdt2 = -0.06
@@ -71,8 +71,6 @@ class readDat:
         self.u4_tot_run2 = ROOT.RooDataSet("u4_tot_run2", "u4_tot_run2", tot_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "nlep <= 2 && njet < 2 && bdt > " + str(bdt1) +" && bdt < " + str(bdt2) , "w")
 
 
-
-        
 
         
 
