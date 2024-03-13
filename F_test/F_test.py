@@ -8,6 +8,8 @@ from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
+ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 parser = argparse.ArgumentParser(description = "F test method (NLL or Chi2)")
 parser.add_argument("method")

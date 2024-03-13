@@ -9,6 +9,8 @@ from sig_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
+ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
