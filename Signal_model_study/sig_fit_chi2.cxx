@@ -1018,7 +1018,7 @@ int fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, 
 
 }
 
-void sig_fit_chi2(){
+void sig_fit_chi2(string year, string cat, string lepton){
   RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL) ;
   RooRealVar x("x", "m_llg", LOWX, HIGHX);
   RooRealVar y("y", "photon pT", 15., 1000.);
@@ -1034,7 +1034,7 @@ void sig_fit_chi2(){
   RooDataSet* ULsample = RooDataSet::read("../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged4_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged3_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged2_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged1_ratio_extended.dat", RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet));
 
 
-  RooDataSet f_data_sig("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "2017","w");
+  RooDataSet f_data_sig("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), year.c_str(),"w");
 
 
 
@@ -1057,46 +1057,25 @@ void sig_fit_chi2(){
   RooDataSet *  d_el_B_u4 = (RooDataSet*)d_el_u4->reduce(RooArgSet(x),"ph_eta > -1.4442 && ph_eta < 1.4442");
   RooDataSet *  d_el_E_u4 = (RooDataSet*)d_el_u4->reduce(RooArgSet(x),"(ph_eta > -2.5 && ph_eta < -1.566) || (ph_eta > 1.566 && ph_eta < 2.5)");
 
-
-  //Set fit initial values
-
   TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
   TLegend *leg = new TLegend(0.1,0.9,0.45,0.5);
   leg->SetTextSize(0.015);
 
   x.setBins(NBIN);
-  RooDataHist h_el_u1("h_el_u1", "h_el_u1", RooArgSet(x), *d_el_u1);
-  RooDataHist h_el_u2("h_el_u2", "h_el_u2", RooArgSet(x), *d_el_u2);
-  RooDataHist h_el_u3("h_el_u3", "h_el_u3", RooArgSet(x), *d_el_u3);
-  RooDataHist h_el_u4("h_el_u4", "h_el_u4", RooArgSet(x), *d_el_u4);
-
-  RooDataHist h_mu_u1("h_mu_u1", "h_mu_u1", RooArgSet(x), *d_mu_u1);
-  RooDataHist h_mu_u2("h_mu_u2", "h_mu_u2", RooArgSet(x), *d_mu_u2);
-  RooDataHist h_mu_u3("h_mu_u3", "h_mu_u3", RooArgSet(x), *d_mu_u3);
-  RooDataHist h_mu_u4("h_mu_u4", "h_mu_u4", RooArgSet(x), *d_mu_u4);
-  /*  
-  TCanvas *c0 = new TCanvas("c0", "c0", 800, 800);
-  c0->cd();
-  xframe->Draw();
-  c0->Draw();
-
-  TCanvas *c1 = new TCanvas("c1", "c1", 800, 800);
-  c1->cd();
-  xframe_h->Draw();
-  c1->Draw();
-  */
-
-  // fit_hist_sum4Gaus_order1(h_el_u4, x, "2017 Ele GGF Cat 4", c4, leg, true);
-  // fit_hist_DSCB(h_el_u4, x, "2017 Ele GGF Cat 4", c4, leg, true);
-  // c4->cd();
-  // leg->Draw("same");
-  // c4->Draw();
-  // c4->SaveAs("plots/2017 Ele GGF Cat 4.pdf");
+  if (cat == "Cat 1" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u1);
+  else if (cat == "Cat 1" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u1);
+  else if (cat == "Cat 2" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u2);
+  else if (cat == "Cat 2" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u2);
+  else if (cat == "Cat 3" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u3);
+  else if (cat == "Cat 3" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u3);
+  else if (cat == "Cat 4" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u4);
+  else if (cat == "Cat 4" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u4);
   
+  string some_title = year + " " + lepton +" GGF " + cat;
   
-  int status1 = fit_hist_sum4Gaus_order0(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
-  int status2 = fit_hist_DSCB(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
-  int status3 = fit_hist_CBGauss(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true); 
+  int status1 = fit_hist_sum4Gaus_order0(h_fit, x, some_title.c_str(), c4, leg, true);
+  int status2 = fit_hist_DSCB(h_fit, x, some_title.c_str(), c4, leg, true);
+  int status3 = fit_hist_CBGauss(h_fit, x, some_title.c_str(), c4, leg, true); 
   c4->cd();
   leg->Draw("same");
   c4->Draw();
@@ -1104,35 +1083,6 @@ void sig_fit_chi2(){
   
   if (status1==0 && status2==0 && status3==0) std::cout <<"Minimization all good!" << std::endl;
   else std::cout << "Minimization fails!" << std::endl;
-  //fit_hist_DSCB(h_el_ul_u2, h_el_u2, x, "2017 Ele Untagged 2");
-  // fit_hist_DSCB(h_el_ul_u3, h_el_u3, x, "2017 Ele Untagged 3");
-  // fit_hist_DSCB(h_el_ul_u4, h_el_u4, x, "2017 Ele Untagged 4");
-
-  // fit_hist_DSCB(h_mu_ul_u1, h_mu_u1, x, "2017 Muon Untagged 1");
-  // fit_hist_DSCB(h_mu_ul_u2, h_mu_u2, x, "2017 Muon Untagged 2");
-  // fit_hist_DSCB(h_mu_ul_u3, h_mu_u3, x, "2017 Muon Untagged 3");
-  // fit_hist_DSCB(h_mu_ul_u4, h_mu_u4, x, "2017 Muon Untagged 4");
-
-  // fit_hist_CB(h_el_ul_u1, h_el_u1, x, "2017 Ele Untagged 1");
-  // fit_hist_CB(h_el_ul_u2, h_el_u2, x, "2017 Ele Untagged 2");
-  // fit_hist_CB(h_el_ul_u3, h_el_u3, x, "2017 Ele Untagged 3");
-  // fit_hist_CB(h_el_ul_u4, h_el_u4, x, "2017 Ele Untagged 4");
-
-  // fit_hist_CB(h_mu_ul_u1, h_mu_u1, x, "2017 Muon Untagged 1");
-  // fit_hist_CB(h_mu_ul_u2, h_mu_u2, x, "2017 Muon Untagged 2");
-  // fit_hist_CB(h_mu_ul_u3, h_mu_u3, x, "2017 Muon Untagged 3");
-  // fit_hist_CB(h_mu_ul_u4, h_mu_u4, x, "2017 Muon Untagged 4");
-
-  // fit_hist_CBGauss(h_el_ul_u1, h_el_u1, x, "2017 Ele Untagged 1");
-  // fit_hist_CBGauss(h_el_ul_u2, h_el_u2, x, "2017 Ele Untagged 2");
-  // fit_hist_CBGauss(h_el_ul_u3, h_el_u3, x, "2017 Ele Untagged 3");
-  // fit_hist_CBGauss(h_el_ul_u4, h_el_u4, x, "2017 Ele Untagged 4");
-
-  // fit_hist_CBGauss(h_mu_ul_u1, h_mu_u1, x, "2017 Muon Untagged 1");
-  // fit_hist_CBGauss(h_mu_ul_u2, h_mu_u2, x, "2017 Muon Untagged 2");
-  // fit_hist_CBGauss(h_mu_ul_u3, h_mu_u3, x, "2017 Muon Untagged 3");
-  // fit_hist_CBGauss(h_mu_ul_u4, h_mu_u4, x, "2017 Muon Untagged 4");
-  
 
 }
     
