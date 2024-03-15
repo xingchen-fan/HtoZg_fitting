@@ -696,7 +696,7 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas
   string full_ul = ul + ss1;
 
 
-  leg->AddEntry("UL", full_ul.c_str(), "L");
+  leg->AddEntry("CB+Gauss", full_ul.c_str(), "L");
   if (OUTPUT) fclose (stdout);
   combine1.clear();
 
@@ -1058,8 +1058,8 @@ void sig_fit_chi2(){
   //Set fit initial values
 
   TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
-  TLegend *leg = new TLegend(0.1,0.9,0.45,0.7);
-  leg->SetTextSize(0.02);
+  TLegend *leg = new TLegend(0.1,0.9,0.45,0.5);
+  leg->SetTextSize(0.015);
 
   x.setBins(NBIN);
   RooDataHist h_el_u1("h_el_u1", "h_el_u1", RooArgSet(x), *d_el_u1);
