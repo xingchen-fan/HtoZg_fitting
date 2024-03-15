@@ -1,6 +1,5 @@
 #include "RooRealVar.h"
 #include "RooDataSet.h"
-//#include "RooGaussian.h"
 #include "RooProdPdf.h"
 #include "TCanvas.h"
 #include "TAxis.h"
@@ -1061,21 +1060,46 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   TLegend *leg = new TLegend(0.1,0.9,0.45,0.5);
   leg->SetTextSize(0.015);
 
+  RooDataHist *h_fit;
   x.setBins(NBIN);
-  if (cat == "Cat 1" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u1);
-  else if (cat == "Cat 1" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u1);
-  else if (cat == "Cat 2" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u2);
-  else if (cat == "Cat 2" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u2);
-  else if (cat == "Cat 3" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u3);
-  else if (cat == "Cat 3" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u3);
-  else if (cat == "Cat 4" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u4);
-  else if (cat == "Cat 4" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u4);
-  
+  if (cat == "Cat 1" && lepton == "Electron") {
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_el_u1);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 1" && lepton == "Muon") {
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_mu_u1);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 2" && lepton == "Electron") {
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_el_u2);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 2" && lepton == "Muon") {
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_mu_u2);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 3" && lepton == "Electron") {
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_el_u3);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 3" && lepton == "Muon") {
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_mu_u3);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 4" && lepton == "Electron"){
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_el_u4);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 4" && lepton == "Muon"){
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_mu_u4);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+
   string some_title = yr + " " + lepton +" GGF " + cat;
   
-  int status1 = fit_hist_sum4Gaus_order0(h_fit, x, some_title.c_str(), c4, leg, true);
-  int status2 = fit_hist_DSCB(h_fit, x, some_title.c_str(), c4, leg, true);
-  int status3 = fit_hist_CBGauss(h_fit, x, some_title.c_str(), c4, leg, true); 
+  int status1 = fit_hist_sum4Gaus_order0(*h_fit, x, some_title.c_str(), c4, leg, true);
+  int status2 = fit_hist_DSCB(*h_fit, x, some_title.c_str(), c4, leg, true);
+  int status3 = fit_hist_CBGauss(*h_fit, x, some_title.c_str(), c4, leg, true); 
   c4->cd();
   leg->Draw("same");
   c4->Draw();
