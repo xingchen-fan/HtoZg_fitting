@@ -86,7 +86,7 @@ void printQual(int qual) {
   cout << endl;
 }
 
-void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
+int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
   bool OUTPUT = output;
   string name = "DSCB " + def_name;
   string ulname = name + "";
@@ -266,6 +266,7 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
 
   leg->AddEntry("DSCB", full_ul.c_str(), "L");
   if (OUTPUT) fclose (stdout);
+  return status1;
 
 }
 
@@ -546,7 +547,7 @@ void fit_hist_CB(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, string def
 
 }
 
-void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
+int fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
   bool OUTPUT = output;
   string name = "CB+Gauss " + def_name;
   string ulname = name + "";
@@ -698,10 +699,11 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas
   leg->AddEntry("CB+Gauss", full_ul.c_str(), "L");
   if (OUTPUT) fclose (stdout);
   combine1.clear();
+  return status1;
 
 }
 
-void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
+int fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
   bool OUTPUT = output;
   string name = "Sum4Gauss order1 " + def_name;
   string ulname = name + "";
@@ -863,11 +865,12 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   // (*listOfPolyVars_)["mean_g3_order1"].Print();
 
   if (OUTPUT) fclose (stdout);
+  return status1;
 
 }
 
 
-void fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
+int fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
   bool OUTPUT = output;
   string name = "Sum4Gauss order0 " + def_name;
   string ulname = name + "";
@@ -1011,6 +1014,7 @@ void fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name,
   // (*listOfPolyVars_)["mean_g3_order1"].Print();
 
   if (OUTPUT) fclose (stdout);
+  return status1;
 
 }
 
@@ -1090,15 +1094,16 @@ void sig_fit_chi2(){
   // c4->SaveAs("plots/2017 Ele GGF Cat 4.pdf");
   
   
-  fit_hist_sum4Gaus_order0(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
-  fit_hist_DSCB(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
-  fit_hist_CBGauss(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true); 
+  int status1 = fit_hist_sum4Gaus_order0(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
+  int status2 = fit_hist_DSCB(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
+  int status3 = fit_hist_CBGauss(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true); 
   c4->cd();
   leg->Draw("same");
   c4->Draw();
   c4->SaveAs("plots/2017 Muon GGF Cat 3.pdf");
   
-
+  if (status1==0 && status2==0 && status3==0) std::cout <<"Minimization all good!" << std::endl;
+  else std::cout << "Minimization fails!" << setd::endl;
   //fit_hist_DSCB(h_el_ul_u2, h_el_u2, x, "2017 Ele Untagged 2");
   // fit_hist_DSCB(h_el_ul_u3, h_el_u3, x, "2017 Ele Untagged 3");
   // fit_hist_DSCB(h_el_ul_u4, h_el_u4, x, "2017 Ele Untagged 4");
