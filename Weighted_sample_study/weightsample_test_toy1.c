@@ -4,7 +4,7 @@
 #include <sstream>
 using namespace RooFit;
 
-// Toy1 script, simple two samples: fitTo and chi2FitTo, two options, please choose as intended. Please remmber chi2FitTo doesn't have asymptotic error option!
+// Toy1 script, simple two samples: fitTo and chi2FitTo, two options, please choose as intended. Please remember chi2FitTo doesn't have asymptotic error option!
 // ROOT VERSION MUST BE HIGHER THAN 6.28 !!!
 
 template <typename T>
@@ -16,7 +16,7 @@ std::string to_string_with_precision(T a_value, int n = 3)
     return out.str();
 }
 
-void weightsample_test(){
+void weightsample_test_toy1(){
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
     RooRealVar x("x", "x", -1., 1.);
 
@@ -79,7 +79,7 @@ void weightsample_test(){
         c.setVal(0);
         d.setError(0);
         // res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(false), PrintLevel(-1));
-        res = fitline.chi2FitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(false), PrintLevel(-1), DataError(RooAbsData::Poisson));
+        res = fitline.chi2FitTo(hist, Save(true), Strategy(0),Offset(false), PrintLevel(-1), DataError(RooAbsData::Poisson));
         if (i == 1) res->Print("V");
         h_offsumw2->Fill(c.getVal()/c.getError());
         err_offsumw2 += c.getError();

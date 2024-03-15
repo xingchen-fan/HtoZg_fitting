@@ -4,9 +4,8 @@
 #include <sstream>
 using namespace RooFit;
 
-// Toy2 script, explicit weight function: fitTo and chi2FitTo, two options, please choose as intended. Please remember chi2FitTo doesn't have asymptotic error option!
+// Toy1 script, simple two samples: fitTo and chi2FitTo, two options, please choose as intended. Please remember chi2FitTo doesn't have asymptotic error option!
 // ROOT VERSION MUST BE HIGHER THAN 6.28 !!!
-
 
 template <typename T>
 std::string to_string_with_precision(T a_value, int n = 3)
@@ -17,9 +16,9 @@ std::string to_string_with_precision(T a_value, int n = 3)
     return out.str();
 }
 
-void weightsample_test_toy2(){
+void weightsample_test(){
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
-    RooRealVar x("x", "x", 0, 1.);
+    RooRealVar x("x", "x", -1., 1.);
 
     RooRealVar b("b", "b", -0.5, -20, 20);
     RooRealVar a("a", "a", 0.5, -5, 20.);
@@ -28,28 +27,19 @@ void weightsample_test_toy2(){
     RooRealVar e("e", "e", 0.5, -10., 10);
     RooRealVar w1("w1", "w1", 1);
     RooRealVar w2("w2", "w2", 2);
+//Simple two samples------------------------
+    RooGenericPdf line1("line1", "line1", "@1*@0 + 0.5", RooArgList(x, a));
+    RooGenericPdf line2("line2", "line2", "@1*@0 + 0.5", RooArgList(x, b));
 
-//w(x) = 0.4x + 0.5
-    RooGenericPdf line3("line3", "line3", "0.4*@0 + 0.5", RooArgList(x));
-    RooFormulaVar wFunc("wFunc","event weight","0.5/(0.4*x + 0.5)",x);
-//w(x) = 0.9x^2 + 0.2
-    // RooGenericPdf line3("line3", "line3", "0.9*@0*@0 + 0.2", RooArgList(x));
-    // RooFormulaVar wFunc("wFunc","event weight","0.5/(0.9*x*x + 0.2)",x);
-
-
-    // RooGenericPdf line3("line3", "line3", "0.9*@0*@0 + 0.5*@0 + 0.2", RooArgList(x));
-    // RooFormulaVar wFunc("wFunc","event weight","0.5/(0.9*x*x + 0.5*x + 0.2)",x);
-
-    // RooGenericPdf fitline("fitline", "fitline", "@1*@0*@0 + @2", RooArgList(x, c, e));
     RooGenericPdf fitline("fitline", "fitline", "@1*@0 + 0.5", RooArgList(x, c));
     
-    TH1D *h_sumw2 = new TH1D("hsumw2", "hsumw2", 100, -5., 5.);
-    TH1D *h_offsumw2 = new TH1D("hoffsumw2", "hoffsumw2", 100, -5., 5.);
-    TH1D *h_asym = new TH1D("hasym", "hasym", 100, -5., 5.);
-    TH1D *h_dummy = new TH1D("hdummy", "hdummy", 100, -5., 5.);
+    TH1D *h_sumw2 = new TH1D("hsumw2", "hsumw2", 60, -3., 3.);
+    TH1D *h_offsumw2 = new TH1D("hoffsumw2", "hoffsumw2", 60, -3., 3.);
+    TH1D *h_asym = new TH1D("hasym", "hasym", 60, -3., 3.);
+    TH1D *h_dummy = new TH1D("hdummy", "hdummy", 60, -3., 3.);
     
-    TH1D *h_dummy_cen = new TH1D("hdummy_cen", "hdummy_cen", 100, -0.05, 0.05);
-    TH1D *h_weight_cen = new TH1D("hweight_cen", "hweight_cen", 100, -0.05, 0.05);
+    TH1D *h_dummy_cen = new TH1D("hdummy_cen", "hdummy_cen", 60, -0.03, 0.03);
+    TH1D *h_weight_cen = new TH1D("hweight_cen", "hweight_cen", 60, -0.03, 0.03);
     
     double err_sumw2 = 0.;
     double err_offsumw2 = 0.;
@@ -65,10 +55,14 @@ void weightsample_test_toy2(){
     int N = 10000;
     for (int i(0); i < N; i++){
 
-//w(x) = 0.4x + 0.5
-        auto data1 = line3.generate(x, NumEvents(20000));
-        RooRealVar *w = (RooRealVar*) data1->addColumn(wFunc);
-        RooDataSet wdata1("wdata1","wdata1",data1,*data1->get(),0,w->GetName());
+//Simple 2 samples--------------
+        auto data1 = line1.generate(x, NumEvents(10000));
+        data1->addColumn(w1);
+        RooDataSet wdata1("wdata1", "wdata1", data1,  RooArgSet(x, w1), "", "w1");
+        auto data2 = line2.generate(x, NumEvents(5000));
+        data2->addColumn(w2);
+        RooDataSet wdata2("wdata2", "wdata2", data2, RooArgSet(x, w2),"", "w2");
+        wdata1.append(wdata2);
 
         x.setBins(2);
         auto hist = RooDataHist("hist", "hist", x, wdata1);
@@ -85,7 +79,7 @@ void weightsample_test_toy2(){
         c.setVal(0);
         d.setError(0);
         // res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(false), PrintLevel(-1));
-        res = fitline.chi2FitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(false), PrintLevel(-1), DataError(RooAbsData::Poisson));
+        res = fitline.chi2FitTo(hist, Save(true), Strategy(0),Offset(false), PrintLevel(-1), DataError(RooAbsData::Poisson));
         if (i == 1) res->Print("V");
         h_offsumw2->Fill(c.getVal()/c.getError());
         err_offsumw2 += c.getError();
