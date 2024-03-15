@@ -93,7 +93,7 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::SumW2));
 	RooPlot *xframe = x.frame(Title(def_name.c_str()));
-  string outputfile = "fit_result_sync/" + name + ".txt";
+  string outputfile = "fit_results/" + name + ".txt";
   if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
 
   RooRealVar mu("mu", "mu", 124.57, 120., 130.);
@@ -212,11 +212,18 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   TH1D *hpdf1 = (TH1D*)pdfDataHis1->createHistogram("hpdf1",x,Binning(NBIN, LOWX, HIGHX));
   TH1D *hh_ul = (TH1D*)h_ul.createHistogram("hh_ul",x,Binning(NBIN, LOWX, HIGHX));
   TH1D *ratio1 = new TH1D("ratio1", "ratio1", NBIN, LOWX, HIGHX);
-  ratio1 -> Sumw2();
-  ratio1 -> Divide(hh_ul,hpdf1);
+  // ratio1 -> Sumw2();
+  ratio1 -> Add(hh_ul,hpdf1, 1., -1.);
+  for (int i(0); i < NBIN; i++){
+    h_ul.get(i);
+    double error = h_ul.weightError(RooAbsData::SumW2);
+    ratio1 -> SetBinError(i, error);
+  }
   c2->cd();
   TPad *pad0 = new TPad("pad0","",0,0.2,1,1);
   TPad *pad00 = new TPad("pad00","",0,0,1,0.2);
+  pad0->SetBottomMargin(0.);
+  pad00->SetTopMargin(0);
   pad0->Draw();
   pad00->Draw();
   pad0->cd();
@@ -225,14 +232,18 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   pad00->cd();
   ratio1-> SetTitle("");
   ratio1 -> GetYaxis()-> SetLabelSize(0.1);
-  ratio1 -> GetYaxis()-> SetRangeUser(0., 3.);
+  ratio1 -> GetYaxis()-> SetRangeUser(-0.2, 0.2);
   ratio1->SetMarkerStyle(8);
   ratio1->SetMarkerSize(1);
   ratio1 -> GetXaxis()-> SetLabelSize(0.1);
-  ratio1 -> GetXaxis()-> SetTitleSize(0.1);
-  //ratio2-> GetXaxis()-> SetTitle("m_{llg}");
-  ratio1->Draw();
-  TLine *line0 = new TLine( LOWX, 1, HIGHX, 1);
+  ratio1 -> GetYaxis()-> SetTitleSize(0.15);
+  ratio1 -> GetYaxis()-> SetTitleOffset(0.25);
+  ratio1 -> GetYaxis()-> SetTitle("Residual ");
+  ratio1 -> GetXaxis()-> SetTitleOffset(-0.3);
+  ratio1 -> GetXaxis()-> SetTitleSize(0.15);
+  ratio1-> GetXaxis()-> SetTitle("m_{llg}");
+  ratio1->Draw("");
+  TLine *line0 = new TLine( LOWX, 0, HIGHX, 0);
   line0-> SetLineColor(kRed);
   line0->SetLineStyle(7);
   line0->SetLineWidth(2); 
@@ -539,18 +550,15 @@ void fit_hist_CB(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, string def
 
 }
 
-void fit_hist_CBGauss(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, string def_name){
-  
+void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, TCanvas *c4, TLegend *leg, string def_name, bool output){
+  bool OUTPUT = output;
   string name = "CB+Gauss " + def_name;
-  string ulname = name + " UL";
-  string rename = name + " Rereco";
+  string ulname = name + "L";
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
-  RooPlot *xframe_re = x.frame(Title(rename.c_str()));
-  h_re.plotOn(xframe_re, LineColor(kGreen), DataError(RooAbsData::Auto));
   RooPlot *xframe = x.frame(Title(name.c_str()));
   string outputfile = "fit_results/" + name + ".txt";
-  freopen (outputfile.c_str(),"w",stdout);
+  if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
 
   RooRealVar mu("mu", "mu", 124.57, 120., 130.);
   RooRealVar alpha("alpha", "alpha", 7.6328e-01, 0.001,2.3);
@@ -558,6 +566,8 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, strin
   RooRealVar sigmaCB("sigmaCB", "sigmaCB", 1.67, 0.1, 5.);
   RooRealVar sigma("sigma", "sigma", 2.5, 0.1, 10.);
   RooRealVar frac("frac","Gauss fraction"       ,0.1,  0., 1.);
+
+  int np = 6;
 
 //Set alpha or n constant
   // alphaL.setConstant(true);
@@ -581,50 +591,43 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, strin
 
   int qual = -1;
 
-  cout << "UL" << endl;
-  RooNLLVar *nll1 = new RooNLLVar("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  RooNLLVar *nll1 = new RooChi2Var("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   //  nll->applyWeightSquared(false)
   RooMinimizer *mini = new RooMinimizer(*nll1);
+  mini->setPrintLevel(-1);
   (*mini).setEps(100);
   (*mini).setStrategy(0);
-  (*mini).setOffsetting(true);
   (*mini).minimize("Minuit2","migrad");
   RooFitResult *res = (*mini).save();
   res->Print("v");
   (*mini).setOffsetting(false);
 
-  auto nll11 = RooNLLVar("nll11","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  auto nll11 = RooChi2Var("nll11","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   RooMinimizer *mini1 = new RooMinimizer(nll11);
+	mini1->setPrintLevel(-1);
   (*mini1).setStrategy(0);
-  (*mini1).setOffsetting(true);
-  (*mini1).setEps(0.1);
+  (*mini1).setEps(1);
   (*mini1).minimize("Minuit2","migrad");
   (*mini1).hesse();
-  qual = calculateConvMatrix(*mini1, nll11);
   res = (*mini1).save();
   res->setCovQual(qual);
   res->Print("v");
   //printQual(qual);
 
-  if (n.getVal() > 100 || n.getError() > 100) {n.setVal(100); n.setError(0); n.setConstant(true);}
+  if (n.getVal() > 100 || n.getError() > 100) {n.setVal(100); n.setError(0); n.setConstant(true); np--;}
   
-  auto nll12 = RooNLLVar("nll12","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  auto nll12 = RooChi2Var("nll12","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   RooMinimizer *mini02 = new  RooMinimizer(nll12);
   (*mini02).setStrategy(0);
-  (*mini02).setOffsetting(true);
-  (*mini02).setEps(0.001);
+  (*mini02).setEps(0.1);
   (*mini02).minimize("Minuit2","migrad");
   (*mini02).hesse();
-  qual = calculateConvMatrix(*mini02, nll12);
   res = (*mini02).save();
   res->setCovQual(qual);
   res->Print("v");
   int status1 = res->status();
   int qual1 = qual;
   //printQual(qual);
-
-  cout << "Correlation = " << res->correlation("sigma", "sigmaCB") <<endl;
-  (res->correlationMatrix()).Print();
 
   double sigmaVal = sigmaCB.getVal();
   sig_model.plotOn(xframe_ul, LineColor(kRed));
@@ -642,26 +645,24 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, strin
   vector<double> combine1 = combine_sigma(Gs1, Ge1, CBs1, CBe1, Gfrac1);
 
   RooChi2Var chi21("chi21", "chi21", sig_model, h_ul, DataError(RooAbsData::Expected));
-
   
-  cout <<endl <<  endl << endl<< endl<< endl<< endl;
-  //RooAbsReal* nll1 = sig_model.createNLL(h1);
-  RooPlot *nllframe1 = sigmaCB.frame(Title("NLL Scan over #sigmaCB"), Bins(60),Range(sigmaVal - 0.1, sigmaVal + 0.1));
-  nll12.plotOn(nllframe1, ShiftToZero());
-
-  
-  TCanvas *c2 = new TCanvas("c2", "c2", 1200, 600);
+  TCanvas *c2 = new TCanvas("c2", "c2", 600, 600);
   RooDataHist *pdfDataHis1 = sig_model.generateBinned(RooArgSet(x), h_ul.sumEntries(), true);
   TH1D *hpdf1 = (TH1D*)pdfDataHis1->createHistogram("hpdf1",x,Binning(NBIN, LOWX, HIGHX));
   TH1D *hh_ul = (TH1D*)h_ul.createHistogram("hh_ul",x,Binning(NBIN, LOWX, HIGHX));
   TH1D *ratio1 = new TH1D("ratio1", "ratio1", NBIN, LOWX, HIGHX);
-  ratio1 -> Sumw2();
-  ratio1 -> Divide(hh_ul,hpdf1);
+  // ratio1 -> Sumw2();
+  ratio1 -> Add(hh_ul,hpdf1, 1., -1.);
+  for (int i(0); i < NBIN; i++){
+    h_ul.get(i);
+    double error = h_ul.weightError(RooAbsData::SumW2);
+    ratio1 -> SetBinError(i, error);
+  }
   c2->cd();
-  c2->Divide(2);
-  c2->cd(1);
   TPad *pad0 = new TPad("pad0","",0,0.2,1,1);
   TPad *pad00 = new TPad("pad00","",0,0,1,0.2);
+  pad0->SetBottomMargin(0.);
+  pad00->SetTopMargin(0);
   pad0->Draw();
   pad00->Draw();
   pad0->cd();
@@ -670,174 +671,40 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, strin
   pad00->cd();
   ratio1-> SetTitle("");
   ratio1 -> GetYaxis()-> SetLabelSize(0.1);
-  ratio1 -> GetYaxis()-> SetRangeUser(0., 2.);
+  ratio1 -> GetYaxis()-> SetRangeUser(-0.2, 0.2);
   ratio1->SetMarkerStyle(8);
   ratio1->SetMarkerSize(1);
   ratio1 -> GetXaxis()-> SetLabelSize(0.1);
-  ratio1 -> GetXaxis()-> SetTitleSize(0.1);
-  //ratio2-> GetXaxis()-> SetTitle("m_{llg}");
-  ratio1->Draw();
-  TLine *line0 = new TLine( LOWX, 1, HIGHX, 1);
+  ratio1 -> GetYaxis()-> SetTitleSize(0.15);
+  ratio1 -> GetYaxis()-> SetTitleOffset(0.25);
+  ratio1 -> GetYaxis()-> SetTitle("Residual ");
+  ratio1 -> GetXaxis()-> SetTitleOffset(-0.3);
+  ratio1 -> GetXaxis()-> SetTitleSize(0.15);
+  ratio1-> GetXaxis()-> SetTitle("m_{llg}");
+  ratio1->Draw("");
+  TLine *line0 = new TLine( LOWX, 0, HIGHX, 0);
   line0-> SetLineColor(kRed);
   line0->SetLineStyle(7);
   line0->SetLineWidth(2); 
   line0->Draw("same");
-  c2->cd(2);
-  nllframe1->Draw();
-  c2->SaveAs(((string)("NLLplots/" + name + "UL.pdf")).c_str());
+  if (OUTPUT) c2->SaveAs(((string)("CBGauss/" + name + ".pdf")).c_str());
 
-
-  //Reset initial
-  //mu.setVal(125.);
-  n.setConstant(false);
-  alpha.setVal(1);
-  n.setVal(2);
-  sigmaCB.setVal(1.);
-  sigma.setVal(2.7);
-  frac.setVal(0.2);
-  //sigmaR.setVal(1.5);
-  //nR.setConstant(false);
-  //nR.setError(1);
-  
-  cout << "Rereco" << endl;
-  RooNLLVar *nll2 = new RooNLLVar("nll2","-log(L)",sig_model, h_re,DataError(RooAbsData::SumW2)) ;
-  //nll2->applyWeightSquared(true);
-  RooMinimizer mini2(*nll2);
-  mini2.setEps(100);
-  mini2.setStrategy(0);
-  mini2.setOffsetting(true);
-  mini2.minimize("Minuit2","migrad");
-  res = mini2.save();
-  res->Print("v");
-  
-  mini2.setOffsetting(false);
-  auto nll21 = RooNLLVar("nll21","-log(L)",sig_model, h_re, DataError(RooAbsData::SumW2)) ;
-  RooMinimizer mini21(nll21);
-  mini21.setStrategy(0);
-  mini21.setOffsetting(true);
-  mini21.setEps(0.1);
-  mini21.minimize("Minuit2","migrad");
-  mini21.hesse();
-  qual = calculateConvMatrix(mini21, nll21);
-  res = mini21.save();
-  res->setCovQual(qual);
-  res->Print("v");
-  //printQual(qual);
-
-  if (n.getVal() > 100 || n.getError() > 100) {n.setVal(100); n.setError(0); n.setConstant(true);}
-
-  auto nll22 = RooNLLVar("nll22","-log(L)",sig_model, h_re, DataError(RooAbsData::SumW2)) ;
-  RooMinimizer mini22(nll22);
-  mini22.setStrategy(0);
-  mini22.setOffsetting(true);
-  mini22.setEps(0.001);
-  mini22.minimize("Minuit2","migrad");
-  mini22.hesse();
-  qual = calculateConvMatrix(mini22, nll22);
-  res = mini22.save();
-  res->setCovQual(qual);
-  res->Print("v");
-  int status2 = res->status();
-  int qual2 = qual;
-  //printQual(qual);
-  cout << "Correlation = " << res->correlation("sigma", "sigmaCB") <<endl;
-  //(res->covarianceMatrix()).Print();
-  (res->correlationMatrix()).Print();
-
-  sigmaVal = sigmaCB.getVal();
-  sig_model.plotOn(xframe_re, LineColor(kRed));
-  sig_model.plotOn(xframe, LineColor(kGreen), Name("rereco"));
-  double Gs2 = sigma.getVal();
-  double Ge2 = sigma.getError();
-  double CBs2 = sigmaCB.getVal();
-  double CBe2 = sigmaCB.getError();
-  double Gfrac2 = frac.getVal();
-  double Gfrac2e = frac.getError();
-  double n2 = n.getVal();
-  double n2e = n.getError();
-  double a2 = alpha.getVal();
-  double a2e = alpha.getError();
-  vector<double> combine2 = combine_sigma(Gs2, Ge2, CBs2, CBe2, Gfrac2);
-
-  RooChi2Var chi22("chi22", "chi22", sig_model, h_re, DataError(RooAbsData::Expected));
-
-  cout << endl << endl <<  endl<< endl<< endl<< endl;
-  //RooAbsReal* nll2 = sig_model.createNLL(h3);
-  // RooNLLVar nll2("nll2", "nll2",sig_model, h3);  
-  //nll2.applyWeightSquared(true);
-  RooPlot *nllframe2 = sigmaCB.frame(Title("NLL Scan over #sigmaCB"), Bins(60),Range(sigmaVal - 0.1, sigmaVal + 0.1));
-  nll22.plotOn(nllframe2, ShiftToZero());
-
-  TCanvas *c3 = new TCanvas("c3", "c3", 1200, 600);
-  RooDataHist *pdfDataHis2 = sig_model.generateBinned(RooArgSet(x), h_re.sumEntries(), true);
-  TH1D *hpdf2 = (TH1D*)pdfDataHis2->createHistogram("hpdf2",x,Binning(NBIN, LOWX, HIGHX));
-  TH1D *hh_re = (TH1D*)h_re.createHistogram("hh_re",x,Binning(NBIN, LOWX, HIGHX));
-  TH1D *ratio2 = new TH1D("ratio2", "ratio2", NBIN, LOWX, HIGHX);
-  ratio2 -> Sumw2();
-  ratio2 -> Divide(hh_re,hpdf2);
-  c3->cd();
-  c3->Divide(2);
-  c3->cd(1);
-  TPad *pad1 = new TPad("pad1","",0,0.2,1,1);
-  TPad *pad2 = new TPad("pad2","",0,0,1,0.2);
-  pad1->Draw();
-  pad2->Draw();
-  pad1->cd();
-  //xframe_re-> GetXaxis()-> SetTitle("");
-  xframe_re->Draw();
-  pad2->cd();
-  ratio2-> SetTitle("");
-  ratio2 -> GetYaxis()-> SetLabelSize(0.1);
-  ratio2 -> GetYaxis()-> SetRangeUser(0., 2.);
-  ratio2->SetMarkerStyle(8);
-  ratio2->SetMarkerSize(1);
-  ratio2 -> GetXaxis()-> SetLabelSize(0.1);
-  ratio2 -> GetXaxis()-> SetTitleSize(0.1);
-  //ratio2-> GetXaxis()-> SetTitle("m_{llg}");
-  ratio2->Draw();
-  TLine *line = new TLine(LOWX, 1, HIGHX, 1);
-  line-> SetLineColor(kRed);
-  line->SetLineStyle(7);
-  line->SetLineWidth(2); 
-  line->Draw("same");
-  c3->cd(2);
-  nllframe2->Draw();
-  c3->SaveAs(((string)("NLLplots/" + name + "Re.pdf")).c_str());
-
-  TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
+  sig_model.plotOn(xframe, LineColor(kRed), Name("CB+Gauss"));
   c4->cd();
-  xframe->GetXaxis()->SetRangeUser(117, 132);
-  xframe->Draw();
+  xframe->GetXaxis()->SetRangeUser(LOWX, HIGHX);
+  xframe->Draw("same");
 
-  TLegend *leg = new TLegend(0.1,0.9,0.45,0.7);
-  leg->SetTextSize(0.02);
-
-  // TLatex *txt = new TLatx(0, 0.01, )
-  // leg1->SetTextSize(0.02);
-
-  string ul="#splitline{#splitline{UL MC fit #sigma = ";
+  string ul="#splitline{#splitline{CB+Gauss MC fit #sigma = ";
   std::stringstream stream;
   stream << std::fixed << std::setprecision(2) << combine1[0] << "#pm" << combine1[1]  <<  "}{" << "G frac = " << Gfrac1 << "#pm" << Gfrac1e << " n = " << n1 << "#pm" << n1e << "}}{#splitline{" << 
-  "#alpha = " << a1 << "#pm" << a1e << "}{Status = " << status1 << " CovQ = " << qual1 << " Chi2 = " << chi21.getVal() << "}}";
+  "#alpha = " << a1 << "#pm" << a1e << "}{Status = " << status1 << " CovQ = " << qual1 << "Reduced Chi2 = " << (chi21.getVal())/(NBIN - np) << "}}";
   std::string ss1 = stream.str();
   string full_ul = ul + ss1;
 
-  string re ="#splitline{#splitline{Rereco MC fit #sigma = ";
-  std::stringstream stream1;
-  stream1 << std::fixed << std::setprecision(2) << combine2[0] << "#pm" << combine2[1]  << "}{" << "G frac = " << Gfrac2 << "#pm" << Gfrac2e << " n = " << n2 << "#pm" << n2e << "}}{#splitline{" << 
-  "#alpha = " << a2 << "#pm" << a2e << "}{Status = " << status2 << " CovQ = " << qual2 << " Chi2 = " << chi22.getVal() << "}}";
-  std::string ss2 = stream1.str();
-  string full_re = re + ss2;
-
 
   leg->AddEntry("UL", full_ul.c_str(), "L");
-  leg->AddEntry("rereco", full_re.c_str(), "L");
-  leg->Draw("same");
-  c4->SaveAs(((string)("plots/" + name + ".pdf")).c_str());
-
-  fclose (stdout);
+  if (OUTPUT) fclose (stdout);
   combine1.clear();
-  combine2.clear();
 
 }
 
@@ -848,7 +715,7 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
 	RooPlot *xframe = x.frame(Title(def_name.c_str()));
-  string outputfile = "fit_result_sync/" + name + ".txt";
+  string outputfile = "fit_results/" + name + ".txt";
   if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
 
 	RooRealVar *MH = new RooRealVar("MH", "MH", 125., 123., 127.);
@@ -856,7 +723,7 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
 	RooArgList *coeffs_order1 = new RooArgList();
 	RooArgSet *listOfPolyVars_ = new RooArgSet();
 	// int g = 0;
-  for (int g(0); g < 2; g++){
+  for (int g(0); g < 4; g++){
 		RooFormulaVar *dMH = new RooFormulaVar("dMH", Form("dMH",g), "@0-125",RooArgList(*MH));
 		RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-15.0,15.0);
     RooRealVar *dm_p1 = new RooRealVar(Form("dm_g%d_p1",g),Form("dm_g%d_p1",g),0.05,-0.25,0.25);
@@ -876,7 +743,7 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
 		// listOfPolyVars_->add(*dm_order2);
 		listOfPolyVars_->add(*mean_order1);
 		listOfPolyVars_->add(*sigma_order1);
-		if (g < 1){
+		if (g < 3){
 			RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
       RooRealVar *frac_p1 = new RooRealVar(Form("frac_g%d_p1",g),Form("frac_g%d_p1",g), 0.0001,-0.01,0.01);
       RooRealVar *frac_p2 = new RooRealVar(Form("frac_g%d_p2",g),Form("frac_g%d_p2",g),0.00001,-0.00001,0.00001);
@@ -937,11 +804,18 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   // TH1D *hpdf1 = (TH1D*)pdfDataHis1->createHistogram("hpdf1",x,Binning(NBIN, LOWX, HIGHX));
   // TH1D *hh_ul = (TH1D*)h_ul.createHistogram("hh_ul",x,Binning(NBIN, LOWX, HIGHX));
   // TH1D *ratio1 = new TH1D("ratio1", "ratio1", NBIN, LOWX, HIGHX);
-  // ratio1 -> Sumw2();
-  // ratio1 -> Divide(hh_ul,hpdf1);
+  // // ratio1 -> Sumw2();
+  // ratio1 -> Add(hh_ul,hpdf1, 1., -1.);
+  // for (int i(0); i < NBIN; i++){
+  //   h_ul.get(i);
+  //   double error = h_ul.weightError(RooAbsData::SumW2);
+  //   ratio1 -> SetBinError(i, error);
+  // }
   // c2->cd();
   // TPad *pad0 = new TPad("pad0","",0,0.2,1,1);
   // TPad *pad00 = new TPad("pad00","",0,0,1,0.2);
+  // pad0->SetBottomMargin(0.);
+  // pad00->SetTopMargin(0);
   // pad0->Draw();
   // pad00->Draw();
   // pad0->cd();
@@ -950,14 +824,18 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   // pad00->cd();
   // ratio1-> SetTitle("");
   // ratio1 -> GetYaxis()-> SetLabelSize(0.1);
-  // ratio1 -> GetYaxis()-> SetRangeUser(0., 3.);
+  // ratio1 -> GetYaxis()-> SetRangeUser(-0.2, 0.2);
   // ratio1->SetMarkerStyle(8);
   // ratio1->SetMarkerSize(1);
   // ratio1 -> GetXaxis()-> SetLabelSize(0.1);
-  // ratio1 -> GetXaxis()-> SetTitleSize(0.1);
-  // //ratio2-> GetXaxis()-> SetTitle("m_{llg}");
-  // ratio1->Draw();
-  // TLine *line0 = new TLine( LOWX, 1, HIGHX, 1);
+  // ratio1 -> GetYaxis()-> SetTitleSize(0.15);
+  // ratio1 -> GetYaxis()-> SetTitleOffset(0.25);
+  // ratio1 -> GetYaxis()-> SetTitle("Residual ");
+  // ratio1 -> GetXaxis()-> SetTitleOffset(-0.3);
+  // ratio1 -> GetXaxis()-> SetTitleSize(0.15);
+  // ratio1-> GetXaxis()-> SetTitle("m_{llg}");
+  // ratio1->Draw("");
+  // TLine *line0 = new TLine( LOWX, 0, HIGHX, 0);
   // line0-> SetLineColor(kRed);
   // line0->SetLineStyle(7);
   // line0->SetLineWidth(2); 
@@ -976,7 +854,155 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
 
   string ul="#splitline{SumGaus MC fit";
   std::stringstream stream;
-  stream << std::fixed << std::setprecision(2) << "}{Status = " <<  status1 << " Reduced Chi2 = " << valChi21/(NBIN - 10) <<"}";
+  stream << std::fixed << std::setprecision(2) << "}{Status = " <<  status1 << " Reduced Chi2 = " << valChi21/(NBIN - 23) <<"}";
+  std::string ss1 = stream.str();
+  string full_ul = ul + ss1;
+
+  leg->AddEntry("SumG", full_ul.c_str(), "L");
+
+	// (*listOfPolyVars_)["sigma_g0_order1"].Print();
+	// (*listOfPolyVars_)["mean_g0_order1"].Print();
+	// (*listOfPolyVars_)["sigma_g1_order1"].Print();
+	// (*listOfPolyVars_)["mean_g1_order1"].Print();
+	// (*listOfPolyVars_)["sigma_g2_order1"].Print();
+	// (*listOfPolyVars_)["mean_g2_order1"].Print();
+	// (*listOfPolyVars_)["sigma_g3_order1"].Print();
+	// (*listOfPolyVars_)["mean_g3_order1"].Print();
+
+  if (OUTPUT) fclose (stdout);
+
+}
+
+
+void fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
+  bool OUTPUT = output;
+  string name = "Sum4Gauss order0 " + def_name;
+  string ulname = name + "";
+  RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
+  h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
+	RooPlot *xframe = x.frame(Title(def_name.c_str()));
+  string outputfile = "fit_results/" + name + ".txt";
+  if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
+
+	RooRealVar *MH = new RooRealVar("MH", "MH", 125., 123., 127.);
+	RooArgList *gaussians_order0 = new RooArgList();
+	RooArgList *coeffs_order0 = new RooArgList();
+	RooArgSet *listOfPolyVars_ = new RooArgSet();
+	// int g = 0;
+  for (int g(0); g < 4; g++){
+		RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-15.0,15.0);
+		RooFormulaVar *mean_order0 = new RooFormulaVar(Form("mean_g%d_order0",g),Form("mean_g%d_order0",g),"((@0+@1))",RooArgList(*MH,*dm_p0));
+		RooRealVar *sigma_order0 = new RooRealVar(Form("sigma_g%d_order0",g),Form("sigma_g%d_order0",g),(g+1)*1.0,0.2,8);
+		RooAbsPdf *gaus_order0 = new RooGaussian(Form("gaus_g%d_order0",g),Form("gaus_g%d_order0",g),x,*mean_order0,*sigma_order0);
+
+		gaussians_order0->add(*gaus_order0);
+		// listOfPolyVars_->add(*dm_order2);
+		listOfPolyVars_->add(*mean_order0);
+		listOfPolyVars_->add(*sigma_order0);
+		if (g < 3){
+			RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
+      coeffs_order0->add(*frac_p0);
+		}
+
+
+	}
+		RooAddPdf sig_model("sig_model","sig_model",*gaussians_order0,*coeffs_order0, true);
+
+
+  int qual = 3;
+
+  auto *nll1 = new RooChi2Var("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  RooMinimizer *mini = new RooMinimizer(*nll1);  mini->setPrintLevel(-1);
+  (*mini).setEps(100);
+  (*mini).setStrategy(0);
+  (*mini).minimize("Minuit2","migrad");
+  RooFitResult *res = (*mini).save();
+  res->Print("v");
+
+  auto nll11 = RooChi2Var("nll11","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  RooMinimizer *mini1 = new RooMinimizer(nll11);  mini1->setPrintLevel(-1);
+  (*mini1).setStrategy(0);
+  (*mini1).setEps(1);
+  (*mini1).minimize("Minuit2","migrad");
+  (*mini1).hesse();
+
+
+  auto nll12 = RooChi2Var("nll12","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  RooMinimizer *mini02 = new  RooMinimizer(nll12);  //mini02->setPrintLevel(-1);
+  (*mini02).setStrategy(0);
+  (*mini02).setEps(0.01);
+  (*mini02).minimize("Minuit2","migrad");
+  (*mini02).hesse();
+  res = (*mini02).save();
+  res->Print("v");
+  int status1 = res->status();
+  int qual1 = qual;
+  //printQual(qual);
+
+
+  // RooChi2Var chi21("chi21", "chi21", sig_model, h_ul, DataError(RooAbsData::Expected));
+  double valChi21 =nll12.getVal();
+  
+  cout <<endl <<  endl;
+
+	sig_model.plotOn(xframe_ul, LineColor(kRed));
+  
+  TCanvas *c2 = new TCanvas("c2", "c2", 600, 600);
+  RooDataHist *pdfDataHis1 = sig_model.generateBinned(RooArgSet(x), h_ul.sumEntries(), true);
+  TH1D *hpdf1 = (TH1D*)pdfDataHis1->createHistogram("hpdf1",x,Binning(NBIN, LOWX, HIGHX));
+  TH1D *hh_ul = (TH1D*)h_ul.createHistogram("hh_ul",x,Binning(NBIN, LOWX, HIGHX));
+  TH1D *ratio1 = new TH1D("ratio1", "ratio1", NBIN, LOWX, HIGHX);
+  // ratio1 -> Sumw2();
+  ratio1 -> Add(hh_ul,hpdf1, 1., -1.);
+  for (int i(0); i < NBIN; i++){
+    h_ul.get(i);
+    double error = h_ul.weightError(RooAbsData::SumW2);
+    ratio1 -> SetBinError(i, error);
+  }
+  c2->cd();
+  TPad *pad0 = new TPad("pad0","",0,0.2,1,1);
+  TPad *pad00 = new TPad("pad00","",0,0,1,0.2);
+  pad0->SetBottomMargin(0.);
+  pad00->SetTopMargin(0);
+  pad0->Draw();
+  pad00->Draw();
+  pad0->cd();
+  //xframe_re-> GetXaxis()-> SetTitle("");
+  xframe_ul->Draw();
+  pad00->cd();
+  ratio1-> SetTitle("");
+  ratio1 -> GetYaxis()-> SetLabelSize(0.1);
+  ratio1 -> GetYaxis()-> SetRangeUser(-0.2, 0.2);
+  ratio1->SetMarkerStyle(8);
+  ratio1->SetMarkerSize(1);
+  ratio1 -> GetXaxis()-> SetLabelSize(0.1);
+  ratio1 -> GetYaxis()-> SetTitleSize(0.15);
+  ratio1 -> GetYaxis()-> SetTitleOffset(0.25);
+  ratio1 -> GetYaxis()-> SetTitle("Residual ");
+  ratio1 -> GetXaxis()-> SetTitleOffset(-0.3);
+  ratio1 -> GetXaxis()-> SetTitleSize(0.15);
+  ratio1-> GetXaxis()-> SetTitle("m_{llg}");
+  ratio1->Draw("");
+  TLine *line0 = new TLine( LOWX, 0, HIGHX, 0);
+  line0-> SetLineColor(kRed);
+  line0->SetLineStyle(7);
+  line0->SetLineWidth(2); 
+  line0->Draw("same");
+  
+  if (OUTPUT) c2->SaveAs(((string)("SumGauss/" + name + ".pdf")).c_str());
+
+	sig_model.plotOn(xframe, LineColor(kBlue), Name("SumG"));
+  c4->cd();
+  xframe->GetXaxis()->SetRangeUser(LOWX, HIGHX);
+  xframe->Draw("same");
+
+
+  // TLatex *txt = new TLatx(0, 0.01, )
+  // leg1->SetTextSize(0.02);
+
+  string ul="#splitline{SumGaus MC fit";
+  std::stringstream stream;
+  stream << std::fixed << std::setprecision(2) << "}{Status = " <<  status1 << " Reduced Chi2 = " << valChi21/(NBIN - 11) <<"}";
   std::string ss1 = stream.str();
   string full_ul = ul + ss1;
 
