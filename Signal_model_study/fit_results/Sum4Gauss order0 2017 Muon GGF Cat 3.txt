@@ -1,0 +1,64 @@
+
+  RooFitResult: minimized FCN value: 74.1299, estimated distance to minimum: 0.0916107
+                covariance matrix quality: Approximation only, not accurate
+                Status : MINIMIZE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+                    MH    1.2500e+02
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+              dm_g0_p0    1.0000e-01   -1.2669e-01 +/-  1.90e-02  <none>
+              dm_g1_p0    1.0000e-01   -9.3331e-01 +/-  8.70e-02  <none>
+              dm_g2_p0    1.0000e-01   -5.0505e+00 +/-  1.76e-01  <none>
+              dm_g3_p0    1.0000e-01   -6.1831e-01 +/-  6.97e-02  <none>
+            frac_g0_p0    5.0000e-01    6.0308e-01 +/-  9.71e-03  <none>
+            frac_g1_p0    4.5000e-01    3.9817e-01 +/-  3.62e-02  <none>
+            frac_g2_p0    4.0000e-01    3.5319e-01 +/-  2.28e-02  <none>
+       sigma_g0_order0    1.0000e+00    1.1633e+00 +/-  1.41e-02  <none>
+       sigma_g1_order0    2.0000e+00    2.0404e+00 +/-  2.36e-02  <none>
+       sigma_g2_order0    3.0000e+00    3.5385e+00 +/-  2.26e-01  <none>
+       sigma_g3_order0    4.0000e+00    2.1057e+00 +/-  5.24e-02  <none>
+
+Minuit2Minimizer: Minimize with max-calls 5500 convergence for edm < 0.01 strategy 0
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = 67.7934619681639674
+Edm   = 9.04012551862276624e-06
+Nfcn  = 164
+dm_g0_p0	  = -0.130871	 +/-  0.0266006	(limited)
+dm_g1_p0	  = -1.07929	 +/-  0.0455476	(limited)
+dm_g2_p0	  = -4.42875	 +/-  0.177824	(limited)
+dm_g3_p0	  = 0.135476	 +/-  0.0408659	(limited)
+frac_g0_p0	  = 0.430421	 +/-  0.00790519	(limited)
+frac_g1_p0	  = 0.42957	 +/-  0.0279439	(limited)
+frac_g2_p0	  = 0.319141	 +/-  0.00959749	(limited)
+sigma_g0_order0	  = 1.04728	 +/-  0.0162495	(limited)
+sigma_g1_order0	  = 1.8237	 +/-  0.0367231	(limited)
+sigma_g2_order0	  = 3.72194	 +/-  0.165215	(limited)
+sigma_g3_order0	  = 1.61096	 +/-  0.0315548	(limited)
+
+  RooFitResult: minimized FCN value: 67.7935, estimated distance to minimum: 0.000487673
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+                    MH    1.2500e+02
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+              dm_g0_p0   -1.3054e-01   -1.3087e-01 +/-  4.63e-02  <none>
+              dm_g1_p0   -1.0796e+00   -1.0793e+00 +/-  4.84e-01  <none>
+              dm_g2_p0   -4.4293e+00   -4.4288e+00 +/-  6.25e-01  <none>
+              dm_g3_p0    1.3526e-01    1.3548e-01 +/-  5.10e-01  <none>
+            frac_g0_p0    4.3042e-01    4.3042e-01 +/-  7.54e-02  <none>
+            frac_g1_p0    4.2994e-01    4.2957e-01 +/-  1.71e-01  <none>
+            frac_g2_p0    3.1915e-01    3.1914e-01 +/-  1.11e-01  <none>
+       sigma_g0_order0    1.0472e+00    1.0473e+00 +/-  5.05e-02  <none>
+       sigma_g1_order0    1.8238e+00    1.8237e+00 +/-  2.47e-01  <none>
+       sigma_g2_order0    3.7236e+00    3.7219e+00 +/-  3.18e-01  <none>
+       sigma_g3_order0    1.6111e+00    1.6110e+00 +/-  1.70e-01  <none>
+
+
+

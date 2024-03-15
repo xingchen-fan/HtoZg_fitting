@@ -549,7 +549,7 @@ void fit_hist_CB(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, string def
 void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
   bool OUTPUT = output;
   string name = "CB+Gauss " + def_name;
-  string ulname = name + "L";
+  string ulname = name + "";
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
   RooPlot *xframe = x.frame(Title(name.c_str()));
@@ -638,8 +638,7 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas
   double a1e = alpha.getError();
   vector<double> combine1 = combine_sigma(Gs1, Ge1, CBs1, CBe1, Gfrac1);
 
-  RooChi2Var chi21("chi21", "chi21", sig_model, h_ul, DataError(RooAbsData::Expected));
-  
+    
   TCanvas *c2 = new TCanvas("c2", "c2", 600, 600);
   RooDataHist *pdfDataHis1 = sig_model.generateBinned(RooArgSet(x), h_ul.sumEntries(), true);
   TH1D *hpdf1 = (TH1D*)pdfDataHis1->createHistogram("hpdf1",x,Binning(NBIN, LOWX, HIGHX));
@@ -691,7 +690,7 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas
   string ul="#splitline{#splitline{CB+Gauss MC fit #sigma = ";
   std::stringstream stream;
   stream << std::fixed << std::setprecision(2) << combine1[0] << "#pm" << combine1[1]  <<  "}{" << "G frac = " << Gfrac1 << "#pm" << Gfrac1e << " n = " << n1 << "#pm" << n1e << "}}{#splitline{" << 
-  "#alpha = " << a1 << "#pm" << a1e << "}{Status = " << status1 << " CovQ = " << qual1 << "Reduced Chi2 = " << (chi21.getVal())/(NBIN - np) << "}}";
+  "#alpha = " << a1 << "#pm" << a1e << "}{Status = " << status1  << "Reduced Chi2 = " << (nll12.getVal())/(NBIN - np) << "}}";
   std::string ss1 = stream.str();
   string full_ul = ul + ss1;
 

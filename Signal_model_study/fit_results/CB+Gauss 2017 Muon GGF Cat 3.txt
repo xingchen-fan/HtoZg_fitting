@@ -1,0 +1,53 @@
+
+  RooFitResult: minimized FCN value: 71.9804, estimated distance to minimum: 0.0594708
+                covariance matrix quality: Approximation only, not accurate
+                Status : MINIMIZE=0 
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+                 alpha    7.6328e-01    1.2009e+00 +/-  6.75e-02  <none>
+                  frac    1.0000e-01    3.1648e-01 +/-  5.51e-02  <none>
+                    mu    1.2457e+02    1.2479e+02 +/-  1.77e-02  <none>
+                     n    2.0000e+01    1.5852e+00 +/-  1.78e-01  <none>
+                 sigma    2.5000e+00    1.8288e+00 +/-  7.71e-02  <none>
+               sigmaCB    1.6700e+00    1.1451e+00 +/-  3.89e-02  <none>
+
+
+  RooFitResult: minimized FCN value: 71.9326, estimated distance to minimum: 0.000163458
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+                 alpha    1.2009e+00    1.2081e+00 +/-  6.87e-02  <none>
+                  frac    3.1648e-01    3.1741e-01 +/-  5.28e-02  <none>
+                    mu    1.2479e+02    1.2479e+02 +/-  1.69e-02  <none>
+                     n    1.5852e+00    1.5570e+00 +/-  1.69e-01  <none>
+                 sigma    1.8288e+00    1.8272e+00 +/-  6.57e-02  <none>
+               sigmaCB    1.1451e+00    1.1454e+00 +/-  3.89e-02  <none>
+
+Minuit2Minimizer: Minimize with max-calls 3000 convergence for edm < 0.1 strategy 0
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = 71.9326144455141616
+Edm   = 4.90053381148698383e-05
+Nfcn  = 40
+alpha	  = 1.20826	 +/-  0.0258049	(limited)
+frac	  = 0.317318	 +/-  0.0213108	(limited)
+mu	  = 124.79	 +/-  0.0134708	(limited)
+n	  = 1.55721	 +/-  0.0516622	(limited)
+sigma	  = 1.82729	 +/-  0.0293608	(limited)
+sigmaCB	  = 1.14552	 +/-  0.0212507	(limited)
+
+  RooFitResult: minimized FCN value: 71.9326, estimated distance to minimum: 0.000131436
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+                 alpha    1.2081e+00    1.2083e+00 +/-  6.87e-02  <none>
+                  frac    3.1741e-01    3.1732e-01 +/-  5.27e-02  <none>
+                    mu    1.2479e+02    1.2479e+02 +/-  1.69e-02  <none>
+                     n    1.5570e+00    1.5572e+00 +/-  1.69e-01  <none>
+                 sigma    1.8272e+00    1.8273e+00 +/-  6.57e-02  <none>
+               sigmaCB    1.1454e+00    1.1455e+00 +/-  3.89e-02  <none>
+
