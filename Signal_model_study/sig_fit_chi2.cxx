@@ -1018,7 +1018,7 @@ int fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, 
 
 }
 
-void sig_fit_chi2(string year, string cat, string lepton){
+void sig_fit_chi2(string yr, string cat, string lepton){
   RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL) ;
   RooRealVar x("x", "m_llg", LOWX, HIGHX);
   RooRealVar y("y", "photon pT", 15., 1000.);
@@ -1034,7 +1034,7 @@ void sig_fit_chi2(string year, string cat, string lepton){
   RooDataSet* ULsample = RooDataSet::read("../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged4_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged3_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged2_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged1_ratio_extended.dat", RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet));
 
 
-  RooDataSet f_data_sig("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), year.c_str(),"w");
+  RooDataSet f_data_sig("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), yr.c_str(),"w");
 
 
 
@@ -1071,7 +1071,7 @@ void sig_fit_chi2(string year, string cat, string lepton){
   else if (cat == "Cat 4" && lepton == "Electron") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_el_u4);
   else if (cat == "Cat 4" && lepton == "Muon") RooDataHist h_fit("h_fit", "h_fit", RooArgSet(x), *d_mu_u4);
   
-  string some_title = year + " " + lepton +" GGF " + cat;
+  string some_title = yr + " " + lepton +" GGF " + cat;
   
   int status1 = fit_hist_sum4Gaus_order0(h_fit, x, some_title.c_str(), c4, leg, true);
   int status2 = fit_hist_DSCB(h_fit, x, some_title.c_str(), c4, leg, true);
