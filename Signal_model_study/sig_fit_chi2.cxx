@@ -1103,7 +1103,7 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   c4->cd();
   leg->Draw("same");
   c4->Draw();
-  c4->SaveAs("plots/2017 Muon GGF Cat 3.pdf");
+  c4->SaveAs(("plots/" + some_title + ".pdf").c_str());
   
   if (status1==0 && status2==0 && status3==0) std::cout <<"Minimization all good!" << std::endl;
   else std::cout << "Minimization fails!" << std::endl;
