@@ -87,12 +87,12 @@ void printQual(int qual) {
 }
 
 void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
-	bool OUTPUT = output;
+  bool OUTPUT = output;
   string name = "DSCB " + def_name;
   string ulname = name + "";
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::SumW2));
-	RooPlot *xframe = x.frame(Title(def_name.c_str()));
+  RooPlot *xframe = x.frame(Title(def_name.c_str()));
   string outputfile = "fit_results/" + name + ".txt";
   if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
 
@@ -104,7 +104,7 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   RooRealVar sigmaL("sigmaL", "sigmaL", 1.66, 0.01, 5);
   RooRealVar sigmaR("sigmaR", "sigmaR", 1.67, 0.01, 5.);
 
-	int np = 6;
+  int np = 6;
 
   //alphaR.removeMin();
   //alphaR.removeMax();
@@ -134,15 +134,15 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   nR.setError(1);
 
   int qual = -1;
-
-	// auto roores = sig_model.chi2FitTo(h_ul, Save(true),PrintLevel(1),Strategy(0));
-	// roores->Print("v");
+  
+  // auto roores = sig_model.chi2FitTo(h_ul, Save(true),PrintLevel(1),Strategy(0));
+  // roores->Print("v");
 
 
   RooChi2Var *nll1 = new RooChi2Var("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   //  nll->applyWeightSquared(false)
   RooMinimizer *mini = new RooMinimizer(*nll1);  
-	mini->setPrintLevel(-1);
+  mini->setPrintLevel(-1);
   (*mini).setEps(100);
   (*mini).setStrategy(0);
   // (*mini).setOffsetting(true);
@@ -153,25 +153,25 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
 
   auto nll11 = RooChi2Var("nll11","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   RooMinimizer *mini1 = new RooMinimizer(nll11);  
-	mini1->setPrintLevel(-1);
+  mini1->setPrintLevel(-1);
   (*mini1).setStrategy(0);
   // (*mini1).setOffsetting(true);
   (*mini1).setEps(1);
   (*mini1).minimize("Minuit2","migrad");
   (*mini1).hesse();
-//   qual = calculateConvMatrix(*mini1, nll11);
+  //   qual = calculateConvMatrix(*mini1, nll11);
   res = (*mini1).save();
-//   res->setCovQual(qual);
+  //   res->setCovQual(qual);
   res->Print("v");
   //printQual(qual);
 
   if (nL.getVal() > 90 || nL.getError() > 100) {nL.setVal(50); nL.setError(0); nL.setConstant(true); np--;}
   if (nR.getVal() > 90 || nR.getError() > 100) {nR.setVal(50); nR.setError(0); nR.setConstant(true); np--;}
 
-	if (nL.getVal() < 0.1) {nL.setVal(0); nL.setError(0); nL.setConstant(true); np--;}
+  if (nL.getVal() < 0.1) {nL.setVal(0); nL.setError(0); nL.setConstant(true); np--;}
   if (nR.getVal() < 0.1) {nR.setVal(0); nR.setError(0); nR.setConstant(true); np--;}
   
-	auto nll12 = RooChi2Var("nll12","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  auto nll12 = RooChi2Var("nll12","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   RooMinimizer *mini02 = new  RooMinimizer(nll12);  //mini02->setPrintLevel(-1);
   (*mini02).setStrategy(0);
   // (*mini02).setOffsetting(true);
@@ -182,7 +182,7 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   res = (*mini02).save();
 //   res->setCovQual(qual);
   res->Print("v");
-	int status1 = res->status();
+  int status1 = res->status();
   int qual1 = qual;
   //printQual(qual);
 
@@ -199,7 +199,7 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   double ar1 = alphaR.getVal();
   double ar1e = alphaR.getError();
 
-//   RooChi2Var chi21("chi21", "chi21", sig_model, h_ul, DataError(RooAbsData::Expected));
+  //   RooChi2Var chi21("chi21", "chi21", sig_model, h_ul, DataError(RooAbsData::Expected));
   double valChi21 = nll12.getVal();
   
   cout <<endl <<  endl;
@@ -252,14 +252,10 @@ void fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c
   if (OUTPUT) c2->SaveAs(((string)("DSCB/" + name + ".pdf")).c_str());
 
 
-	sig_model.plotOn(xframe, LineColor(kGreen), Name("DSCB"));
+  sig_model.plotOn(xframe, LineColor(kGreen), Name("DSCB"));
   c4->cd();
   xframe->GetXaxis()->SetRangeUser(LOWX, HIGHX);
   xframe->Draw("same");
-
-
-  // TLatex *txt = new TLatx(0, 0.01, )
-  // leg1->SetTextSize(0.02);
 
   string ul="#splitline{#splitline{DSCB MC fit #sigma = ";
   std::stringstream stream;
@@ -550,7 +546,7 @@ void fit_hist_CB(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, string def
 
 }
 
-void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, TCanvas *c4, TLegend *leg, string def_name, bool output){
+void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4, TLegend *leg, bool output){
   bool OUTPUT = output;
   string name = "CB+Gauss " + def_name;
   string ulname = name + "L";
@@ -591,7 +587,7 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, TCanvas *c4, TLegend *le
 
   int qual = -1;
 
-  RooNLLVar *nll1 = new RooChi2Var("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
+  RooChi2Var *nll1 = new RooChi2Var("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   //  nll->applyWeightSquared(false)
   RooMinimizer *mini = new RooMinimizer(*nll1);
   mini->setPrintLevel(-1);
@@ -604,13 +600,12 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, TCanvas *c4, TLegend *le
 
   auto nll11 = RooChi2Var("nll11","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
   RooMinimizer *mini1 = new RooMinimizer(nll11);
-	mini1->setPrintLevel(-1);
+  mini1->setPrintLevel(-1);
   (*mini1).setStrategy(0);
   (*mini1).setEps(1);
   (*mini1).minimize("Minuit2","migrad");
   (*mini1).hesse();
   res = (*mini1).save();
-  res->setCovQual(qual);
   res->Print("v");
   //printQual(qual);
 
@@ -623,7 +618,6 @@ void fit_hist_CBGauss(RooDataHist &h_ul, RooRealVar &x, TCanvas *c4, TLegend *le
   (*mini02).minimize("Minuit2","migrad");
   (*mini02).hesse();
   res = (*mini02).save();
-  res->setCovQual(qual);
   res->Print("v");
   int status1 = res->status();
   int qual1 = qual;
@@ -714,47 +708,47 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   string ulname = name + "";
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
-	RooPlot *xframe = x.frame(Title(def_name.c_str()));
+  RooPlot *xframe = x.frame(Title(def_name.c_str()));
   string outputfile = "fit_results/" + name + ".txt";
   if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
 
-	RooRealVar *MH = new RooRealVar("MH", "MH", 125., 123., 127.);
-	RooArgList *gaussians_order1 = new RooArgList();
-	RooArgList *coeffs_order1 = new RooArgList();
-	RooArgSet *listOfPolyVars_ = new RooArgSet();
-	// int g = 0;
+  RooRealVar *MH = new RooRealVar("MH", "MH", 125., 123., 127.);
+  RooArgList *gaussians_order1 = new RooArgList();
+  RooArgList *coeffs_order1 = new RooArgList();
+  RooArgSet *listOfPolyVars_ = new RooArgSet();
+  // int g = 0;
   for (int g(0); g < 4; g++){
-		RooFormulaVar *dMH = new RooFormulaVar("dMH", Form("dMH",g), "@0-125",RooArgList(*MH));
-		RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-15.0,15.0);
+    RooFormulaVar *dMH = new RooFormulaVar("dMH", Form("dMH",g), "@0-125",RooArgList(*MH));
+    RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-15.0,15.0);
     RooRealVar *dm_p1 = new RooRealVar(Form("dm_g%d_p1",g),Form("dm_g%d_p1",g),0.05,-0.25,0.25);
     RooRealVar *dm_p2 = new RooRealVar(Form("dm_g%d_p2",g),Form("dm_g%d_p2",g),0.01,-0.01,0.01);
+    
+    RooPolyVar *dm_order1 = new RooPolyVar(Form("dm_g%d_order1",g),Form("dm_g%d_order1",g),*dMH,RooArgList(*dm_p0,*dm_p1)); //y=a+bx
+    RooFormulaVar *mean_order1 = new RooFormulaVar(Form("mean_g%d_order1",g),Form("mean_g%d_order1",g),"((@0+@1))",RooArgList(*MH,*dm_order1));
 
-		RooPolyVar *dm_order1 = new RooPolyVar(Form("dm_g%d_order1",g),Form("dm_g%d_order1",g),*dMH,RooArgList(*dm_p0,*dm_p1)); //y=a+bx
-		RooFormulaVar *mean_order1 = new RooFormulaVar(Form("mean_g%d_order1",g),Form("mean_g%d_order1",g),"((@0+@1))",RooArgList(*MH,*dm_order1));
-
-		RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*1.0,0.2,8);
+    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*1.0,0.2,8);
     RooRealVar *sigma_p1 = new RooRealVar(Form("sigma_g%d_p1",g),Form("sigma_g%d_p1",g),0.01,-0.05,0.05);
     RooRealVar *sigma_p2 = new RooRealVar(Form("sigma_g%d_p2",g),Form("sigma_g%d_p2",g),0.01,-0.01,0.01);
 
-		RooPolyVar *sigma_order1 = new RooPolyVar(Form("sigma_g%d_order1",g),Form("sigma_g%d_order1",g),*dMH,RooArgList(*sigma_p0,*sigma_p1));
-		RooAbsPdf *gaus_order1 = new RooGaussian(Form("gaus_g%d_order1",g),Form("gaus_g%d_order1",g),x,*mean_order1,*sigma_order1);
+    RooPolyVar *sigma_order1 = new RooPolyVar(Form("sigma_g%d_order1",g),Form("sigma_g%d_order1",g),*dMH,RooArgList(*sigma_p0,*sigma_p1));
+    RooAbsPdf *gaus_order1 = new RooGaussian(Form("gaus_g%d_order1",g),Form("gaus_g%d_order1",g),x,*mean_order1,*sigma_order1);
 
-		gaussians_order1->add(*gaus_order1);
-		// listOfPolyVars_->add(*dm_order2);
-		listOfPolyVars_->add(*mean_order1);
-		listOfPolyVars_->add(*sigma_order1);
-		if (g < 3){
-			RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
+    gaussians_order1->add(*gaus_order1);
+    // listOfPolyVars_->add(*dm_order2);
+    listOfPolyVars_->add(*mean_order1);
+    listOfPolyVars_->add(*sigma_order1);
+    if (g < 3){
+      RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
       RooRealVar *frac_p1 = new RooRealVar(Form("frac_g%d_p1",g),Form("frac_g%d_p1",g), 0.0001,-0.01,0.01);
       RooRealVar *frac_p2 = new RooRealVar(Form("frac_g%d_p2",g),Form("frac_g%d_p2",g),0.00001,-0.00001,0.00001);
-			RooPolyVar *frac_order1 = new RooPolyVar(Form("frac_g%d_order1",g),Form("frac_g%d_order1",g),*dMH,RooArgList(*frac_p0,*frac_p1));
-			RooFormulaVar *frac_constrained_order1 = new RooFormulaVar(Form("frac_g%d_constrained_order1",g),Form("frac_g%d_constrained_order1",g),"(@0>0)*(@0<1)*@0+ (@0>1.0)*0.9999",RooArgList(*frac_order1));
+      RooPolyVar *frac_order1 = new RooPolyVar(Form("frac_g%d_order1",g),Form("frac_g%d_order1",g),*dMH,RooArgList(*frac_p0,*frac_p1));
+      RooFormulaVar *frac_constrained_order1 = new RooFormulaVar(Form("frac_g%d_constrained_order1",g),Form("frac_g%d_constrained_order1",g),"(@0>0)*(@0<1)*@0+ (@0>1.0)*0.9999",RooArgList(*frac_order1));
       coeffs_order1->add(*frac_constrained_order1);
-		}
-
-
-	}
-		RooAddPdf sig_model("sig_model","sig_model",*gaussians_order1,*coeffs_order1, true);
+    }
+    
+    
+  }
+  RooAddPdf sig_model("sig_model","sig_model",*gaussians_order1,*coeffs_order1, true);
 
 
   int qual = -1;
@@ -843,7 +837,7 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   
   // if (OUTPUT) c2->SaveAs(((string)("SumGauss/" + name + ".pdf")).c_str());
 
-	sig_model.plotOn(xframe, LineColor(kBlue), Name("SumG"));
+  sig_model.plotOn(xframe, LineColor(kBlue), Name("SumG"));
   c4->cd();
   xframe->GetXaxis()->SetRangeUser(LOWX, HIGHX);
   xframe->Draw("same");
@@ -859,15 +853,15 @@ void fit_hist_sum4Gaus_order1(RooDataHist &h_ul, RooRealVar &x, string def_name,
   string full_ul = ul + ss1;
 
   leg->AddEntry("SumG", full_ul.c_str(), "L");
-
-	// (*listOfPolyVars_)["sigma_g0_order1"].Print();
-	// (*listOfPolyVars_)["mean_g0_order1"].Print();
-	// (*listOfPolyVars_)["sigma_g1_order1"].Print();
-	// (*listOfPolyVars_)["mean_g1_order1"].Print();
-	// (*listOfPolyVars_)["sigma_g2_order1"].Print();
-	// (*listOfPolyVars_)["mean_g2_order1"].Print();
-	// (*listOfPolyVars_)["sigma_g3_order1"].Print();
-	// (*listOfPolyVars_)["mean_g3_order1"].Print();
+  
+  // (*listOfPolyVars_)["sigma_g0_order1"].Print();
+  // (*listOfPolyVars_)["mean_g0_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g1_order1"].Print();
+  // (*listOfPolyVars_)["mean_g1_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g2_order1"].Print();
+  // (*listOfPolyVars_)["mean_g2_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g3_order1"].Print();
+  // (*listOfPolyVars_)["mean_g3_order1"].Print();
 
   if (OUTPUT) fclose (stdout);
 
@@ -880,35 +874,35 @@ void fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name,
   string ulname = name + "";
   RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
   h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
-	RooPlot *xframe = x.frame(Title(def_name.c_str()));
+  RooPlot *xframe = x.frame(Title(def_name.c_str()));
   string outputfile = "fit_results/" + name + ".txt";
   if (OUTPUT) freopen (outputfile.c_str(),"w",stdout);
-
-	RooRealVar *MH = new RooRealVar("MH", "MH", 125., 123., 127.);
-	RooArgList *gaussians_order0 = new RooArgList();
-	RooArgList *coeffs_order0 = new RooArgList();
-	RooArgSet *listOfPolyVars_ = new RooArgSet();
-	// int g = 0;
+  
+  RooRealVar *MH = new RooRealVar("MH", "MH", 125.);
+  RooArgList *gaussians_order0 = new RooArgList();
+  RooArgList *coeffs_order0 = new RooArgList();
+  RooArgSet *listOfPolyVars_ = new RooArgSet();
+  // int g = 0;
   for (int g(0); g < 4; g++){
-		RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-15.0,15.0);
-		RooFormulaVar *mean_order0 = new RooFormulaVar(Form("mean_g%d_order0",g),Form("mean_g%d_order0",g),"((@0+@1))",RooArgList(*MH,*dm_p0));
-		RooRealVar *sigma_order0 = new RooRealVar(Form("sigma_g%d_order0",g),Form("sigma_g%d_order0",g),(g+1)*1.0,0.2,8);
-		RooAbsPdf *gaus_order0 = new RooGaussian(Form("gaus_g%d_order0",g),Form("gaus_g%d_order0",g),x,*mean_order0,*sigma_order0);
-
-		gaussians_order0->add(*gaus_order0);
-		// listOfPolyVars_->add(*dm_order2);
-		listOfPolyVars_->add(*mean_order0);
-		listOfPolyVars_->add(*sigma_order0);
-		if (g < 3){
-			RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
+    RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-15.0,15.0);
+    RooFormulaVar *mean_order0 = new RooFormulaVar(Form("mean_g%d_order0",g),Form("mean_g%d_order0",g),"((@0+@1))",RooArgList(*MH,*dm_p0));
+    RooRealVar *sigma_order0 = new RooRealVar(Form("sigma_g%d_order0",g),Form("sigma_g%d_order0",g),(g+1)*1.0,0.2,8);
+    RooAbsPdf *gaus_order0 = new RooGaussian(Form("gaus_g%d_order0",g),Form("gaus_g%d_order0",g),x,*mean_order0,*sigma_order0);
+    
+    gaussians_order0->add(*gaus_order0);
+    // listOfPolyVars_->add(*dm_order2);
+    listOfPolyVars_->add(*mean_order0);
+    listOfPolyVars_->add(*sigma_order0);
+    if (g < 3){
+      RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
       coeffs_order0->add(*frac_p0);
-		}
-
-
-	}
-		RooAddPdf sig_model("sig_model","sig_model",*gaussians_order0,*coeffs_order0, true);
-
-
+    }
+    
+    
+  }
+  RooAddPdf sig_model("sig_model","sig_model",*gaussians_order0,*coeffs_order0, true);
+  
+  
   int qual = 3;
 
   auto *nll1 = new RooChi2Var("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
@@ -945,7 +939,7 @@ void fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name,
   
   cout <<endl <<  endl;
 
-	sig_model.plotOn(xframe_ul, LineColor(kRed));
+  sig_model.plotOn(xframe_ul, LineColor(kRed));
   
   TCanvas *c2 = new TCanvas("c2", "c2", 600, 600);
   RooDataHist *pdfDataHis1 = sig_model.generateBinned(RooArgSet(x), h_ul.sumEntries(), true);
@@ -1008,14 +1002,14 @@ void fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name,
 
   leg->AddEntry("SumG", full_ul.c_str(), "L");
 
-	// (*listOfPolyVars_)["sigma_g0_order1"].Print();
-	// (*listOfPolyVars_)["mean_g0_order1"].Print();
-	// (*listOfPolyVars_)["sigma_g1_order1"].Print();
-	// (*listOfPolyVars_)["mean_g1_order1"].Print();
-	// (*listOfPolyVars_)["sigma_g2_order1"].Print();
-	// (*listOfPolyVars_)["mean_g2_order1"].Print();
-	// (*listOfPolyVars_)["sigma_g3_order1"].Print();
-	// (*listOfPolyVars_)["mean_g3_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g0_order1"].Print();
+  // (*listOfPolyVars_)["mean_g0_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g1_order1"].Print();
+  // (*listOfPolyVars_)["mean_g1_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g2_order1"].Print();
+  // (*listOfPolyVars_)["mean_g2_order1"].Print();
+  // (*listOfPolyVars_)["sigma_g3_order1"].Print();
+  // (*listOfPolyVars_)["mean_g3_order1"].Print();
 
   if (OUTPUT) fclose (stdout);
 
@@ -1032,13 +1026,9 @@ void sig_fit_chi2(){
   RooRealVar ph_eta("ph_eta", "ph_eta", -3, 3);
   RooRealVar nlep("nlep", "nlep", 0, 10);
   RooRealVar njet("njet", "njet", 0, 10);
-	gStyle->SetOptStat(0);
-  
-  
+  gStyle->SetOptStat(0);
 
-
-  RooDataSet* ULsample = RooDataSet::read("../fitting/ruisample/Signal_untagged4_ratio_extended.dat,../fitting/ruisample/Signal_untagged3_ratio_extended.dat,../fitting/ruisample/Signal_untagged2_ratio_extended.dat,../fitting/ruisample/Signal_untagged1_ratio_extended.dat",\
-	RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet));
+  RooDataSet* ULsample = RooDataSet::read("../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged4_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged3_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged2_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged1_ratio_extended.dat", RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet));
 
 
   RooDataSet f_data_sig("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "2017","w");
@@ -1067,8 +1057,8 @@ void sig_fit_chi2(){
 
   //Set fit initial values
 
-	TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
-	TLegend *leg = new TLegend(0.1,0.9,0.45,0.7);
+  TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
+  TLegend *leg = new TLegend(0.1,0.9,0.45,0.7);
   leg->SetTextSize(0.02);
 
   x.setBins(NBIN);
@@ -1093,21 +1083,22 @@ void sig_fit_chi2(){
   c1->Draw();
   */
 
-	// fit_hist_sum4Gaus_order1(h_el_u4, x, "2017 Ele GGF Cat 4", c4, leg, true);
-	// fit_hist_DSCB(h_el_u4, x, "2017 Ele GGF Cat 4", c4, leg, true);
-	// c4->cd();
-	// leg->Draw("same");
-	// c4->Draw();
-	// c4->SaveAs("plots/2017 Ele GGF Cat 4.pdf");
-
-
-	fit_hist_sum4Gaus_order1(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, false);
-	// fit_hist_DSCB(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
-	c4->cd();
-	// leg->Draw("same");
-	c4->Draw();
-	// c4->SaveAs("plots/2017 Muon GGF Cat 3.pdf");
-
+  // fit_hist_sum4Gaus_order1(h_el_u4, x, "2017 Ele GGF Cat 4", c4, leg, true);
+  // fit_hist_DSCB(h_el_u4, x, "2017 Ele GGF Cat 4", c4, leg, true);
+  // c4->cd();
+  // leg->Draw("same");
+  // c4->Draw();
+  // c4->SaveAs("plots/2017 Ele GGF Cat 4.pdf");
+  
+  
+  fit_hist_sum4Gaus_order0(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
+  fit_hist_DSCB(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true);
+  fit_hist_CBGauss(h_mu_u3, x, "2017 Muon GGF Cat 3", c4, leg, true); 
+  c4->cd();
+  leg->Draw("same");
+  c4->Draw();
+  c4->SaveAs("plots/2017 Muon GGF Cat 3.pdf");
+  
 
   //fit_hist_DSCB(h_el_ul_u2, h_el_u2, x, "2017 Ele Untagged 2");
   // fit_hist_DSCB(h_el_ul_u3, h_el_u3, x, "2017 Ele Untagged 3");
