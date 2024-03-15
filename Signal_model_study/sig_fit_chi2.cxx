@@ -1103,7 +1103,7 @@ void sig_fit_chi2(){
   c4->SaveAs("plots/2017 Muon GGF Cat 3.pdf");
   
   if (status1==0 && status2==0 && status3==0) std::cout <<"Minimization all good!" << std::endl;
-  else std::cout << "Minimization fails!" << setd::endl;
+  else std::cout << "Minimization fails!" << std::endl;
   //fit_hist_DSCB(h_el_ul_u2, h_el_u2, x, "2017 Ele Untagged 2");
   // fit_hist_DSCB(h_el_ul_u3, h_el_u3, x, "2017 Ele Untagged 3");
   // fit_hist_DSCB(h_el_ul_u4, h_el_u4, x, "2017 Ele Untagged 4");
