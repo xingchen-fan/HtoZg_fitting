@@ -12,9 +12,10 @@
 
 using namespace RooFit;
 using namespace std; 
-int NBIN = 64;
+
 int LOWX = 115;
 int HIGHX = 131;
+int NBIN = 4*(HIGHX - LOWX);
 
 int calculateConvMatrix(RooMinimizer &minimizer, RooNLLVar &nll){
   std::vector<RooNLLVar *> nllComponents;
@@ -266,283 +267,6 @@ int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4
   leg->AddEntry("DSCB", full_ul.c_str(), "L");
   if (OUTPUT) fclose (stdout);
   return status1;
-
-}
-
-void fit_hist_CB(RooDataHist &h_ul, RooDataHist &h_re, RooRealVar &x, string def_name){
-  
-  string name = "CB " + def_name;
-  string ulname = name + " UL";
-  string rename = name + " Rereco";
-  RooPlot *xframe_ul = x.frame(Title(ulname.c_str()));
-  h_ul.plotOn(xframe_ul, LineColor(kBlue), DataError(RooAbsData::Auto));
-  RooPlot *xframe_re = x.frame(Title(rename.c_str()));
-  h_re.plotOn(xframe_re, LineColor(kGreen), DataError(RooAbsData::Auto));
-  RooPlot *xframe = x.frame(Title(name.c_str()));
-  string outputfile = "fit_results/" + name + ".txt";
-  freopen (outputfile.c_str(),"w",stdout);
-
-  RooRealVar mu("mu", "mu", 124.57, 120., 130.);
-  RooRealVar alpha("alpha", "alpha", 7.6328e-01, 0.001,2.3);
-  RooRealVar n("n", "n", 10, 1., 120);
-  RooRealVar sigma("sigma", "sigma", 1.67, 0.5, 3.);
-
-//Set alpha or n constant
-  // alphaL.setConstant(true);
-  // alphaR.setConstant(true);
-  //nL.setConstant(true);
-  //nR.setConstant(true);
-  // mu.setConstant(true);
-  gStyle->SetOptStat(0);
-
-  RooCrystalBall sig_model("sig_model","sig_model", x, mu, sigma, alpha, n);
-
-  alpha.setError(0.1);
-  mu.setError(0.1);
-  sigma.setError(0.01);
-  alpha.setError(0.1);
-  n.setError(1);
-
-  int qual = -1;
-
-  cout << "UL" << endl;
-  RooNLLVar *nll1 = new RooNLLVar("nll1","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
-  //  nll->applyWeightSquared(false)
-  RooMinimizer *mini = new RooMinimizer(*nll1);
-  (*mini).setEps(100);
-  (*mini).setStrategy(0);
-  (*mini).setOffsetting(true);
-  (*mini).minimize("Minuit2","migrad");
-  RooFitResult *res = (*mini).save();
-  res->Print("v");
-  (*mini).setOffsetting(false);
-
-  auto nll11 = RooNLLVar("nll11","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
-  RooMinimizer *mini1 = new RooMinimizer(nll11);
-  (*mini1).setStrategy(0);
-  (*mini1).setOffsetting(true);
-  (*mini1).setEps(0.1);
-  (*mini1).minimize("Minuit2","migrad");
-  (*mini1).hesse();
-  qual = calculateConvMatrix(*mini1, nll11);
-  res = (*mini1).save();
-  res->setCovQual(qual);
-  res->Print("v");
-  //printQual(qual);
-
-  if (n.getVal() > 100 || n.getError() > 100) {n.setVal(100); n.setError(0); n.setConstant(true);}
-  
-  auto nll12 = RooNLLVar("nll12","-log(L)",sig_model, h_ul, DataError(RooAbsData::SumW2)) ;
-  RooMinimizer *mini02 = new  RooMinimizer(nll12);
-  (*mini02).setStrategy(0);
-  (*mini02).setOffsetting(true);
-  (*mini02).setEps(0.001);
-  (*mini02).minimize("Minuit2","migrad");
-  (*mini02).hesse();
-  qual = calculateConvMatrix(*mini02, nll12);
-  res = (*mini02).save();
-  res->setCovQual(qual);
-  res->Print("v");
-  int status1 = res->status();
-  int qual1 = qual;
-  //printQual(qual);
-
-  double sigmaVal = sigma.getVal();
-  sig_model.plotOn(xframe_ul, LineColor(kRed));
-  sig_model.plotOn(xframe, LineColor(kBlue), Name("UL"));
-  double s1 = sigma.getVal();
-  double e1 = sigma.getError();
-  double n1 = n.getVal();
-  double n1e = n.getError();
-  double a1 = alpha.getVal();
-  double a1e = alpha.getError();
-
-  RooChi2Var chi21("chi21", "chi21", sig_model, h_ul, DataError(RooAbsData::Expected));
-
-  
-  cout <<endl <<  endl << endl<< endl<< endl<< endl;
-  //RooAbsReal* nll1 = sig_model.createNLL(h1);
-  RooPlot *nllframe1 = sigma.frame(Title("NLL Scan over #sigma"), Bins(60),Range(sigmaVal - 0.1, sigmaVal + 0.1));
-  nll12.plotOn(nllframe1, ShiftToZero());
-
-  
-  TCanvas *c2 = new TCanvas("c2", "c2", 1200, 600);
-  RooDataHist *pdfDataHis1 = sig_model.generateBinned(RooArgSet(x), h_ul.sumEntries(), true);
-  TH1D *hpdf1 = (TH1D*)pdfDataHis1->createHistogram("hpdf1",x,Binning(NBIN, LOWX, HIGHX));
-  TH1D *hh_ul = (TH1D*)h_ul.createHistogram("hh_ul",x,Binning(NBIN, LOWX, HIGHX));
-  TH1D *ratio1 = new TH1D("ratio1", "ratio1", NBIN, LOWX, HIGHX);
-  ratio1 -> Sumw2();
-  ratio1 -> Divide(hh_ul,hpdf1);
-  c2->cd();
-  c2->Divide(2);
-  c2->cd(1);
-  TPad *pad0 = new TPad("pad0","",0,0.2,1,1);
-  TPad *pad00 = new TPad("pad00","",0,0,1,0.2);
-  pad0->Draw();
-  pad00->Draw();
-  pad0->cd();
-  //xframe_re-> GetXaxis()-> SetTitle("");
-  xframe_ul->Draw();
-  pad00->cd();
-  ratio1-> SetTitle("");
-  ratio1 -> GetYaxis()-> SetLabelSize(0.1);
-  ratio1 -> GetYaxis()-> SetRangeUser(0., 2.);
-  ratio1->SetMarkerStyle(8);
-  ratio1->SetMarkerSize(1);
-  ratio1 -> GetXaxis()-> SetLabelSize(0.1);
-  ratio1 -> GetXaxis()-> SetTitleSize(0.1);
-  //ratio2-> GetXaxis()-> SetTitle("m_{llg}");
-  ratio1->Draw();
-  TLine *line0 = new TLine( 117, 1, 132, 1);
-  line0-> SetLineColor(kRed);
-  line0->SetLineStyle(7);
-  line0->SetLineWidth(2); 
-  line0->Draw("same");
-  c2->cd(2);
-  nllframe1->Draw();
-  c2->SaveAs(((string)("NLLplots/" + name + "UL.pdf")).c_str());
-
-
-  //Reset initial
-  //mu.setVal(125.);
-  n.setConstant(false);
-  alpha.setVal(6.7436e-01);
-  n.setVal(10);
-  sigma.setVal(1.5);
-  //sigmaR.setVal(1.5);
-  //nR.setConstant(false);
-  //nR.setError(1);
-  
-  cout << "Rereco" << endl;
-  RooNLLVar *nll2 = new RooNLLVar("nll2","-log(L)",sig_model, h_re,DataError(RooAbsData::SumW2)) ;
-  //nll2->applyWeightSquared(true);
-  RooMinimizer mini2(*nll2);
-  mini2.setEps(100);
-  mini2.setStrategy(0);
-  mini2.setOffsetting(true);
-  mini2.minimize("Minuit2","migrad");
-  res = mini2.save();
-  res->Print("v");
-  
-  mini2.setOffsetting(false);
-  auto nll21 = RooNLLVar("nll21","-log(L)",sig_model, h_re, DataError(RooAbsData::SumW2)) ;
-  RooMinimizer mini21(nll21);
-  mini21.setStrategy(0);
-  mini21.setOffsetting(true);
-  mini21.setEps(0.1);
-  mini21.minimize("Minuit2","migrad");
-  mini21.hesse();
-  qual = calculateConvMatrix(mini21, nll21);
-  res = mini21.save();
-  res->setCovQual(qual);
-  res->Print("v");
-  //printQual(qual);
-
-  if (n.getVal() > 100 || n.getError() > 100) {n.setVal(100); n.setError(0); n.setConstant(true);}
-
-  auto nll22 = RooNLLVar("nll22","-log(L)",sig_model, h_re, DataError(RooAbsData::SumW2)) ;
-  RooMinimizer mini22(nll22);
-  mini22.setStrategy(0);
-  mini22.setOffsetting(true);
-  mini22.setEps(0.001);
-  mini22.minimize("Minuit2","migrad");
-  mini22.hesse();
-  qual = calculateConvMatrix(mini22, nll22);
-  res = mini22.save();
-  res->setCovQual(qual);
-  res->Print("v");
-  int status2 = res->status();
-  int qual2 = qual;
-  //printQual(qual);
-
-  sigmaVal = sigma.getVal();
-  sig_model.plotOn(xframe_re, LineColor(kRed));
-  sig_model.plotOn(xframe, LineColor(kGreen), Name("rereco"));
-  double s2 = sigma.getVal();
-  double e2 = sigma.getError();
-  double n2 = n.getVal();
-  double n2e = n.getError();
-  double a2 = alpha.getVal();
-  double a2e = alpha.getError();
-
-  RooChi2Var chi22("chi22", "chi22", sig_model, h_re, DataError(RooAbsData::Expected));
-
-  cout << endl << endl <<  endl<< endl<< endl<< endl;
-  //RooAbsReal* nll2 = sig_model.createNLL(h3);
-  // RooNLLVar nll2("nll2", "nll2",sig_model, h3);  
-  //nll2.applyWeightSquared(true);
-  RooPlot *nllframe2 = sigma.frame(Title("NLL Scan over #sigma"), Bins(60),Range(sigmaVal - 0.1, sigmaVal + 0.1));
-  nll22.plotOn(nllframe2, ShiftToZero());
-
-  TCanvas *c3 = new TCanvas("c3", "c3", 1200, 600);
-  RooDataHist *pdfDataHis2 = sig_model.generateBinned(RooArgSet(x), h_re.sumEntries(), true);
-  TH1D *hpdf2 = (TH1D*)pdfDataHis2->createHistogram("hpdf2",x,Binning(NBIN, LOWX, HIGHX));
-  TH1D *hh_re = (TH1D*)h_re.createHistogram("hh_re",x,Binning(NBIN, LOWX, HIGHX));
-  TH1D *ratio2 = new TH1D("ratio2", "ratio2", NBIN, LOWX, HIGHX);
-  ratio2 -> Sumw2();
-  ratio2 -> Divide(hh_re,hpdf2);
-  c3->cd();
-  c3->Divide(2);
-  c3->cd(1);
-  TPad *pad1 = new TPad("pad1","",0,0.2,1,1);
-  TPad *pad2 = new TPad("pad2","",0,0,1,0.2);
-  pad1->Draw();
-  pad2->Draw();
-  pad1->cd();
-  //xframe_re-> GetXaxis()-> SetTitle("");
-  xframe_re->Draw();
-  pad2->cd();
-  ratio2-> SetTitle("");
-  ratio2 -> GetYaxis()-> SetLabelSize(0.1);
-  ratio2 -> GetYaxis()-> SetRangeUser(0., 2.);
-  ratio2->SetMarkerStyle(8);
-  ratio2->SetMarkerSize(1);
-  ratio2 -> GetXaxis()-> SetLabelSize(0.1);
-  ratio2 -> GetXaxis()-> SetTitleSize(0.1);
-  //ratio2-> GetXaxis()-> SetTitle("m_{llg}");
-  ratio2->Draw();
-  TLine *line = new TLine( 117, 1, 132, 1);
-  line-> SetLineColor(kRed);
-  line->SetLineStyle(7);
-  line->SetLineWidth(2); 
-  line->Draw("same");
-  c3->cd(2);
-  nllframe2->Draw();
-  c3->SaveAs(((string)("NLLplots/" + name + "Re.pdf")).c_str());
-
-  TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
-  c4->cd();
-  xframe->GetXaxis()->SetRangeUser(117, 132);
-  xframe->Draw();
-
-  TLegend *leg = new TLegend(0.1,0.9,0.45,0.7);
-  leg->SetTextSize(0.02);
-
-  // TLatex *txt = new TLatx(0, 0.01, )
-  // leg1->SetTextSize(0.02);
-
-  string ul="#splitline{#splitline{UL MC fit #sigma = ";
-  std::stringstream stream;
-  stream << std::fixed << std::setprecision(2) << s1 << "#pm" << e1  <<  "}{" << "n = " << n1 << "#pm" << n1e << "}}{#splitline{" << 
-  "#alpha = " << a1 << "#pm" << a1e << "}{Status = " << status1 << " CovQ = " << qual1 << " Chi2 = " << chi21.getVal() << "}}";
-  std::string ss1 = stream.str();
-  string full_ul = ul + ss1;
-
-  string re ="#splitline{#splitline{Rereco MC fit #sigma = ";
-  std::stringstream stream1;
-  stream1 << std::fixed << std::setprecision(2) << s2 << "#pm" << e2  << "}{" << "n = " << n2 << "#pm" << n2e << "}}{#splitline{" << 
-  "#alpha = " << a2 << "#pm" << a2e << "}{Status = " << status2 << " CovQ = " << qual2 << " Chi2 = " << chi22.getVal() << "}}";
-  std::string ss2 = stream1.str();
-  string full_re = re + ss2;
-
-
-  leg->AddEntry("UL", full_ul.c_str(), "L");
-  leg->AddEntry("rereco", full_re.c_str(), "L");
-  leg->Draw("same");
-  c4->SaveAs(((string)("plots/" + name + ".pdf")).c_str());
-
-  fclose (stdout);
-
 
 }
 
@@ -1018,6 +742,10 @@ int fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, 
 }
 
 void sig_fit_chi2(string yr, string cat, string lepton){
+  if (cat = "Cat 1" && lepton == "Muon"){
+    HIGHX = 130;
+    NBIN = 60;
+  }
   RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL) ;
   RooRealVar x("x", "m_llg", LOWX, HIGHX);
   RooRealVar y("y", "photon pT", 15., 1000.);
@@ -1100,7 +828,11 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   int status1 = fit_hist_sum4Gaus_order0(*h_fit, x, some_title.c_str(), c4, leg, true);
   int status2 = fit_hist_DSCB(*h_fit, x, some_title.c_str(), c4, leg, true);
   int status3 = fit_hist_CBGauss(*h_fit, x, some_title.c_str(), c4, leg, true); 
+  RooPlot *xframe_hist = x.frame();
+  h_fit->plotOn(xframe_hist);
+  
   c4->cd();
+  xframe_hist->Draw("same");
   leg->Draw("same");
   c4->Draw();
   c4->SaveAs(("plots/" + some_title + ".pdf").c_str());
