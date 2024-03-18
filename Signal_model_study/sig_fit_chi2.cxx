@@ -742,7 +742,7 @@ int fit_hist_sum4Gaus_order0(RooDataHist &h_ul, RooRealVar &x, string def_name, 
 }
 
 void sig_fit_chi2(string yr, string cat, string lepton){
-  if (cat = "Cat 1" && lepton == "Muon"){
+  if (cat == "Cat 1" && lepton == "Muon"){
     HIGHX = 130;
     NBIN = 60;
   }
@@ -828,11 +828,11 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   int status1 = fit_hist_sum4Gaus_order0(*h_fit, x, some_title.c_str(), c4, leg, true);
   int status2 = fit_hist_DSCB(*h_fit, x, some_title.c_str(), c4, leg, true);
   int status3 = fit_hist_CBGauss(*h_fit, x, some_title.c_str(), c4, leg, true); 
-  RooPlot *xframe_hist = x.frame();
-  h_fit->plotOn(xframe_hist);
+  //RooPlot *xframe_hist = x.frame();
+  // h_fit->plotOn(xframe_hist);
   
   c4->cd();
-  xframe_hist->Draw("same");
+  //xframe_hist->Draw("same");
   leg->Draw("same");
   c4->Draw();
   c4->SaveAs(("plots/" + some_title + ".pdf").c_str());
