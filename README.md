@@ -1,7 +1,7 @@
 # HtoZg_fitting
 
 # Environment
-The code is tested unfer `CMSSW_12_6_0` with `ROOT 6.24` and `Python 3.9.14`. Should work without `CMSSW` but plain `pyroot`.
+The code is tested unfer `CMSSW_12_6_0` with `ROOT 6.30` and `Python 3.9.14`. Should work without `CMSSW` but plain `pyroot`. For example, it should work on any lxplus9 cluster with `ROOT 6.30`.
 
 Make sure `RooGaussStepBernstein` is properly installed!
 
