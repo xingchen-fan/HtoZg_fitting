@@ -1,5 +1,11 @@
 import ROOT
 
+def bondComp(par, tol):
+    if par.getValV()+tol > par.getMax() or par.getVal()-tol < par.getMin():
+        print (par.GetName(), " = ", par.getValV()" hits the bondary (", par.getMin(), ", ", par.getMax(), ")")
+        return True
+    elif return False
+    
 #### Bernstein
 class Bern2Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
@@ -9,7 +15,10 @@ class Bern2Class:
         self.sigma = ROOT.RooRealVar("sigma_bern2_" + cat,"sigma_bern2_" + cat,sigma_init,  0.1, 15.)
         self.stepval = ROOT.RooRealVar("stepval_bern2_" + cat, "stepval_bern2_" + cat, step_init, 95., 115.)
         self.pdf = ROOT.RooGaussStepBernstein("bern2_" +cat + "_model", "Bernstein2 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2))
- 
+    def checkBond(self):
+        tol = 0.001
+        if any([bondComp(, tol)])
+        
 class Bern3Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
         self.p0 = ROOT.RooRealVar("b3p0_" + cat, "b3p1_" + cat, p0)
