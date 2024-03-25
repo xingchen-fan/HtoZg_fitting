@@ -1,0 +1,84 @@
+
+  RooFitResult: minimized FCN value: 76139.7, estimated distance to minimum: 4.35878e-08
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=-1 HESSE=3 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b2p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b2p1_u1   -2.4317e+00   -2.9802e+00 +/-  1.20e-01  <none>
+               b2p2_u1    1.7413e+00    2.1049e+00 +/-  1.08e-01  <none>
+        sigma_bern2_u1    1.0082e-01    3.0626e+00 +/-  4.82e-01  <none>
+      stepval_bern2_u1    1.0265e+02    1.0381e+02 +/-  4.43e-01  <none>
+
+
+  RooFitResult: minimized FCN value: 76114.9, estimated distance to minimum: 5.77143e-07
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=-1 HESSE=3 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b3p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b3p1_u1   -5.0755e-01   -1.6022e+00 +/-  2.73e-01  <none>
+               b3p2_u1    5.1754e-01    1.6496e+00 +/-  2.36e-01  <none>
+               b3p3_u1    6.9760e-01   -1.6565e-01 +/-  1.83e-01  <none>
+        sigma_bern2_u1    4.1060e+00    4.7148e+00 +/-  5.84e-01  <none>
+      stepval_bern2_u1    1.0358e+02    1.0355e+02 +/-  4.77e-01  <none>
+
+
+  RooFitResult: minimized FCN value: 76114.7, estimated distance to minimum: 5.48337e-08
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=-1 HESSE=3 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b4p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b4p1_u1    8.0681e-01    4.2676e-01 +/-  4.79e-01  <none>
+               b4p2_u1    6.4021e-01    9.6949e-01 +/-  3.43e-01  <none>
+               b4p3_u1    4.6771e-01    3.3958e-01 +/-  2.94e-01  <none>
+               b4p4_u1    3.6917e-01    3.4530e-01 +/-  2.47e-01  <none>
+        sigma_bern2_u1    5.3231e+00    5.0378e+00 +/-  6.37e-01  <none>
+      stepval_bern2_u1    1.0308e+02    1.0354e+02 +/-  4.77e-01  <none>
+
+
+  RooFitResult: minimized FCN value: 76114.4, estimated distance to minimum: 5.35828e-06
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=-1 HESSE=3 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b5p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b4p3_u1    6.0268e-01   -2.9796e+00 +/-  3.38e-01  <none>
+               b4p4_u1    3.7525e-01    2.9479e+00 +/-  3.05e-01  <none>
+               b4p5_u1    2.2612e-01   -1.1574e+00 +/-  2.93e-01  <none>
+               b5p1_u1    1.6533e+00   -7.1273e-01 +/-  7.10e-01  <none>
+               b5p2_u1    1.0553e+00    4.2879e+00 +/-  4.56e-01  <none>
+        sigma_bern2_u1    5.3193e+00    5.6904e+00 +/-  6.11e-01  <none>
+      stepval_bern2_u1    1.0362e+02    1.0372e+02 +/-  4.46e-01  <none>
+
+# bin1 bkg =  19599.54399090011
+# bin2 bkg =  43977.12983090085
+# bin3 bkg =  99609.67754180051
+# bin4 bkg =  180295.53420700098
+stat bern2 u1
+stat bern3 u1
+stat bern4 u1
+stat bern5 u1
+NLL  =  [76139.68436271034, 76114.92537716625, 76114.68686119911, 76114.35681721999]
+P-value =  [1.965628658124395e-12, 0.48976981319332225, 0.4165288924311704]

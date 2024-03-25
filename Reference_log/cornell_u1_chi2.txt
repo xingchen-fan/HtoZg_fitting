@@ -1,0 +1,84 @@
+
+  RooFitResult: minimized FCN value: 272.472, estimated distance to minimum: 2.45366e-12
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b2p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b2p1_u1   -2.9866e+00   -2.9783e+00 +/-  1.32e-01  <none>
+               b2p2_u1    2.0809e+00    2.0840e+00 +/-  1.16e-01  <none>
+        sigma_bern2_u1    3.2432e+00    3.1831e+00 +/-  4.59e-01  <none>
+      stepval_bern2_u1    1.0369e+02    1.0375e+02 +/-  4.26e-01  <none>
+
+
+  RooFitResult: minimized FCN value: 227.468, estimated distance to minimum: 5.35616e-11
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b3p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b3p1_u1   -4.8387e-01   -1.5860e+00 +/-  4.19e-01  <none>
+               b3p2_u1    4.9875e-01    1.6506e+00 +/-  3.94e-01  <none>
+               b3p3_u1    7.0803e-01   -1.7397e-01 +/-  2.99e-01  <none>
+        sigma_bern2_u1    4.1610e+00    4.7362e+00 +/-  6.05e-01  <none>
+      stepval_bern2_u1    1.0358e+02    1.0356e+02 +/-  4.71e-01  <none>
+
+
+  RooFitResult: minimized FCN value: 226.881, estimated distance to minimum: 4.50442e-12
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b4p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b4p1_u1    8.0325e-01    3.0870e-01 +/-  1.18e+00  <none>
+               b4p2_u1    6.6836e-01    1.1314e+00 +/-  1.24e+00  <none>
+               b4p3_u1    4.7767e-01    1.9777e-01 +/-  1.13e+00  <none>
+               b4p4_u1    3.3603e-01    4.2117e-01 +/-  7.09e-01  <none>
+        sigma_bern2_u1    5.2858e+00    5.0878e+00 +/-  7.47e-01  <none>
+      stepval_bern2_u1    1.0315e+02    1.0357e+02 +/-  4.71e-01  <none>
+
+
+  RooFitResult: minimized FCN value: 226.406, estimated distance to minimum: 4.38706e-11
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+               b5p0_u1    1.0000e+01
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+               b4p3_u1    5.8904e-01   -2.5087e+00 +/-  2.24e+00  <none>
+               b4p4_u1    3.4922e-01    2.5734e+00 +/-  1.73e+00  <none>
+               b4p5_u1    2.7213e-01   -9.3370e-01 +/-  1.12e+00  <none>
+               b5p1_u1    1.6944e+00   -3.8911e-01 +/-  2.12e+00  <none>
+               b5p2_u1    1.0909e+00    3.8974e+00 +/-  2.18e+00  <none>
+        sigma_bern2_u1    5.2732e+00    5.6229e+00 +/-  8.60e-01  <none>
+      stepval_bern2_u1    1.0363e+02    1.0373e+02 +/-  4.65e-01  <none>
+
+# bin1 bkg =  19599.54399090011
+# bin2 bkg =  43977.12983090085
+# bin3 bkg =  99609.67754180051
+# bin4 bkg =  180295.53420700098
+stat bern2 u1
+stat bern3 u1
+stat bern4 u1
+stat bern5 u1
+Chi2  =  [272.47235971452153, 227.46831559315407, 226.88125960131273, 226.40592976908616]
+P-value =  [1.2159702081303588e-11, 0.4182999828205586, 0.46679242034632096]

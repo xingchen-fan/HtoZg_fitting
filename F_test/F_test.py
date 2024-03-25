@@ -77,7 +77,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
         for entry in stats:
             print(entry.GetTitle())
             Minimizer_NLL(entry, -1, 100, False, strategy)
-            r = Minimizer_NLL(entry, -1, eps, offset, strategy).Print("V")
+            r = Minimizer_NLL(entry, -1, eps, offset, strategy)
             r.Print("V")
     output = [stat1.getVal(), stat2.getVal(), stat3.getVal(), stat4.getVal()]
     fs = []
