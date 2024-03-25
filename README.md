@@ -23,6 +23,8 @@ Right now, we have two types of files: `.dat` for Cornell MC samples and `.root`
 
 Cornell `.dat` files have specific columns for relevant variables, make sure assign them to the correct `RooRealVar`. Similarly, Peking `.root` files have specific branch names, the asignment is hard-coded in `sample_reader.py`.
 
+Cornell samples for synchronization only are at `/afs/cern.ch/user/f/fanx/public/samples/` which is hard-coded in the F-test script. If you wnat to try other samples, make sure you change it as well as th file names in `sample_reader.py`.
+
 ## Background Functions
 The functions are defined in `Utilities/bkg_functions_class.py`. A typical definition of a model is like this: 
 ```
@@ -59,5 +61,8 @@ bash$ python3 F_test.py Chi2
 Output has both the test statistics and the P-values.
 
 ## Spurious Signal Test
-In the `Spurious_signal_test.py`, please change the sample directory. Chi2 fit with SumW2 and Poisson options are used in this test. By default, the signal model is Double-sided Crystal Ball (DSCB), and the signal yield with the errors are reported. Both the signal fit and S+B fit plots are saved. 
+In the `Spurious_signal_test.py`, please change the sample directory. Chi2 fit with SumW2 and Poisson options are used in this test. By default, the signal model is Double-sided Crystal Ball (DSCB), and the signal yield with the errors are reported. Both the signal fit and S+B fit plots are saved.
+
+## Reference Log
+I upload some results when I run the scripts so that you can comapre with.
 
