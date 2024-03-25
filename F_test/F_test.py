@@ -90,7 +90,8 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
 
     print(method, " = ", output)
     print("P-value = ", fs)
-    plotClass(x, histogram, bern2_model.pdf)
+    plotClass(x, histogram, bern2_model.pdf, title="Bern2 u1")
+
     can2 = ROOT.TCanvas("c2","c2", 500, 500)
     can2.cd()
     plot2 = x.frame()
@@ -100,7 +101,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     bern2_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name("Bern2"))
     bern3_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(3), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name("Bern3"))
     bern4_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(4), ROOT.RooFit.LineWidth(3),ROOT.RooFit.Name("Bern4"))
-    bern5_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(5), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name("Bern5"))
+    bern5_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(7), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name("Bern5"))
     plot2.Draw()
     leg = ROOT.TLegend(.7,.7,.9,.9)
     leg.SetBorderSize(0)
@@ -143,7 +144,9 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 
 # Cornell MC sample dat reader and make RooDataHist
 x.setBins(260)
-reader = readDat(list, "../../../../CMSSW_11_3_4/src/HToZg_combine/")
+reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
+#reader = readDat(list, "../../sample/")
+reader.numCheck()
 
 # Beijing data sample root reader and make RooDataHist
 #x.setBins(260)

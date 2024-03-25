@@ -6,7 +6,7 @@ def plotClass (x, datahist, pdf, title="Histogram", output_dir="plots/"):
     h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
     model_hist = pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
 
-    ratio = ROOT.TH1D("ratio", "ratio", 65, 105, 170)
+    ratio = ROOT.TH1D("ratio", "ratio", 65, x.getMin(), x.getMax())
     ratio.Divide(h_hist, model_hist)
     ratio.SetMarkerColor(ROOT.kRed)
     ratio.SetMarkerStyle(8)
@@ -23,7 +23,7 @@ def plotClass (x, datahist, pdf, title="Histogram", output_dir="plots/"):
     ratio.GetYaxis().SetTitleSize(0.15)
     ratio.GetYaxis().SetTitle("Ratio")
 
-    line = ROOT.TLine( 105, 1, 170, 1)
+    line = ROOT.TLine( x.getMin(), 1, x.getMax(), 1)
     line.SetLineColor(ROOT.kBlack)
     line.SetLineStyle(7)
     line.SetLineWidth(2)
@@ -54,3 +54,6 @@ def plotClass (x, datahist, pdf, title="Histogram", output_dir="plots/"):
     line.Draw("same")
     can.SaveAs(output_dir + title+".pdf")
     x.setBins(260)
+
+    
+    
