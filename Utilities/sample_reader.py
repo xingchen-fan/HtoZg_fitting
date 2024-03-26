@@ -15,17 +15,17 @@ class readDat: #Cornell MC sampleS
         njet = list[8]
 
         # Read dat samples
-        bkg_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        sig_run2 = ROOT.RooDataSet.read("FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        tot_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat,FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        #bkg_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet),"", dir)
-        #sig_run2 = ROOT.RooDataSet.read("Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        #tot_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat,Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+#        bkg_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+#        sig_run2 = ROOT.RooDataSet.read("FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+#        tot_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat,FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        bkg_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet),"", dir)
+        sig_run2 = ROOT.RooDataSet.read("Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        tot_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat,Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
         
-        bdt1 = -0.36
-        bdt2 = -0.06
-        bdt3 = 0.08
-        bdt4 = 0.15
+        bdt1 = -0.5 #-0.36
+        bdt2 = 0.02 #-0.06
+        bdt3 = 0.34 #0.08
+        bdt4 = 0.66 #0.15
 
         # Make RooDataSet
         # u1_bkg_run2_el = ROOT.RooDataSet("u1_bkg_run2_el", "u1_bkg_run2_el", bkg_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "lep < 1 && nlep <= 2 && njet < 2 && bdt > " + str(bdt4), "w")

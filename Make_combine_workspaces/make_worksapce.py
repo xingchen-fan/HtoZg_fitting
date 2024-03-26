@@ -25,7 +25,7 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 LOG = False
 
 # Specify the lower bond of mllg
-lowx = 105.
+lowx = 100.
 
 # Define variables
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
@@ -57,8 +57,8 @@ bern3 = Bern2Class(x, mu_gauss, cat)
 pow1 = Pow1Class(x, mu_gauss, cat)
 exp1 = Exp1Class(x, mu_gauss, cat)
 exp2 = Exp2Class(x, mu_gauss, cat)
-lau1 = Lau1Class(x, mu_gauss, cat)
-lau2 = Lau2Class(x, mu_gauss, cat)
+lau1 = Lau1Class(x, mu_gauss, cat, p1 = -6, p2 = -5)
+lau2 = Lau2Class(x, mu_gauss, cat, p1 = -6, p2 = -5, p3 = -4)
 modg = ModGausClass(x,cat, lowx, lowx+65)
 
 sig_model = DSCB_Class(x, MH, cat)
@@ -92,7 +92,7 @@ for model in profile:
 # Create signal workspace
 f_out1 = ROOT.TFile("workspaces/workspace_sig_" + cat + ".root", "RECREATE")
 w_sig = ROOT.RooWorkspace("workspace_sig","workspace_sig")
-getattr(w_sig, "import")(sig_model)
+getattr(w_sig, "import")(sig_model.pdf)
 w_sig.Print()
 w_sig.Write()
 f_out1.Close()
@@ -108,7 +108,7 @@ multipdf = ROOT.RooMultiPdf("multipdf_"+cat, "MultiPdf for "+cat, cate, models)
 #multipdf.setCorrectionFactor(0.)
 
 norm = ROOT.RooRealVar("multipdf_"+ cat +"_norm", "Number of background events", tot_hist.sumEntries(), 0, 3*tot_hist.sumEntries())
-f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile" + cat + ".root", "RECREATE")
+f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_" + cat + ".root", "RECREATE")
 w_bkg = ROOT.RooWorkspace("workspace_bkg","workspace_bkg")
 getattr(w_bkg, "import")(tot_hist)
 getattr(w_bkg, "import")(cate)
