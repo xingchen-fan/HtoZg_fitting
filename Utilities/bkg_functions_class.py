@@ -194,3 +194,17 @@ class Lau3Class:
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
 
+class ModGausClass:
+    def __init__(self, x, cat="", lowx = 105., highx = 170.):
+        self.m0 = ROOT.RooRealVar("m0_"+cat,"mass peak value [GeV]" ,104,100,150)
+        self.vl = ROOT.RooRealVar("nuL_" +cat,"low-end power"       ,2.1,  -2,  10)
+        self.vr = ROOT.RooRealVar("nuRange_"+cat,"power range"       ,1., -5,  5)
+        self.s0 = ROOT.RooRealVar("sigma0_"+cat,"peak width"       ,7,  1., 50)
+        self.sl = ROOT.RooRealVar("sigmaL_"+cat,"low-end width"    ,10,  -10., 40)
+        self.sh = ROOT.RooRealVar("sigmaH_"+cat,"high-end width"   ,45, 0.1,60)
+        self.pdf = ROOT.ModGaus("modg_"+cat+"_model","modg_"+cat+"_model", x, self.m0, self.vl, self.vr, self.s0, self.sl, self.sh, lowx, highx)
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.m0, self.vl, self.vr, self.s0, self.sl, self.sh]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")

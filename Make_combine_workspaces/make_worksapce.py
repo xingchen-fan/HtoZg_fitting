@@ -59,6 +59,7 @@ exp1 = Exp1Class(x, mu_gauss, cat)
 exp2 = Exp2Class(x, mu_gauss, cat)
 lau1 = Lau1Class(x, mu_gauss, cat)
 lau2 = Lau2Class(x, mu_gauss, cat)
+modg = ModGausClass(x,cat, lowx, lowx+65)
 
 sig_model = DSCB_Class(x, MH, cat)
 
@@ -71,7 +72,7 @@ x.setRange("signal",115, 132)
 sig_model.pdf.fitTo(sig_hist, ROOT.RooFit.SumW2Error(True),  ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0), ROOT.RooFit.Range("signal"))
 sig_model.setConst(True)
 
-profile = [bern2, bern3, pow1, exp1, exp2, lau1, lau2]
+profile = [bern2, bern3, pow1, exp1, exp2, lau1, lau2, modg]
 stat_list = []
 error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
 for model in profile:
