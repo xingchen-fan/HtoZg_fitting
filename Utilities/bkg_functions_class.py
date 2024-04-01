@@ -27,9 +27,9 @@ class Bern3Class:
         self.p1 = ROOT.RooRealVar("b3p1_" + cat, "b3p1_" + cat, p_init,-bond, bond)
         self.p2 = ROOT.RooRealVar("b3p2_" + cat, "b3p2_" + cat, p_init,-bond, bond)
         self.p3 = ROOT.RooRealVar("b3p3_" + cat, "b3p3_" + cat, p_init,-bond, bond)
-        self.sigma = ROOT.RooRealVar("sigma_bern2_" + cat,"sigma_bern2_" + cat,sigma_init,  0.1, 15.)
-        self.stepval = ROOT.RooRealVar("stepval_bern2_" + cat, "stepval_bern2_" + cat, step_init, 95., 115.)
-        self.pdf = ROOT.RooGaussStepBernstein("bern2_" +cat + "_model", "Bernstein3 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2,self.p3))
+        self.sigma = ROOT.RooRealVar("sigma_bern3_" + cat,"sigma_bern3_" + cat, sigma_init,  0.1, 15.)
+        self.stepval = ROOT.RooRealVar("stepval_bern3_" + cat, "stepval_bern3_" + cat, step_init, 95., 115.)
+        self.pdf = ROOT.RooGaussStepBernstein("bern3_" +cat + "_model", "Bernstein3 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2,self.p3))
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.p3, self.sigma, self.stepval]
@@ -39,13 +39,13 @@ class Bern3Class:
 class Bern4Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
         self.p0 = ROOT.RooRealVar("b4p0_" + cat, "b4p1_" + cat, p0)
-        self.p1 = ROOT.RooRealVar("b4p1_" + cat, "b4p1_" + cat, p_init,-bond, bond)
-        self.p2 = ROOT.RooRealVar("b4p2_" + cat, "b4p2_" + cat, p_init,-bond, bond)
-        self.p3 = ROOT.RooRealVar("b4p3_" + cat, "b4p3_" + cat, p_init,-bond, bond)
-        self.p4 = ROOT.RooRealVar("b4p4_" + cat, "b4p4_" + cat, p_init,-bond, bond)
-        self.sigma = ROOT.RooRealVar("sigma_bern2_" + cat,"sigma_bern2_" + cat,sigma_init,  0.1, 15.)
-        self.stepval = ROOT.RooRealVar("stepval_bern2_" + cat, "stepval_bern2_" + cat, step_init, 95., 115.)
-        self.pdf = ROOT.RooGaussStepBernstein("bern2_" +cat + "_model", "Bernstein4 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4))
+        self.p1 = ROOT.RooRealVar("b4p1_" + cat, "b4p1_" + cat, p_init, -bond, bond)
+        self.p2 = ROOT.RooRealVar("b4p2_" + cat, "b4p2_" + cat, p_init, -bond, bond)
+        self.p3 = ROOT.RooRealVar("b4p3_" + cat, "b4p3_" + cat, p_init, -bond, bond)
+        self.p4 = ROOT.RooRealVar("b4p4_" + cat, "b4p4_" + cat, p_init, -bond, bond)
+        self.sigma = ROOT.RooRealVar("sigma_bern4_" + cat,"sigma_bern4_" + cat, sigma_init,  0.1, 15.)
+        self.stepval = ROOT.RooRealVar("stepval_bern4_" + cat, "stepval_bern4_" + cat, step_init, 95., 115.)
+        self.pdf = ROOT.RooGaussStepBernstein("bern4_" +cat + "_model", "Bernstein4 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4))
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.p3, self.p4, self.sigma, self.stepval]
@@ -57,12 +57,12 @@ class Bern5Class:
         self.p0 = ROOT.RooRealVar("b5p0_" + cat, "b5p1_" + cat, p0)
         self.p1 = ROOT.RooRealVar("b5p1_" + cat, "b5p1_" + cat, p_init,-bond, bond)
         self.p2 = ROOT.RooRealVar("b5p2_" + cat, "b5p2_" + cat, p_init,-bond, bond)
-        self.p3 = ROOT.RooRealVar("b4p3_" + cat, "b4p3_" + cat, p_init,-bond, bond)
-        self.p4 = ROOT.RooRealVar("b4p4_" + cat, "b4p4_" + cat, p_init,-bond, bond)
-        self.p5 = ROOT.RooRealVar("b4p5_" + cat, "b4p5_" + cat, p_init,-bond, bond)
-        self.sigma = ROOT.RooRealVar("sigma_bern2_" + cat,"sigma_bern2_" + cat,sigma_init,  0.1, 15.)
-        self.stepval = ROOT.RooRealVar("stepval_bern2_" + cat, "stepval_bern2_" + cat, step_init, 95., 115.)
-        self.pdf = ROOT.RooGaussStepBernstein("bern2_" +cat + "_model", "Bernstein5 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4, self.p5))
+        self.p3 = ROOT.RooRealVar("b5p3_" + cat, "b5p3_" + cat, p_init,-bond, bond)
+        self.p4 = ROOT.RooRealVar("b5p4_" + cat, "b5p4_" + cat, p_init,-bond, bond)
+        self.p5 = ROOT.RooRealVar("b5p5_" + cat, "b5p5_" + cat, p_init,-bond, bond)
+        self.sigma = ROOT.RooRealVar("sigma_bern5_" + cat,"sigma_bern5_" + cat,sigma_init,  0.1, 15.)
+        self.stepval = ROOT.RooRealVar("stepval_bern5_" + cat, "stepval_bern5_" + cat, step_init, 95., 115.)
+        self.pdf = ROOT.RooGaussStepBernstein("bern5_" +cat + "_model", "Bernstein5 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4, self.p5))
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.p3, self.p4, self.p5, self.sigma, self.stepval]
