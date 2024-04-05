@@ -3,13 +3,15 @@ import os
 import sys
 import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
+sys.path.append(os.path.abspath("../CMS_plotter/"))
+import CMS_lumi, tdrstyle
 from bkg_functions_fit import *
 from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
-ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+#ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 parser = argparse.ArgumentParser(description = "F test method (NLL or Chi2)")
 parser.add_argument("method")
@@ -53,7 +55,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     bern5_model = Bern5Class(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
     if e_type == "Poisson": error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
     elif e_type == "SumW2": error = ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)
-
+    #cuthistogram = histogram.reduce(ROOT.RooFit.CutRange("left"))
     if method == "Chi2": 
         stat1 = ROOT.RooChi2Var("stat_bern2_" + cat, "stat bern2 " + cat, bern2_model.pdf,  histogram, error)
         stat2 = ROOT.RooChi2Var("stat_bern3_" + cat, "stat bern3 " + cat, bern3_model.pdf,  histogram, error)
@@ -80,6 +82,8 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
             r = Minimizer_NLL(entry, -1, eps, offset, strategy)
             r.Print("V")
     output = [stat1.getVal(), stat2.getVal(), stat3.getVal(), stat4.getVal()]
+    #res = bern4_model.pdf.chi2FitTo(cuthistogram, ROOT.RooFit.Range("left"), error, ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.Save(True))
+    #res.Print("V")
     fs = []
     if method == "Chi2":
         for i in range(len(output) - 1):
@@ -92,6 +96,9 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     print("P-value = ", fs)
     plotClass(x, histogram, bern2_model.pdf, title="Bern2 u1")
 
+    CMS_lumi.lumi_sqrtS = "13 TeV"
+    CMS_lumi.writeExtraText = 1
+    CMS_lumi.extraText = "          Preliminary"
     can2 = ROOT.TCanvas("c2","c2", 500, 500)
     can2.cd()
     plot2 = x.frame()
@@ -103,6 +110,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     bern4_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(4), ROOT.RooFit.LineWidth(3),ROOT.RooFit.Name("Bern4"))
     bern5_model.pdf.plotOn(plot2, ROOT.RooFit.LineColor(7), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name("Bern5"))
     plot2.Draw()
+    plot2.SetTitle("")
     leg = ROOT.TLegend(.7,.7,.9,.9)
     leg.SetBorderSize(0)
     leg.SetFillColor(0)
@@ -114,7 +122,8 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     leg.AddEntry("Bern4","Bern 4","L")
     leg.AddEntry("Bern5","Bern 5","L")
     leg.Draw("same")
-    can2.Draw()
+    CMS_lumi.CMS_lumi(can2, 0, 0)
+    #    can2.Draw()
     can2.SaveAs("some.pdf")
     x.setBins(260)
     
@@ -151,6 +160,10 @@ reader.numCheck()
 # Beijing data sample root reader and make RooDataHist
 #x.setBins(260)
 #reader = readRoot(x, "~/beijing_sample/data.root")
+
+x.setRange("left", lowx, 120)
+x.setRange("right", 130, lowx+65)
+x.setRange("full", lowx, lowx+105)
 
 singleBernFTest(x, mu_gauss, reader.data_hist_untagged1_bkg, "u1", args.method, "Poisson", False)
 # singleBernFTest(x, mu_gauss, reader.data_hist_untagged2_bkg, "u2", args.method, "Poisson", False)
