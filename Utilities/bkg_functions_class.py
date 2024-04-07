@@ -15,6 +15,7 @@ class Bern2Class:
         self.sigma = ROOT.RooRealVar("sigma_bern2_" + cat,"sigma_bern2_" + cat,sigma_init,  0.1, 15.)
         self.stepval = ROOT.RooRealVar("stepval_bern2_" + cat, "stepval_bern2_" + cat, step_init, 95., 115.)
         self.pdf = ROOT.RooGaussStepBernstein("bern2_" +cat + "_model", "Bernstein2 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2))
+        self.name = "bern2_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.sigma, self.stepval]
@@ -30,6 +31,7 @@ class Bern3Class:
         self.sigma = ROOT.RooRealVar("sigma_bern3_" + cat,"sigma_bern3_" + cat, sigma_init,  0.1, 15.)
         self.stepval = ROOT.RooRealVar("stepval_bern3_" + cat, "stepval_bern3_" + cat, step_init, 95., 115.)
         self.pdf = ROOT.RooGaussStepBernstein("bern3_" +cat + "_model", "Bernstein3 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2,self.p3))
+        self.name = "bern3_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.p3, self.sigma, self.stepval]
@@ -46,6 +48,7 @@ class Bern4Class:
         self.sigma = ROOT.RooRealVar("sigma_bern4_" + cat,"sigma_bern4_" + cat, sigma_init,  0.1, 15.)
         self.stepval = ROOT.RooRealVar("stepval_bern4_" + cat, "stepval_bern4_" + cat, step_init, 95., 115.)
         self.pdf = ROOT.RooGaussStepBernstein("bern4_" +cat + "_model", "Bernstein4 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4))
+        self.name = "bern4_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.p3, self.p4, self.sigma, self.stepval]
@@ -63,6 +66,7 @@ class Bern5Class:
         self.sigma = ROOT.RooRealVar("sigma_bern5_" + cat,"sigma_bern5_" + cat,sigma_init,  0.1, 15.)
         self.stepval = ROOT.RooRealVar("stepval_bern5_" + cat, "stepval_bern5_" + cat, step_init, 95., 115.)
         self.pdf = ROOT.RooGaussStepBernstein("bern5_" +cat + "_model", "Bernstein5 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4, self.p5))
+        self.name = "bern5_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.p1, self.p2, self.p3, self.p4, self.p5, self.sigma, self.stepval]
@@ -82,6 +86,7 @@ class Pow1Class:
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("pow1_" + cat + "_model", "step pow1 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
+        self.name = "pow1_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.t, self.p, self.sigma]
@@ -100,6 +105,7 @@ class Exp1Class:
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("exp1_"+cat + "_model", "step exp1 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
+        self.name = "exp1_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.t, self.p1, self.sigma]
@@ -121,6 +127,7 @@ class Exp2Class:
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("exp2_"+cat + "_model", "step exp2 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
+        self.name = "exp2_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.t, self.p1, self.p2, self.f, self.sigma]
@@ -142,6 +149,7 @@ class Lau1Class:
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("lau1_" +cat+ "_model", "step lau1 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
+        self.name = "lau1_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.t, self.p1, self.p2, self.f, self.sigma]
@@ -164,6 +172,7 @@ class Lau2Class:
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("lau2_" +cat+ "_model", "step lau2 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
+        self.name = "lau2_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.t, self.p1, self.p2, self.p3, self.f1, self.f2, self.sigma]
@@ -188,6 +197,7 @@ class Lau3Class:
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("lau3_" +cat+ "_model", "step lau3 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
+        self.name = "lau3_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.t, self.p1, self.p2, self.p3, self.p4, self.f1, self.f2, self.f3, self.sigma]
@@ -203,6 +213,7 @@ class ModGausClass:
         self.sl = ROOT.RooRealVar("sigmaL_"+cat,"low-end width"    ,10,  -10., 40)
         self.sh = ROOT.RooRealVar("sigmaH_"+cat,"high-end width"   ,45, 0.1,60)
         self.pdf = ROOT.ModGaus("modg_"+cat+"_model","modg_"+cat+"_model", x, self.m0, self.vl, self.vr, self.s0, self.sl, self.sh, lowx, highx)
+        self.name = "modg_"+ cat
     def checkBond(self):
         tol = 0.001
         par_list = [self.m0, self.vl, self.vr, self.s0, self.sl, self.sh]

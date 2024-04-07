@@ -4,9 +4,9 @@ from Xc_Minimizer import *
 class BiasClass:
     def __init__(self, pdf, hist, sideBand = False, fitRange = ''):
         if sideBand:
-            self.nll = ROOT.RooNLLVar("nll_", "nll_", pdf, hist, ROOT.RooFit.Range(fitRange))
+            self.nll = ROOT.RooNLLVar("nll_"+pdf.GetName(), "nll_"+pdf.GetName(), pdf.pdf, hist, ROOT.RooFit.Range(fitRange))
         else:
-            self.nll = ROOT.RooNLLVar("nll_", "nll_", pdf, hist)
+            self.nll = ROOT.RooNLLVar("nll_"+pdf.GetName(), "nll_"+pdf.GetName(), pdf.pdf, hist)
         self.corrNLL = 0.
     def minimize(self, printLevel = -1, eps = 1, offSet = True):
         Minimizer_NLL(self.nll, -1, 100, False, 0)
