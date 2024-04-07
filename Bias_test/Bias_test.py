@@ -76,6 +76,8 @@ for entry in profile_seed:
     BiasClass(entry.pdf, reader.data_hist_bin1, True, 'left,right').minimize()
     entry.checkBond()
 
+print("Done seed PDFs")
+
 r_sig = []
 r_error = []
 best_list = []
@@ -91,7 +93,7 @@ for entry in profile_seed:
             hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.* N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
-            tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(dscb_model.pdf, profile[i].pdf), ROOT.RooArgList(c2, c1))
+            tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(dscb_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, reader.data_hist_bin1, False).minimize()
             if i ==0: min_nll=bias.corrNLL
             elif bias.corrNLL< min_nll: 
@@ -102,6 +104,7 @@ for entry in profile_seed:
         r_sig.append(r_sig_/N_sig)
         r_error.append(r_error_/N_sig)
         best_list.append(best_)
+        print("Finish toy sample", j+1)
 
 print("r = ", r_sig)
 print("r error = ", r_error)
