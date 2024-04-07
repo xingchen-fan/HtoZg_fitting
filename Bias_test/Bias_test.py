@@ -44,7 +44,7 @@ reader = readRoot(x, "~/beijing_sample/data.root")
 #cutHist = reader.data_hist_bin1.reduce(ROOT.RooFit.CutRange('left,right'))
 #print ("cut norm = ", cutHist.sumEntries())
 N = reader.data_hist_bin1.sumEntries() *10
-print("10 times stats = "N)
+print("10 times stats = ",N)
 x.setBins(260)
 x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
