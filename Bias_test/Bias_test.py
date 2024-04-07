@@ -110,6 +110,7 @@ for entry in profile_seed:
         r_sig.append(r_sig_/N_sig)
         r_error.append(r_error_/N_sig)
         best_list.append(best_)
+    c2.Print()
     print("r = ", r_sig)
     print("r error = ", r_error)
     print("best func = ", best_list)
