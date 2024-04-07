@@ -89,7 +89,7 @@ for entry in profile_seed:
         r_sig_ = 0
         r_error_ = 0
         best_=''
-        for i, ele in profile:
+        for i, ele in enumerate(profile):
             hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.* N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
