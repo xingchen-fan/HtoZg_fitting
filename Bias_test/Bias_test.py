@@ -94,7 +94,8 @@ for entry in profile_seed:
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.* N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
             tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(dscb_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
-            bias = BiasClass(tot_model, reader.data_hist_bin1, False).minimize()
+            bias = BiasClass(tot_model, reader.data_hist_bin1, False)
+            bias.minimize()
             if i ==0: min_nll=bias.corrNLL
             elif bias.corrNLL< min_nll: 
                 min_nll = bias.corrNLL
