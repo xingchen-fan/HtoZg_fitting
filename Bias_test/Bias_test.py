@@ -97,7 +97,7 @@ for entry in profile_seed:
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.* N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
             tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(dscb_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
-            bias = BiasClass(tot_model, reader.data_hist_bin1, False)
+            bias = BiasClass(tot_model, hist_toy, False)
             bias.minimize()
             if i ==0: 
                 ind = 0
@@ -116,7 +116,7 @@ for entry in profile_seed:
         best_list.append(best_)
 
         tot_model_ = ROOT.RooAddPdf("tot_model_", "tot_model_", ROOT.RooArgList(dscb_model.pdf, profile[ind].pdf), ROOT.RooArgList(c2, c1))
-        BiasClass(tot_model_, reader.data_hist_bin1, False).minimize()
+        BiasClass(tot_model_, hist_toy, False).minimize()
         plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
     c2.Print()
     print("r = ", r_sig)
