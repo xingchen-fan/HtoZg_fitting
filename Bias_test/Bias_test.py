@@ -78,11 +78,12 @@ for entry in profile_seed:
 
 print("Done seed PDFs")
 
-r_sig = []
-r_error = []
-best_list = []
+
 N_toy = 2
 for entry in profile_seed:
+    r_sig = []
+    r_error = []
+    best_list = []
     for j in range(N_toy):
         min_nll = 0
         ind = 999
@@ -96,7 +97,11 @@ for entry in profile_seed:
             tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(dscb_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, reader.data_hist_bin1, False)
             bias.minimize()
-            if i ==0: min_nll=bias.corrNLL
+            if i ==0: 
+                min_nll=bias.corrNLL
+                r_sig_ = c2.getVal()
+                r_error_ = c2.getError()
+                best_= ele.pdf.GetName()
             elif bias.corrNLL< min_nll: 
                 min_nll = bias.corrNLL
                 r_sig_ = c2.getVal()
@@ -105,11 +110,12 @@ for entry in profile_seed:
         r_sig.append(r_sig_/N_sig)
         r_error.append(r_error_/N_sig)
         best_list.append(best_)
-        print("Finish toy sample", j+1)
+    print("r = ", r_sig)
+    print("r error = ", r_error)
+    print("best func = ", best_list)
+    print("Finish ", entry.pdf.GetName()," toy sample")
 
-print("r = ", r_sig)
-print("r error = ", r_error)
-print("best func = ", best_list)
+
 
 
 
