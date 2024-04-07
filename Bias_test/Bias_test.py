@@ -91,20 +91,22 @@ for entry in profile_seed:
         r_sig_ = 0
         r_error_ = 0
         best_=''
+        x.setBins(260)
+        hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         for i, ele in enumerate(profile):
-            x.setBins(260)
-            hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.* N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
             tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(dscb_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, reader.data_hist_bin1, False)
             bias.minimize()
             if i ==0: 
+                ind = 0
                 min_nll=bias.corrNLL
                 r_sig_ = c2.getVal()
                 r_error_ = c2.getError()
                 best_= ele.pdf.GetName()
             elif bias.corrNLL< min_nll: 
+                ind = i
                 min_nll = bias.corrNLL
                 r_sig_ = c2.getVal()
                 r_error_ = c2.getError()
@@ -112,6 +114,10 @@ for entry in profile_seed:
         r_sig.append(r_sig_/N_sig)
         r_error.append(r_error_/N_sig)
         best_list.append(best_)
+
+        tot_model_ = ROOT.RooAddPdf("tot_model_", "tot_model_", ROOT.RooArgList(dscb_model.pdf, profile[ind].pdf), ROOT.RooArgList(c2, c1))
+        BiasClass(tot_model_, reader.data_hist_bin1, False).minimize()
+        plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
     c2.Print()
     print("r = ", r_sig)
     print("r error = ", r_error)
