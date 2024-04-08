@@ -2,6 +2,7 @@ import ROOT
 import os
 import sys
 import matplotlib.pyplot as plt
+import numpy as np
 #import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
@@ -136,7 +137,7 @@ for entry in profile_seed:
             strength = list[2] + abs(list[2]) * (k - N_scan/2) * scan_size
             list_ = profilefFit(profile, dscb_model, hist_toy, True, strength)
             NLL_list.append(list_[1])
-        dNLL = [ 1 + x - list[1] for x in NLL_list]
+        dNLL = [ np.sign(list[2]) + x - list[1] for x in NLL_list]
         left = 0
         right = 0
         for i in range(len(dNLL) - 1):
