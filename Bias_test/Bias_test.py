@@ -135,7 +135,7 @@ for entry in profile_seed:
         # BiasClass(tot_model_, hist_toy, False).minimize()
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
-        best_list = []
+        scan_list = []
         all_NLL = []
         
         for k in range(N_scan):
@@ -164,6 +164,7 @@ for entry in profile_seed:
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
         plt.close(fig)
         r_sig.append(scan_size*(dNLL.index(0) - N_scan/2)*abs(list[2]))
+        best_list.append(scan_list[dNLL.index(0)])
         if len(left) == 0 or len(right) == 0: 
             print("Scan error! in ", entry.pdf.GetName())
             r_error.append(0)
