@@ -96,7 +96,8 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.*N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
         tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
-        bias = BiasClass(tot_model, hist, False)
+        if str == 0: bias = BiasClass(ele.pdf, hist, False)
+        else: bias = BiasClass(tot_model, hist, False)
         bias.minimize()
         if i ==0: 
             ind = 0
@@ -116,7 +117,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
 # Scan every signal yield/2 around the signal yield
 N_toy = 1
 N_scan = 30
-scan_size = 1
+scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
     r_error = []
@@ -133,7 +134,8 @@ for entry in profile_seed:
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
         for k in range(N_scan):
-            list_ = profilefFit(profile, dscb_model, hist_toy, True, abs(list[2]) * (k - N_scan/2) * scan_size)
+            strength = abs(list[2]) * (k - N_scan/2) * scan_size
+            list_ = profilefFit(profile, dscb_model, hist_toy, True, strength)
             NLL_list.append(list_[1])
         dNLL = [x - list[1] for x in NLL_list]
         left = 0
@@ -142,7 +144,7 @@ for entry in profile_seed:
             if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left = i
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right = i
         if left == right: print("Scan error! in ", entry.pdf.GetName())
-        xs = [scan_size*x for x in range(len(dNLL))]
+        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
         fig = plt.figure()
         plt.plot(xs, dNLL)
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
