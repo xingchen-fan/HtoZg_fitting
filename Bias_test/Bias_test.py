@@ -139,7 +139,7 @@ for entry in profile_seed:
         
         for k in range(N_scan):
             strength = list[2] + abs(list[2]) * (k - N_scan/2) * scan_size
-            list_ = profilefFit(profile, dscb_model, hist_toy, True, strength, fig, xs)
+            list_ = profilefFit(profile, dscb_model, hist_toy, True, strength)
             NLL_list.append(list_[1])
             all_NLL.append(list_[5])
         dNLL = [ x - list[1] for x in NLL_list]
