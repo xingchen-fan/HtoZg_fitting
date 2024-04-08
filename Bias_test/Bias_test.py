@@ -89,7 +89,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
     r_error_ = 0
     best_=''
     for i, ele in enumerate(profile):
-        ele.reset()
+        #ele.reset()
         if (fix): 
             c1 = ROOT.RooRealVar("c1", "c1", N)
             c2 = ROOT.RooRealVar("c2", "c2", str)
@@ -116,8 +116,8 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan every signal yield/2 around the signal yield
 N_toy = 1
-N_scan = 30
-scan_size = 0.2
+N_scan = 20
+scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
     r_error = []
