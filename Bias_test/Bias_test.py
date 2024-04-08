@@ -113,6 +113,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
 # Scan every signal yield/2 around the signal yield
 N_toy = 1
 N_scan = 30
+scan_size = 1
 for entry in profile_seed:
     r_sig = []
     r_error = []
@@ -129,7 +130,7 @@ for entry in profile_seed:
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
         for k in range(N_scan):
-            list_ = profilefFit(profile, dscb_model, hist_toy, True, abs(list[2]) * (k - N_scan/2) / 4)
+            list_ = profilefFit(profile, dscb_model, hist_toy, True, abs(list[2]) * (k - N_scan/2) * scan_size)
             NLL_list.append(list_[1])
         dNLL = [x - list[1] for x in NLL_list]
         left = 0
@@ -138,12 +139,12 @@ for entry in profile_seed:
             if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left = i
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right = i
         if left == right: print("Scan error! in ", entry.pdf.GetName())
-        xs = [0.24*x for x in range(len(dNLL))]
+        xs = [scan_size*x for x in range(len(dNLL))]
         fig = plt.figure()
         plt.plot(xs, dNLL)
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
         plt.close(fig)
-        r_error.append((right - left)*list[2]/2)
+        r_error.append((right - left)*abs(list[2]) * scan_size)
 
     print("r = ", r_sig)
     print("r error = ", r_error)
