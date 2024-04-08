@@ -12,7 +12,9 @@ class BiasClass:
         Minimizer_NLL(self.nll, -1, 100, False, 0)
         r = Minimizer_NLL(self.nll, printLevel, eps, offSet, 0)
         #print("Cov q = ", r.covQual(), " status = ", r.status(), end="\n")
-        if r.status() != 0: print("Minimization fails!")
+        if r.status() != 0: 
+            print("Minimization fails!")
+            r.Print("V")
         #r.Print("V")
         self.corrNLL = self.nll.getVal() + 0.5*r.floatParsFinal().getSize()
 
