@@ -137,14 +137,14 @@ for entry in profile_seed:
             strength = list[2] + abs(list[2]) * (k - N_scan/2) * scan_size
             list_ = profilefFit(profile, dscb_model, hist_toy, True, strength)
             NLL_list.append(list_[1])
-        dNLL = [ np.sign(list[2]) + x - list[1] for x in NLL_list]
+        dNLL = [ x - list[1] for x in NLL_list]
         left = 0
         right = 0
         for i in range(len(dNLL) - 1):
             if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left = i
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right = i
         if left == right: print("Scan error! in ", entry.pdf.GetName())
-        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        xs = [np.sign(list[2]) + scan_size*(x - N_scan/2) for x in range(N_scan)]
         fig = plt.figure()
         plt.plot(xs, dNLL)
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
