@@ -96,7 +96,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.*N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
         tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
-        if str == 0: bias = BiasClass(ele.pdf, hist, False)
+        if fix and str == 0: bias = BiasClass(ele.pdf, hist, False)
         else: bias = BiasClass(tot_model, hist, False)
         bias.minimize()
         if i ==0: 
