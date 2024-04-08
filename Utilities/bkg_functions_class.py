@@ -9,6 +9,7 @@ def bondComp(par, tol):
 #### Bernstein
 class Bern2Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
+        self.init_list = [p0, p_init, sigma_init, step_init]
         self.p0 = ROOT.RooRealVar("b2p0_" + cat, "b2p1_" + cat, p0)
         self.p1 = ROOT.RooRealVar("b2p1_" + cat, "b2p1_" + cat, p_init,-bond, bond)
         self.p2 = ROOT.RooRealVar("b2p2_" + cat, "b2p2_" + cat, p_init,-bond, bond)
@@ -22,14 +23,15 @@ class Bern2Class:
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
     def reset(self):
-         self.p0.setVal(self.p_init)
-         self.p1.setVal(self.p_init)
-         self.p2.setVal(self.p_init)
-         self.sigma.setVal(self.sigma_init)
-         self.stepval.setVal(self.step_init)
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[1])
+         self.sigma.setVal(self.init_list[2])
+         self.stepval.setVal(self.init_list[3])
 
 class Bern3Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
+        self.init_list = [p0, p_init, sigma_init, step_init]
         self.p0 = ROOT.RooRealVar("b3p0_" + cat, "b3p1_" + cat, p0)
         self.p1 = ROOT.RooRealVar("b3p1_" + cat, "b3p1_" + cat, p_init,-bond, bond)
         self.p2 = ROOT.RooRealVar("b3p2_" + cat, "b3p2_" + cat, p_init,-bond, bond)
@@ -44,15 +46,16 @@ class Bern3Class:
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
     def reset(self):
-         self.p0.setVal(self.p_init)
-         self.p1.setVal(self.p_init)
-         self.p2.setVal(self.p_init)
-         self.p3.setVal(self.p_init)
-         self.sigma.setVal(self.sigma_init)
-         self.stepval.setVal(self.step_init)
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[1])
+         self.p3.setVal(self.init_list[1])
+         self.sigma.setVal(self.init_list[2])
+         self.stepval.setVal(self.init_list[3])
 
 class Bern4Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
+        self.init_list = [p0, p_init, sigma_init, step_init]
         self.p0 = ROOT.RooRealVar("b4p0_" + cat, "b4p1_" + cat, p0)
         self.p1 = ROOT.RooRealVar("b4p1_" + cat, "b4p1_" + cat, p_init, -bond, bond)
         self.p2 = ROOT.RooRealVar("b4p2_" + cat, "b4p2_" + cat, p_init, -bond, bond)
@@ -68,13 +71,13 @@ class Bern4Class:
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
     def reset(self):
-         self.p0.setVal(self.p_init)
-         self.p1.setVal(self.p_init)
-         self.p2.setVal(self.p_init)
-         self.p3.setVal(self.p_init)
-         self.p4.setVal(self.p_init)
-         self.sigma.setVal(self.sigma_init)
-         self.stepval.setVal(self.step_init)
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[1])
+         self.p3.setVal(self.init_list[1])
+         self.p4.setVal(self.init_list[1])
+         self.sigma.setVal(self.init_list[2])
+         self.stepval.setVal(self.init_list[3])
 
 class Bern5Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
