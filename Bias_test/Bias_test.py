@@ -116,7 +116,7 @@ for entry in profile_seed:
     r_sig = []
     r_error = []
     best_list = []
-    for j in range(len(N_toy)):      
+    for j in range(N_toy):      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profilefFit(profile, dscb_model, hist_toy)
@@ -127,7 +127,7 @@ for entry in profile_seed:
         # BiasClass(tot_model_, hist_toy, False).minimize()
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
-        for k in range(len(N_scan)):
+        for k in range(N_scan):
             list_ = profilefFit(profile, dscb_model, hist_toy, True, list[2] * (k - N_scan/2) / 2)
             NLL_list.append(list_[1])
         dNLL = [x - list[1] for x in NLL_list]
@@ -137,7 +137,7 @@ for entry in profile_seed:
             if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left = i
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right = i
         if left == right: print("Scan error! in ", entry.pdf.GetName())
-        xs = [x for x in range(len(dNLL))]
+        xs = [0.5*x for x in range(len(dNLL))]
         plt.plot(xs, dNLL)
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
         r_error.append((right - left)*list[2]/2)
