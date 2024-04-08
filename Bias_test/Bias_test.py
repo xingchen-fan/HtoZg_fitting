@@ -88,6 +88,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
     r_error_ = 0
     best_=''
     for i, ele in enumerate(profile):
+        ele.reset()
         c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.* N)
         if (fix): c2 = ROOT.RooRealVar("c2", "c2", str)
         else: c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
