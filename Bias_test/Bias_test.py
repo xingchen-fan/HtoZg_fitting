@@ -72,7 +72,7 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed, bern3_model_seed, bern4_model_seed]
-profile = [bern3_model]#, bern3_model, bern4_model]
+profile = [bern2_model, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -116,7 +116,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan every signal yield/2 around the signal yield
 N_toy = 1
-N_scan = 20
+N_scan = 40
 scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
