@@ -1,7 +1,8 @@
 import ROOT
 import os
 import sys
-import argparse
+import matplotlib.pyplot as plt
+#import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
@@ -108,25 +109,26 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
     return [ind, min_nll, r_sig_, r_error_, best_]
 
 # Discrete profiling - Find minimum and (r_down, r_up)
-N_toy = 2
-N_scan = 30
+# Scan every signal yield/2 around the signal yield
+N_toy = 1
+N_scan = 60
 for entry in profile_seed:
     r_sig = []
     r_error = []
     best_list = []
-    for j in range(N_toy):      
+    for j in range(len(N_toy)):      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profilefFit(profile, dscb_model, hist_toy)
-        r_sig.append(list[2]/N_sig)
+        r_sig.append(list[2])
         #r_error.append(list[3]/N_sig)
         best_list.append(list[4])
         # tot_model_ = ROOT.RooAddPdf("tot_model_", "tot_model_", ROOT.RooArgList(dscb_model.pdf, profile[ind].pdf), ROOT.RooArgList(c2, c1))
         # BiasClass(tot_model_, hist_toy, False).minimize()
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
-        for k in range(N_scan):
-            list_ = profilefFit(profile, dscb_model, hist_toy, True, list[2] * (k - N_scan/2))
+        for k in range(len(N_scan)):
+            list_ = profilefFit(profile, dscb_model, hist_toy, True, list[2] * (k - N_scan/2) / 2)
             NLL_list.append(list_[1])
         dNLL = [x - list[1] for x in NLL_list]
         left = 0
@@ -135,10 +137,10 @@ for entry in profile_seed:
             if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left = i
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right = i
         if left == right: print("Scan error! in ", entry.pdf.GetName())
-        
-
-
-
+        xs = [x for x in range(len(dNLL))]
+        plt.plot(xs, dNLL)
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
+        r_error.append((right - left)*list[2]/2)
 
     print("r = ", r_sig)
     print("r error = ", r_error)
