@@ -71,7 +71,7 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model]
+profile = [bern3_model]#, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -96,8 +96,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
             c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.*N)
             c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
         tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
-        if fix and str == 0: bias = BiasClass(ele.pdf, hist, False)
-        else: bias = BiasClass(tot_model, hist, False)
+        bias = BiasClass(tot_model, hist, False)
         bias.minimize()
         if i ==0: 
             ind = 0
@@ -117,7 +116,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
 # Scan every signal yield/2 around the signal yield
 N_toy = 1
 N_scan = 30
-scan_size = 0.05
+scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
     r_error = []
@@ -134,10 +133,10 @@ for entry in profile_seed:
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
         for k in range(N_scan):
-            strength = abs(list[2]) * (k - N_scan/2) * scan_size
+            strength = list[2] + abs(list[2]) * (k - N_scan/2) * scan_size
             list_ = profilefFit(profile, dscb_model, hist_toy, True, strength)
             NLL_list.append(list_[1])
-        dNLL = [x - list[1] for x in NLL_list]
+        dNLL = [ 1 + x - list[1] for x in NLL_list]
         left = 0
         right = 0
         for i in range(len(dNLL) - 1):
