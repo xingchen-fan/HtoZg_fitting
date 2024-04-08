@@ -128,7 +128,7 @@ for entry in profile_seed:
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         NLL_list = []
         for k in range(N_scan):
-            list_ = profilefFit(profile, dscb_model, hist_toy, True, list[2] * (k - N_scan/2) / 4)
+            list_ = profilefFit(profile, dscb_model, hist_toy, True, abs(list[2]) * (k - N_scan/2) / 4)
             NLL_list.append(list_[1])
         dNLL = [x - list[1] for x in NLL_list]
         left = 0
