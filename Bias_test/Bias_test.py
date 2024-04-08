@@ -71,7 +71,7 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed, bern3_model_seed, bern4_model_seed]
-profile = [bern3_model]
+profile = [bern2_model, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -89,9 +89,12 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
     best_=''
     for i, ele in enumerate(profile):
         ele.reset()
-        c1 = ROOT.RooRealVar("c1", "c1", N)
-        if (fix): c2 = ROOT.RooRealVar("c2", "c2", str)
-        else: c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
+        if (fix): 
+            c1 = ROOT.RooRealVar("c1", "c1", N)
+            c2 = ROOT.RooRealVar("c2", "c2", str)
+        else:
+            c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.*N)
+            c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
         tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
         bias.minimize()
