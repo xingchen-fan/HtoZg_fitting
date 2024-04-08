@@ -119,7 +119,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
 # Scan every signal yield/2 around the signal yield
 N_toy = 1
 N_scan = 40
-scan_size = 0.05
+scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
     r_error = []
