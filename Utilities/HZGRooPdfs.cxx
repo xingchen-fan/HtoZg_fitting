@@ -33,6 +33,7 @@
 #include "RooAbsReal.h"
 #include "RooRealVar.h"
 #include "RooArgList.h"
+#include "TF1.h"
 
 using namespace std;
 
