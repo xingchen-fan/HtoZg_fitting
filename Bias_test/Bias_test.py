@@ -138,7 +138,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0., scan_size = 0.1
         r_error_ = -1
     else: r_error_ = (right[len(right) - 1] - left[0])*abs(r_sig_) * scan_size
 
-    return [ind, min_nll, r_sig_, r_error_, best_, dNLL, scan_list]
+    return [ind, min_nll, r_sig_, r_error_, best_, dNLL, scan_list, left[0], right[len(right) - 1]]
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
@@ -171,6 +171,8 @@ for entry in profile_seed:
         r_sig.append(list[2])
         best_list.append(list[4])
         r_error.append(list[3])
+        print ("left = ", list[7])
+        print ("right = ", list[8])
 
     print("r = ", r_sig)
     print("r error = ", r_error)
