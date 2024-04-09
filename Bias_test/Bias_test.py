@@ -139,7 +139,7 @@ def scanFit(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan =
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
-N_toy = 100
+N_toy = 10
 N_scan = 60
 scan_size = 0.5
 for entry in profile_seed:
@@ -157,6 +157,7 @@ for entry in profile_seed:
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profilefFit(profile, dscb_model, hist_toy)
         for ele in profile:
+            ele.reset()
             scan_list.append(scanFit(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
         dNLL_offset = []
         for m in range(N_scan):
@@ -173,14 +174,14 @@ for entry in profile_seed:
         else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size
         
         
-        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        # fig = plt.figure()    
-        # plt.plot(xs, scan_list[0])
-        # plt.plot(xs, scan_list[1])
-        # plt.plot(xs, scan_list[2])
-        # plt.plot(xs, dNLL)
-        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        # plt.close(fig)
+        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        fig = plt.figure()    
+        plt.plot(xs, scan_list[0])
+        plt.plot(xs, scan_list[1])
+        plt.plot(xs, scan_list[2])
+        plt.plot(xs, dNLL)
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        plt.close(fig)
         r_sig.append(list[2])
         best_list.append(list[4])
         best_error.append(list[3])
@@ -192,7 +193,7 @@ for entry in profile_seed:
         print("Finish toy ", j+1)
 
     pull.Draw("HIST")
-    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
+    # can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
 
 
     print("r = ", sum(r_sig)/N_toy)
