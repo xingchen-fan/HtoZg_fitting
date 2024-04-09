@@ -71,8 +71,8 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r = bern2_model.pdf.fitTo(reader.data_hist_untagged1_bkg,ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.SumW2Error(True))
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
-profile_seed = [bern2_model_seed, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model]
+profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
+profile = [bern3_model]#, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
