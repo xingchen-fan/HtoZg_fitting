@@ -131,7 +131,7 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
 # Scan N_scan/2 points of signal_yield * scan_size around 0
 N_toy = 1
 N_scan = 30
-scan_size = 0.5
+scan_size = 0.2
 for entry in profile_seed:
     r_sig = []
     r_error = []
