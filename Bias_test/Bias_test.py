@@ -16,7 +16,7 @@ from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 # ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
+# ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
@@ -24,7 +24,6 @@ parser = argparse.ArgumentParser(description = "Number of toy samples")
 parser.add_argument("N_toy")
 args = parser.parse_args()
 
-A = ROOT.dummy(3.3)
 # Define variables
 lowx = 105.
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)

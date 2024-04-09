@@ -847,3 +847,100 @@ Double_t RooGaussStepBernstein::analyticalIntegral(Int_t code,
 
   return result;
 }
+
+
+
+
+ClassImp(ModGaus); 
+
+ ModGaus::ModGaus(const char *name, const char *title, 
+                        RooAbsReal& _m,
+                        RooAbsReal& _m0,
+                        RooAbsReal& _vl,
+                        RooAbsReal& _vr,
+                        RooAbsReal& _s0,
+                        RooAbsReal& _sl,
+                        RooAbsReal& _sh,
+		                double xlow_,
+                        double xhigh_) :
+   RooAbsPdf(name,title), 
+   m("m","m",this,_m),
+   m0("m0","m0",this,_m0),
+   vl("vl","vl",this,_vl),
+   vr("vr","vr",this,_vr),
+   s0("s0","s0",this,_s0),
+   sl("sl","sl",this,_sl),
+   sh("sh","sh",this,_sh),
+   xlow(xlow_),
+   xhigh(xhigh_)
+ { 
+ } 
+
+
+ ModGaus::ModGaus(const ModGaus& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   m("m",this,other.m),
+   m0("m0",this,other.m0),
+   vl("vl",this,other.vl),
+   vr("vr",this,other.vr),
+   s0("s0",this,other.s0),
+   sl("sl",this,other.sl),
+   sh("sh",this,other.sh),
+    xlow(other.xlow),
+    xhigh(other.xhigh)
+ { 
+ } 
+
+// Modified Guass--------------------------------------------------------------------------------------
+ // Original
+ 
+ Double_t mfunc(Double_t* x, Double_t* pr){
+    Double_t width, power;
+    // vh - vl >> vh
+    power = pr[1] + pr[2]*(x[0] - pr[6])/(pr[7]-pr[6]);
+    if(x[0] <= pr[0]) width = pr[4] + (pr[3] - pr[4])*(x[0] - 105)/(pr[0]-pr[6]);
+    else width = pr[3] + (pr[5] - pr[3])*(x[0] - pr[0])/(pr[7] - pr[0]);
+    return exp(-1*pow(fabs((x[0]-pr[0])/width), power));
+
+}
+
+void ModGaus::updateNorm(std::vector<Double_t> fitpars) const{
+    if (fitpars != current) {
+        int nbins = 10000;
+        Double_t low = xlow;
+        Double_t high = xhigh;
+        Double_t _norm = 0;
+        TF1 intfunc("func", mfunc, 0., 200., 8);
+        for(int i(0); i<nbins; i++) {
+            intfunc.SetParameters(m0, vl, vr, s0, sl, sh, low, high);
+            _norm+= ((high - low)/nbins) * intfunc.Eval(low + (i + 0.5)*(high - low)/nbins);
+
+        }
+    norm = _norm;
+    //cout << "norm = " << norm << endl;
+    }
+}
+ Double_t ModGaus::evaluate() const 
+ { 
+   // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
+  Double_t width, power;
+  // vh - vl >> vh
+  power = vl + vr*(m - xlow)/(xhigh - xlow);
+  if(m <= m0) width = sl + (s0 - sl)*(m - xlow)/(m0-xlow);
+  else width = s0 + (sh - s0)*(m - m0)/(xhigh - m0);
+  // TF1 modg("modg", mfunc, 105, 170, 6);
+  // modg.SetParameters(m0, vl, vr, s0, sl, sh);
+  // Double_t selfnorm = modg.Integral(105, 170);
+  std::vector<Double_t> vect;
+  vect.push_back(m0); vect.push_back(vl); vect.push_back(vr); vect.push_back(s0); vect.push_back(sl); vect.push_back(sh);
+  updateNorm(vect);
+  vect.clear();
+  current.clear();
+  current.insert(current.end(), {m0, vl, vr, s0, sl, sh});  
+
+  return exp(-1*pow(fabs((m-m0)/width), power))/norm;
+ }
+
+dummy::dummy(float k){
+    std::cout << "test = "<<k << std::endl;
+}
