@@ -152,7 +152,7 @@ for entry in profile_seed:
     for j in range(N_toy):      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
-        list = profilefFit(profile, dscb_model, hist_toy, scan_size = scan_size, N_scan = N_scan)
+        list = profilefFit(profile, dscb_model, hist_toy, fix = False, str = 0., scan_size = scan_size, N_scan = N_scan)
         #r_sig.append(list[2])
         #r_error.append(list[3]/N_sig)
         #best_list.append(list[4])
