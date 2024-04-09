@@ -125,7 +125,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0., scan_size = 0.1
         for k in range(N_scan):
             sig_list[j].setVal(abs(r_sig_) * (k - N_scan/2) * scan_size)
             scan_list_.append(pll.getVal() + profile_nll[j] - min_nll)
-        scan_list.append[scan_list_]
+        scan_list.append(scan_list_)
     for m in range(N_scan):
         dNLL.append(min([scan_list[n][m] for n in range(len(bias_list))]))
     #dNLL = [ x - min(choose_list) for x in choose_list]
