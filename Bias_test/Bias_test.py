@@ -140,6 +140,8 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_
 
 def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
     scan_list_ = []
+    scan_all_ = []
+    output_all_ = []
     # Left r < 0
     step = 0
     offset_nll = 0.
@@ -159,6 +161,7 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
         chose = min(choose)
         if step==0: offset_nll = chose
         scan_list_.insert(0, chose)
+        scan_all_.insert(0, choose)
         step += 1
         if chose - offset_nll > 2.: scan = False
         elif step > 40: scan = False
@@ -178,12 +181,16 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
             choose.append(bias.corrNLL)
         chose = min(choose)
         scan_list_.append(chose)
+        scan_all_.append(choose)
         step += 1
         if chose - offset_nll > 2.: scan = False
         elif step > 40: scan = False
 
+    for i in range(len(profile_)):
+        output_all_.append([x[i] for x in scan_all_])
+    
     dNLL_ = [x - min(scan_list_) for x in scan_list_ ]
-    return dNLL_
+    return dNLL_, output_all_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan points of signal_yield * scan_size around 0
@@ -224,10 +231,14 @@ for entry in profile_seed:
         #######################################
 
         # Method2 #############################
-        dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
+        dNLL, output = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
         xs = [x for x in range(len(dNLL))]
         fig = plt.figure()
-        plt.plot(xs, dNLL)
+        # plt.plot(xs, dNLL)
+        plt.plot(xs, output[0])
+        plt.plot(xs, output[1])
+        plt.plot(xs, output[2])
+        plt.plot(xs, output[3])
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
         #######################################
@@ -254,6 +265,7 @@ for entry in profile_seed:
         else: bad += 1
         print("Finish toy ", j+1)
 
+    pull.Fit("gaus")
     pull.Draw("HIST")
     can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
 
