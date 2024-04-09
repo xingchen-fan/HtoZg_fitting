@@ -149,6 +149,7 @@ for entry in profile_seed:
     best_error = []
     scan_list = []
     bad = 0
+    pull_list = []
     pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
     can = ROOT.TCanvas("can", "can", 500, 500)
     for j in range(N_toy):      
@@ -171,23 +172,26 @@ for entry in profile_seed:
         else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size
         
         
-        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        # fig = plt.figure()    
-        # plt.plot(xs, scan_list[0])
-        # plt.plot(xs, scan_list[1])
-        # plt.plot(xs, dNLL)
-        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
-        # plt.close(fig)
+        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        fig = plt.figure()    
+        plt.plot(xs, scan_list[0])
+        plt.plot(xs, scan_list[1])
+        plt.plot(xs, scan_list[2])
+        plt.plot(xs, dNLL)
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + j + ".pdf")
+        plt.close(fig)
         r_sig.append(list[2])
         best_list.append(list[4])
         best_error.append(list[3])
         r_error.append(r_error_)
-        if r_error_ > 0: pull.Fill(list[2]/r_error_)
+        if r_error_ > 0: 
+            pull.Fill(list[2]/r_error_)
+            pull_list.append(list[2]/r_error_)
         else: bad += 1
         print("Finish toy ", j+1)
 
-    pull.Draw("HIST")
-    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
+    # pull.Draw("HIST")
+    # can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
 
 
     # print("r = ", sum(r_sig)/N_toy)
@@ -200,6 +204,7 @@ for entry in profile_seed:
     print("r error = ", r_error)
     print("bad toys = ", bad)
     print("best func = ", best_list)
+    print("pull = ", pull_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
 
 
