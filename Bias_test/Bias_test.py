@@ -266,7 +266,7 @@ for entry in profile_seed:
         print("Finish toy ", j+1)
 
     pull.Fit("gaus")
-    pull.Draw("HIST")
+    # pull.Draw("HIST")
     can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
 
 
