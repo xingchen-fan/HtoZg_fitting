@@ -161,6 +161,7 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.1):
         scan_list_.insert(0, chose)
         step += 1
         if chose - offset_nll > 1.: scan = False
+        elif step > 15: scan = False
     
     # Right r > 0
     step = 1
@@ -179,6 +180,7 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.1):
         scan_list_.append(chose)
         step += 1
         if chose - offset_nll > 1.: scan = False
+        elif step > 15: scan = False
 
     dNLL_ = [x - min(scan_list_) for x in scan_list_ ]
     return dNLL_
