@@ -72,7 +72,7 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model]
+profile = [bern3_model]#, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -132,7 +132,7 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
         tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
         bias.minimize()
-        scan_list_.append(bias.corrNLL - min_nlln)
+        scan_list_.append(bias.corrNLL - min_nll)
     return scan_list_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
