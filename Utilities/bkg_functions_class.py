@@ -277,7 +277,7 @@ class ModGausClass:
         self.s0 = ROOT.RooRealVar("sigma0_"+cat,"peak width"       ,7,  1., 50)
         self.sl = ROOT.RooRealVar("sigmaL_"+cat,"low-end width"    ,10,  -10., 40)
         self.sh = ROOT.RooRealVar("sigmaH_"+cat,"high-end width"   ,45, 0.1,60)
-        self.pdf = ModGaus("modg_"+cat+"_model","modg_"+cat+"_model", x, self.m0, self.vl, self.vr, self.s0, self.sl, self.sh, lowx, highx)
+        self.pdf = ROOT.ModGaus("modg_"+cat+"_model","modg_"+cat+"_model", x, self.m0, self.vl, self.vr, self.s0, self.sl, self.sh, lowx, highx)
         self.name = "modg_"+ cat
     def checkBond(self):
         tol = 0.001
