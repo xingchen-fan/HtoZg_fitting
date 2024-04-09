@@ -139,7 +139,7 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
-N_toy = 1
+N_toy = 500
 N_scan = 40
 scan_size = 0.2
 for entry in profile_seed:
@@ -148,6 +148,9 @@ for entry in profile_seed:
     best_list = []
     best_error = []
     scan_list = []
+    bad = 0
+    pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
+    can = ROOT.TCanvas("can", "can", 500, 500)
     for j in range(N_toy):      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
@@ -168,22 +171,29 @@ for entry in profile_seed:
         else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size
         
         
-        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        fig = plt.figure()    
-        plt.plot(xs, scan_list[0])
-        plt.plot(xs, scan_list[1])
-        plt.plot(xs, dNLL)
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
-        plt.close(fig)
+        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        # fig = plt.figure()    
+        # plt.plot(xs, scan_list[0])
+        # plt.plot(xs, scan_list[1])
+        # plt.plot(xs, dNLL)
+        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
+        # plt.close(fig)
         r_sig.append(list[2])
         best_list.append(list[4])
         best_error.append(list[3])
         r_error.append(r_error_)
+        if r_error_ > 0: pull.Fill(list[2]/r_error_)
+        else: bad += 1
 
-    print("r = ", r_sig)
-    print("best error = ", best_error)
-    print("r error = ", r_error)
-    print("best func = ", best_list)
+        pull.Draw("HIST")
+        can.SaveAs("plots/Pull_"+entry.pdf.GetName() + ".pdf")
+
+
+    print("r = ", sum(r_sig)/N_toy)
+    print("best error = ", sum(best_error)/N_toy)
+    print("r error = ", sum(r_error)/N_toy)
+    print("bad toys = ", bad)
+    # print("best func = ", best_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
 
 
