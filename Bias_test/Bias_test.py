@@ -3,11 +3,10 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-#import argparse
+import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
-from bkg_functions_fit import *
 from bkg_functions_class import *
 from sig_functions_class import *
 from Xc_Minimizer import *
@@ -17,6 +16,10 @@ from bias_class import *
 ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
+
+parser = argparse.ArgumentParser(description = "Number of toy samples")
+parser.add_argument("N_toy")
+args = parser.parse_args()
 
 # Define variables
 lowx = 105.
@@ -67,6 +70,13 @@ bern2_model = Bern2Class(x, mu_gauss, "bin1", 10, 0.3, 10, 7., 105.)
 bern3_model = Bern3Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 bern5_model = Bern5Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
+pow1_model = Pow1Class(x, mu_gauss, "bin1")
+exp1_model = Exp1Class(x, mu_gauss, "bin1")
+exp2_model = Exp2Class(x, mu_gauss, "bin1")
+lau1_model = Lau1Class(x, mu_gauss, "bin1")
+lau2_model = Lau2Class(x, mu_gauss, "bin1")
+modg_model = ModGausClass(x, "bin1", 105., 170.
+                          )
 #extmodel = ROOT.RooExtendPdf("extmodel", "Extended model", bern2_model.pdf, N, 'full');
 #extmodel = ROOT.RooAddPdf("extmodel","extmodel", ROOT.RooArgList(bern3_model.pdf, dummy_sig), ROOT.RooArgList(N, dummy_N))
 #r = bern2_model.pdf.fitTo(reader.data_hist_untagged1_bkg,ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.SumW2Error(True))
@@ -186,15 +196,15 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
         if chose - offset_nll > 2.: scan = False
         elif step > 40: scan = False
 
+    min_nll_ = min(scan_list_)
     for i in range(len(profile_)):
-        output_all_.append([x[i] for x in scan_all_])
+        output_all_.append([x[i] - min_nll_ for x in scan_all_])
     
-    dNLL_ = [x - min(scan_list_) for x in scan_list_ ]
+    dNLL_ = [x - min_nll_ for x in scan_list_ ]
     return dNLL_, output_all_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan points of signal_yield * scan_size around 0
-N_toy = 10
 # N_scan = 40
 scan_size = 0.25
 for entry in profile_seed:

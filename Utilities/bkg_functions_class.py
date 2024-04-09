@@ -111,6 +111,7 @@ class Bern5Class:
 #### Pow1 series
 class Pow1Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7.):
+        self.init_list = [sigma_init, step_init, p_init]
         self.t = ROOT.RooRealVar("pow1t_" + cat, "t pow1" + cat, step_init, 95., 115.)
         self.p = ROOT.RooRealVar("pow1p_" + cat, "p1 pow1" + cat, p_init, -11., -1.)
         self.sigma = ROOT.RooRealVar("sigma_pow1_" + cat,"sigma_pow1_"+cat, sigma_init,  1., 15.)
@@ -126,10 +127,15 @@ class Pow1Class:
         par_list = [self.t, self.p, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p.setVal(self.init_list[2])
+        self.sigma.setVal(self.init_list[0])
 
 #### Exp series
 class Exp1Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -0.02):
+        self.init_list = [sigma_init, step_init, p_init]
         self.sigma = ROOT.RooRealVar("sigma_exp1_" + cat,"sigma_exp1" + cat       ,sigma_init,  1., 15.)
         self.t = ROOT.RooRealVar("exp_t1_" + cat, "t exp1 " + cat, step_init, 90., 115.)
         self.p1 = ROOT.RooRealVar("exp_p1_" + cat, "p1 exp1 " +cat, p_init, -2., 0)
@@ -145,10 +151,14 @@ class Exp1Class:
         par_list = [self.t, self.p1, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
-
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.sigma.setVal(self.init_list[0])
 
 class Exp2Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -0.02, p2_init = -0.02, f_init = 0.5):
+        self.init_list = [sigma_init, step_init, p1_init, p2_init]
         self.sigma = ROOT.RooRealVar("sigma_exp2_" + cat,"sigma_exp2" + cat       ,sigma_init,  1., 15.)
         self.t = ROOT.RooRealVar("exp2_t1_" + cat, "t exp2 " + cat, step_init, 90., 115.)
         self.p1 = ROOT.RooRealVar("exp2_p1_" + cat, "p1 exp2 " +cat, p1_init, -2., 0)
@@ -167,10 +177,16 @@ class Exp2Class:
         par_list = [self.t, self.p1, self.p2, self.f, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[3])
+        self.sigma.setVal(self.init_list[0])
 
 #### Laurent series
 class Lau1Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1 = -7, p2 = -6, f_init = 0.5):
+        self.init_list = [sigma_init, step_init, p1, p2, f_init]
         self.sigma = ROOT.RooRealVar("sigma_lau1_" + cat,"sigma_lau1_" + cat       ,sigma_init,  1., 15.)
         self.t = ROOT.RooRealVar("lau1_t_" + cat, "t lau1 " + cat, step_init, 90., 115.)
         self.f = ROOT.RooRealVar("lau1_f_" + cat, "f lau1 " + cat, f_init, 0., 1.)
@@ -189,9 +205,16 @@ class Lau1Class:
         par_list = [self.t, self.p1, self.p2, self.f, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[3])
+        self.f.setVal(self.init_list[4])
+        self.sigma.setVal(self.init_list[0])
 
 class Lau2Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1 = -8, p2 = -7, p3 = -6, f_init = 0.05):
+        self.init_list = [sigma_init, step_init, p1, p2, p3, f_init]
         self.sigma = ROOT.RooRealVar("sigma_lau2_" + cat,"sigma_lau2_" + cat       ,sigma_init,  1., 15.)
         self.t = ROOT.RooRealVar("lau2_t_" + cat, "t lau2 " + cat, step_init, 90., 115.)
         self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f_init, 0., 1.)
@@ -212,6 +235,14 @@ class Lau2Class:
         par_list = [self.t, self.p1, self.p2, self.p3, self.f1, self.f2, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[3])
+        self.p3.setVal(self.init_list[4])
+        self.f1.setVal(self.init_list[5])
+        self.f2.setVal(self.init_list[5])
+        self.sigma.setVal(self.init_list[0])
     
 class Lau3Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1 = -8, p2 = -7, p3 = -6, p4 = -5, f_init = 0.05):
@@ -253,3 +284,5 @@ class ModGausClass:
         par_list = [self.m0, self.vl, self.vr, self.s0, self.sl, self.sh]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        pass
