@@ -219,7 +219,7 @@ for entry in profile_seed:
     pull_list = []
     pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
     can = ROOT.TCanvas("can", "can", 500, 500)
-    for j in range(N_toy):
+    for j in range(args.N_toy):
         scan_list = []      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
@@ -283,9 +283,9 @@ for entry in profile_seed:
     can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
 
 
-    print("r = ", sum(r_sig)/N_toy)
-    print("best error = ", sum(best_error)/N_toy)
-    print("r error = ", sum(r_error)/N_toy)
+    print("r = ", sum(r_sig)/args.N_toy)
+    print("best error = ", sum(best_error)/args.N_toy)
+    print("r error = ", sum(r_error)/args.N_toy)
     print("bad toys = ", bad)
 
     # print("r = ", r_sig)
