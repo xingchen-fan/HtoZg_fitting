@@ -188,8 +188,8 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
 N_toy = 10
-N_scan = 60
-scan_size = 0.5
+N_scan = 40
+scan_size = 0.25
 for entry in profile_seed:
     r_sig = []
     r_error = []
