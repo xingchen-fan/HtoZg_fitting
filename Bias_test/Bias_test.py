@@ -1,4 +1,5 @@
 import ROOT
+import cppyy
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -15,7 +16,8 @@ from sample_reader import *
 from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-ROOT.gSystem.Load('/usr/lib64/libfftw3.so.3.5.8')
+cppy.include("fftw3.h")
+ROOT.gSystem.Load("libfftw3")
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
