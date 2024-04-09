@@ -13,8 +13,8 @@ from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
 from bias_class import *
-# ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-# ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
 ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
@@ -64,15 +64,15 @@ dscb_model.setConst(True)
 N_sig = 10
 
 # Functions to test
-# bern2_model_seed = Bern2Class(x, mu_gauss, "bin1_seed", 10, 0.3, 10, 7., 105.)
-# bern3_model_seed = Bern3Class(x, mu_gauss, "bin1_seed", 10, 0.3, 10, 3., 106.)
-# bern4_model_seed = Bern4Class(x, mu_gauss, "bin1_seed", 10, 0.3, 10, 3., 106.)
+bern2_model_seed = Bern2Class(x, mu_gauss, "bin1_seed", 10, 0.3, 10, 7., 105.)
+bern3_model_seed = Bern3Class(x, mu_gauss, "bin1_seed", 10, 0.3, 10, 3., 106.)
+bern4_model_seed = Bern4Class(x, mu_gauss, "bin1_seed", 10, 0.3, 10, 3., 106.)
 exp1_model_seed = Exp1Class(x, mu_gauss, "bin1_seed")
 
-# bern2_model = Bern2Class(x, mu_gauss, "bin1", 10, 0.3, 10, 7., 105.)
-# bern3_model = Bern3Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
-# bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
-# bern5_model = Bern5Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
+bern2_model = Bern2Class(x, mu_gauss, "bin1", 10, 0.3, 10, 7., 105.)
+bern3_model = Bern3Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
+bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
+bern5_model = Bern5Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 pow1_model = Pow1Class(x, mu_gauss, "bin1")
 exp1_model = Exp1Class(x, mu_gauss, "bin1")
 exp2_model = Exp2Class(x, mu_gauss, "bin1")
@@ -84,9 +84,8 @@ modg_model = ModGausClass(x, "bin1", 105., 170.)
 #r = bern2_model.pdf.fitTo(reader.data_hist_untagged1_bkg,ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.SumW2Error(True))
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
-profile_seed = [exp1_model_seed]#, bern3_model_seed, bern4_model_seed]
-# profile = [bern2_model, bern3_model, bern4_model, bern5_model]
-profile = [pow1_model]
+profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
+profile = [bern2_model, bern3_model, bern4_model, bern5_model]
 
 # Set best-fit values
 for entry in profile_seed:
