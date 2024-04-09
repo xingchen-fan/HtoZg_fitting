@@ -114,17 +114,25 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
     return [ind, min_nll, r_sig_, r_error_, best_]
 
 def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20):
-    c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
-    c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
-    tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
-    bias = BiasClass(tot_model, hist, False)
-    bias.minimize()
-    offset = bias.corrNLL
-    pll = bias.nll.createProfile(c2)
+    # c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
+    # c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
+    # tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
+    # bias = BiasClass(tot_model, hist, False)
+    # bias.minimize()
+    # offset = bias.corrNLL
+    # pll = bias.nll.createProfile(c2)
+
     scan_list_ = []
+    # for k in range(N_scan):
+    #     c2.setVal(abs(r_sig) * (k - N_scan/2) * scan_size)
+    #     scan_list_.append(pll.getVal() + offset - min_nll)
     for k in range(N_scan):
-        c2.setVal(abs(r_sig) * (k - N_scan/2) * scan_size)
-        scan_list_.append(pll.getVal() + offset - min_nll)
+        c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
+        c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), abs(r_sig) * (k - N_scan/2) * scan_size)
+        tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
+        bias = BiasClass(tot_model, hist, False)
+        bias.minimize()
+        scan_list_.append(bias.corrNLL - min_nlln)
     return scan_list_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
