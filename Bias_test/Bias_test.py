@@ -200,33 +200,33 @@ for entry in profile_seed:
     pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
     can = ROOT.TCanvas("can", "can", 500, 500)
     for j in range(N_toy):
-        # scan_list = []      
+        scan_list = []      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profileFit(profile, dscb_model, hist_toy)
         
         # Debug plot only!!! 
-        # for ele in profile:
-        #     ele.reset()
-        #     scan_list.append(scanFitPlot(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
-        # dNLL_offset = []
-        # for m in range(N_scan):
-        #     dNLL_offset.append(min([scan_list[n][m] for n in range(len(profile))]))
-        # dNLL = [x - min(dNLL_offset) for x in dNLL_offset]
-        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        # fig = plt.figure()    
-        # plt.plot(xs, scan_list[0])
-        # plt.plot(xs, scan_list[1])
-        # plt.plot(xs, scan_list[2])
-        # plt.plot(xs, dNLL)
-        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        # plt.close(fig)
-        dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        xs = [x for x in range(len(dNLL))]
-        fig = plt.figure()
+        for ele in profile:
+            ele.reset()
+            scan_list.append(scanFitPlot(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
+        dNLL_offset = []
+        for m in range(N_scan):
+            dNLL_offset.append(min([scan_list[n][m] for n in range(len(profile))]))
+        dNLL = [x - min(dNLL_offset) for x in dNLL_offset]
+        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        fig = plt.figure()    
+        plt.plot(xs, scan_list[0])
+        plt.plot(xs, scan_list[1])
+        plt.plot(xs, scan_list[2])
         plt.plot(xs, dNLL)
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
+        # dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
+        # xs = [x for x in range(len(dNLL))]
+        # fig = plt.figure()
+        # plt.plot(xs, dNLL)
+        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        # plt.close(fig)
         
         left = []
         right = []
