@@ -139,8 +139,8 @@ def scanFit(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan =
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
-N_toy = 10
-N_scan = 40
+N_toy = 100
+N_scan = 60
 scan_size = 0.5
 for entry in profile_seed:
     r_sig = []
@@ -173,14 +173,14 @@ for entry in profile_seed:
         else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size
         
         
-        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        fig = plt.figure()    
-        plt.plot(xs, scan_list[0])
-        plt.plot(xs, scan_list[1])
-        plt.plot(xs, scan_list[2])
-        plt.plot(xs, dNLL)
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        plt.close(fig)
+        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        # fig = plt.figure()    
+        # plt.plot(xs, scan_list[0])
+        # plt.plot(xs, scan_list[1])
+        # plt.plot(xs, scan_list[2])
+        # plt.plot(xs, dNLL)
+        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        # plt.close(fig)
         r_sig.append(list[2])
         best_list.append(list[4])
         best_error.append(list[3])
@@ -195,17 +195,17 @@ for entry in profile_seed:
     can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
 
 
-    # print("r = ", sum(r_sig)/N_toy)
-    # print("best error = ", sum(best_error)/N_toy)
-    # print("r error = ", sum(r_error)/N_toy)
-    # print("bad toys = ", bad)
-
-    print("r = ", r_sig)
-    print("best error = ", best_error)
-    print("r error = ", r_error)
+    print("r = ", sum(r_sig)/N_toy)
+    print("best error = ", sum(best_error)/N_toy)
+    print("r error = ", sum(r_error)/N_toy)
     print("bad toys = ", bad)
-    print("best func = ", best_list)
-    print("pull = ", pull_list)
+
+    # print("r = ", r_sig)
+    # print("best error = ", best_error)
+    # print("r error = ", r_error)
+    # print("bad toys = ", bad)
+    # print("best func = ", best_list)
+    # print("pull = ", pull_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
 
 
