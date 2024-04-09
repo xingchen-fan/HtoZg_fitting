@@ -1,4 +1,6 @@
 import ROOT
+ROOT.gInterpreter.AddIncludePath('ModGaus.h')
+ROOT.gSystem.Load('ModGuas_cxx.so')
 
 def bondComp(par, tol):
     if par.getValV()+tol > par.getMax() or par.getVal()-tol < par.getMin():
