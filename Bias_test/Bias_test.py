@@ -138,7 +138,7 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_sc
         scan_list_.append(bias.corrNLL - min_nll + 0.5) # One fewer DOF
     return scan_list_
 
-def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.1):
+def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
     scan_list_ = []
     # Left r < 0
     step = 0
@@ -161,7 +161,7 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.1):
         scan_list_.insert(0, chose)
         step += 1
         if chose - offset_nll > 2.: scan = False
-        elif step > 15: scan = False
+        elif step > 30: scan = False
     
     # Right r > 0
     step = 1
@@ -180,7 +180,7 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.1):
         scan_list_.append(chose)
         step += 1
         if chose - offset_nll > 2.: scan = False
-        elif step > 15: scan = False
+        elif step > 30: scan = False
 
     dNLL_ = [x - min(scan_list_) for x in scan_list_ ]
     return dNLL_
@@ -200,7 +200,7 @@ for entry in profile_seed:
     pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
     can = ROOT.TCanvas("can", "can", 500, 500)
     for j in range(N_toy):
-        scan_list = []      
+        # scan_list = []      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profileFit(profile, dscb_model, hist_toy)
