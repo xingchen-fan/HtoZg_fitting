@@ -13,10 +13,10 @@ from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
 from bias_class import *
-ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
-ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
+# ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+# ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+# ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
+# ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
 parser = argparse.ArgumentParser(description = "Number of toy samples")
