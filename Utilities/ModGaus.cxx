@@ -14,6 +14,7 @@
 #include <math.h> 
 #include "TMath.h" 
 #include "TF1.h"
+#include <iostream>
 
 ClassImp(ModGaus); 
 
@@ -105,6 +106,9 @@ void ModGaus::updateNorm(std::vector<Double_t> fitpars) const{
   return exp(-1*pow(fabs((m-m0)/width), power))/norm;
  }
 
+dummy::dummy(float k){
+    std::cout << "test = "<<k << std::endl;
+}
 //  Double_t mfunc(Double_t* x, Double_t* pr){
 //     Double_t width, power;
 //     // vh - vl >> vh

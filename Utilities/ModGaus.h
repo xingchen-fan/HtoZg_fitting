@@ -48,6 +48,10 @@ private:
   ClassDef(ModGaus,1) // Your description goes here...
 };
 
+class dummy{
+    public:
+        dummy(float k);
+};
 #endif
 
 
