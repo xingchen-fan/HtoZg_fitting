@@ -147,7 +147,7 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
     while scan:
         choose = []
         for pdf_ in profile:
-            # pdf_.reset()
+            pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 3.*N)
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), - abs(r_sig) * step * scan_size)
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
@@ -169,7 +169,7 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
     while scan:
         choose = []
         for pdf_ in profile:
-            if step==1: pdf_.reset()
+            pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 3.*N)
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), abs(r_sig) * step * scan_size)
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
