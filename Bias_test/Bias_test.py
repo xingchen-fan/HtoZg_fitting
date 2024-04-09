@@ -72,7 +72,7 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern3_model]#, bern3_model, bern4_model]
+profile = [bern2_model, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -164,8 +164,8 @@ for entry in profile_seed:
         fig = plt.figure()    
         plt.plot(xs, list[5])
         plt.plot(xs, list[6][0])
-        # plt.plot(xs, list[6][1])
-        # plt.plot(xs, list[6][2])
+        plt.plot(xs, list[6][1])
+        plt.plot(xs, list[6][2])
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
         plt.close(fig)
         r_sig.append(list[2])
