@@ -187,7 +187,7 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan points of signal_yield * scan_size around 0
-N_toy = 200
+N_toy = 10
 # N_scan = 40
 scan_size = 0.25
 for entry in profile_seed:
@@ -225,11 +225,11 @@ for entry in profile_seed:
 
         # Method2 #############################
         dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        # xs = [x for x in range(len(dNLL))]
-        # fig = plt.figure()
-        # plt.plot(xs, dNLL)
-        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        # plt.close(fig)
+        xs = [x for x in range(len(dNLL))]
+        fig = plt.figure()
+        plt.plot(xs, dNLL)
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        plt.close(fig)
         #######################################
 
         left = []
