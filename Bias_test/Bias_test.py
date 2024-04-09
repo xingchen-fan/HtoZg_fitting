@@ -178,7 +178,7 @@ for entry in profile_seed:
         plt.plot(xs, scan_list[1])
         plt.plot(xs, scan_list[2])
         plt.plot(xs, dNLL)
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + j + ".pdf")
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
         r_sig.append(list[2])
         best_list.append(list[4])
