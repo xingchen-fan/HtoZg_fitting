@@ -187,7 +187,7 @@ for entry in profile_seed:
         print("Finish toy ", j+1)
 
     pull.Draw("HIST")
-    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + ".pdf")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
 
 
     print("r = ", sum(r_sig)/N_toy)
