@@ -8,9 +8,9 @@ class BiasClass:
         else:
             self.nll = ROOT.RooNLLVar("nll_"+pdf.GetName(), "nll_"+pdf.GetName(), pdf, hist)
         self.corrNLL = 0.
-    def minimize(self, printLevel = -1, eps = 0.1, offSet = True):
-        Minimizer_NLL(self.nll, -1, 100, False, 0)
-        r = Minimizer_NLL(self.nll, printLevel, eps, offSet, 0)
+    def minimize(self, printLevel = -1, eps = 0.1, offSet = True, skip_hesse = False):
+        Minimizer_NLL(self.nll, -1, 100, False, 0, skip_hesse)
+        r = Minimizer_NLL(self.nll, printLevel, eps, offSet, 0, skip_hesse)
         #print("Cov q = ", r.covQual(), " status = ", r.status(), end="\n")
         if r.status() != 0: 
             print("Minimization fails!")

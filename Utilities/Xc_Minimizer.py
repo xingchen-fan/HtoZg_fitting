@@ -34,14 +34,14 @@ def SumW2Err (nll, mini):
     nll.applyWeightSquared(False)
     return err
 
-def Minimizer_NLL(nll_, printLevel_ = -1, eps_ = 100, offSet_ = False, strategy_ = 0):
+def Minimizer_NLL(nll_, printLevel_ = -1, eps_ = 100, offSet_ = False, strategy_ = 0, skip_hesse = False):
     mini = ROOT.RooMinimizer(nll_)
     mini.setPrintLevel(printLevel_)
     mini.setEps(eps_)
     mini.setOffsetting(offSet_)
     mini.setStrategy(strategy_)
     mini.minimize("Minuit2","migrad")
-    mini.hesse()
+    if not skip_hesse: mini.hesse()
     r = mini.save()
     return r
 
