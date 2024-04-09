@@ -82,44 +82,69 @@ for entry in profile_seed:
 print("Done seed PDFs")
 
 # Define profile Fit
-def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
+def profilefFit(profile, sig_model, hist, fix = False, str = 0., scan_size = 0.1, N_scan = 20):
     min_nll = 0
     ind = 999
     r_sig_ = 0
     r_error_ = 0
     best_=''
     profile_nll = []
+    bias_list = []
+    sig_list = []
+    scan_list = []
+    dNLL = []
     for i, ele in enumerate(profile):
         #ele.reset()
         if (fix): 
-            c1 = ROOT.RooRealVar("c1", "c1", N)
-            c2 = ROOT.RooRealVar("c2", "c2", str)
+            c1 = ROOT.RooRealVar("c1_"+str(i), "c1_"+str(i), N)
+            c2 = ROOT.RooRealVar("c2_"+str(i), "c2_"+str(i), str)
         else:
-            c1 = ROOT.RooRealVar("c1", "c1", N, 0, 3.*N)
-            c2 = ROOT.RooRealVar("c2", "c2", 0., -100.*N_sig, 100.*N_sig)
-        tot_model = ROOT.RooAddPdf("tot_model", "tot_model", ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
+            c1 = ROOT.RooRealVar("c1_"+str(i), "c1_"+str(i), N, 0, 3.*N)
+            c2 = ROOT.RooRealVar("c2_"+str(i), "c2_"+str(i), 0., -100.*N_sig, 100.*N_sig)
+        tot_model = ROOT.RooAddPdf("tot_model_"+str(i), "tot_model_"+str(i), ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
         bias.minimize()
+        sig_list.append(c2)
+        bias_list.append(bias)
         profile_nll.append(bias.corrNLL)
         if i ==0: 
             ind = 0
             min_nll=bias.corrNLL
             r_sig_ = c2.getVal()
-            r_error_ = c2.getError()
+            #r_error_ = c2.getError()
             best_= ele.pdf.GetName()
         elif bias.corrNLL< min_nll: 
             ind = i
             min_nll = bias.corrNLL
             r_sig_ = c2.getVal()
-            r_error_ = c2.getError()
+            #r_error_ = c2.getError()
             best_= ele.pdf.GetName()
-    return [ind, min_nll, r_sig_, r_error_, best_, profile_nll]
+    for j in range(len(bias_list)):
+        pll = bias_list[j].nll.createProfile(sig_list[j])
+        scan_list_ = []
+        for k in range(N_scan):
+            sig_list[j].setVal(abs(r_sig_) * (k - N_scan/2) * scan_size)
+            scan_list_.append(pll.getVal() + profile_nll[j] - min_nll)
+        scan_list.append[scan_list_]
+    for m in range(N_scan):
+        dNLL.append(min([scan_list[n][m] for n in range(len(bias_list))]))
+    #dNLL = [ x - min(choose_list) for x in choose_list]
+    left = []
+    right = []
+    for i in range(len(dNLL) - 1):
+        if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left.append(i)
+        if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right.append(i)
+    if len(left) == 0 or len(right) == 0: 
+        r_error_ = -1
+    else: r_error_ = (right[len(right) - 1] - left[0])*abs(r_sig_) * scan_size
+
+    return [ind, min_nll, r_sig_, r_error_, best_, dNLL, scan_list]
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
 N_toy = 1
-N_scan = 40
-scan_size = 0.05
+N_scan = 20
+scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
     r_error = []
@@ -127,48 +152,25 @@ for entry in profile_seed:
     for j in range(N_toy):      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
-        list = profilefFit(profile, dscb_model, hist_toy)
+        list = profilefFit(profile, dscb_model, hist_toy, scan_size = scan_size, N_scan = N_scan)
         #r_sig.append(list[2])
         #r_error.append(list[3]/N_sig)
         #best_list.append(list[4])
         # tot_model_ = ROOT.RooAddPdf("tot_model_", "tot_model_", ROOT.RooArgList(dscb_model.pdf, profile[ind].pdf), ROOT.RooArgList(c2, c1))
         # BiasClass(tot_model_, hist_toy, False).minimize()
         # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
-        NLL_list = []
-        scan_list = []
-        all_NLL = []
-        
-        for k in range(N_scan):
-            strength = 0 + abs(list[2]) * (k - N_scan/2) * scan_size
-            list_ = profilefFit(profile, dscb_model, hist_toy, True, strength)
-            NLL_list.append(list_[1])
-            scan_list.append(list_[4])
-            all_NLL.append(list_[5])
-        dNLL = [ x - min(NLL_list) for x in NLL_list]
-        # dNLL0 = [x[0] - list[1] for x in all_NLL]
-        # dNLL1 = [x[1] - list[1] for x in all_NLL]
-        # dNLL2 = [x[2] - list[1] for x in all_NLL]
-
-        left = []
-        right = []
-        for i in range(len(dNLL) - 1):
-            if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left.append(i)
-            if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right.append(i)
         
         xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
         fig = plt.figure()    
-        # plt.plot(xs, dNLL0)
-        # plt.plot(xs, dNLL1)
-        # plt.plot(xs, dNLL2)
-        plt.plot(xs, dNLL)
+        plt.plot(xs, list[5])
+        plt.plot(xs, list[6][0])
+        plt.plot(xs, list[6][1])
+        plt.plot(xs, list[6][2])
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
         plt.close(fig)
-        r_sig.append(scan_size*(dNLL.index(0) - N_scan/2)*abs(list[2]))
-        best_list.append(scan_list[dNLL.index(0)])
-        if len(left) == 0 or len(right) == 0: 
-            print("Scan error! in ", entry.pdf.GetName())
-            r_error.append(0)
-        else: r_error.append((right[len(right) - 1] - left[0])*abs(list[2]) * scan_size)
+        r_sig.append(list[2])
+        best_list.append(list[4])
+        r_error.append(list[3])
 
     print("r = ", r_sig)
     print("r error = ", r_error)
