@@ -141,7 +141,7 @@ def scanFit(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan =
 # Scan N_scan/2 points of signal_yield * scan_size around 0
 N_toy = 10
 N_scan = 40
-scan_size = 0.2
+scan_size = 0.5
 for entry in profile_seed:
     r_sig = []
     r_error = []
@@ -158,9 +158,10 @@ for entry in profile_seed:
         list = profilefFit(profile, dscb_model, hist_toy)
         for ele in profile:
             scan_list.append(scanFit(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
-        dNLL = []
+        dNLL_offset = []
         for m in range(N_scan):
-            dNLL.append(min([scan_list[n][m] for n in range(len(profile))]))
+            dNLL_offset.append(min([scan_list[n][m] for n in range(len(profile))]))
+        dNLL = [x - min(dNLL_offset) for x in dNLL_offset]
         left = []
         right = []
         r_error_ = 0
@@ -190,8 +191,8 @@ for entry in profile_seed:
         else: bad += 1
         print("Finish toy ", j+1)
 
-    # pull.Draw("HIST")
-    # can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
+    pull.Draw("HIST")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
 
 
     # print("r = ", sum(r_sig)/N_toy)
