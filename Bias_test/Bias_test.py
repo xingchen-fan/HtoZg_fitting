@@ -185,8 +185,8 @@ for entry in profile_seed:
         if r_error_ > 0: pull.Fill(list[2]/r_error_)
         else: bad += 1
 
-        pull.Draw("HIST")
-        can.SaveAs("plots/Pull_"+entry.pdf.GetName() + ".pdf")
+    pull.Draw("HIST")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + ".pdf")
 
 
     print("r = ", sum(r_sig)/N_toy)
