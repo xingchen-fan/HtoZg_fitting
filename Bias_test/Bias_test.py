@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser(description = "Number of toy samples")
 parser.add_argument("N_toy")
 args = parser.parse_args()
 
+A = ROOT.dummy(3.3)
 # Define variables
 lowx = 105.
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
