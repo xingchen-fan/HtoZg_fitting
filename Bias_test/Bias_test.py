@@ -139,7 +139,7 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
-N_toy = 100
+N_toy = 20
 N_scan = 40
 scan_size = 0.2
 for entry in profile_seed:
@@ -190,11 +190,16 @@ for entry in profile_seed:
     can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
 
 
-    print("r = ", sum(r_sig)/N_toy)
-    print("best error = ", sum(best_error)/N_toy)
-    print("r error = ", sum(r_error)/N_toy)
+    # print("r = ", sum(r_sig)/N_toy)
+    # print("best error = ", sum(best_error)/N_toy)
+    # print("r error = ", sum(r_error)/N_toy)
+    # print("bad toys = ", bad)
+
+    print("r = ", r_sig)
+    print("best error = ", best_error)
+    print("r error = ", r_error)
     print("bad toys = ", bad)
-    # print("best func = ", best_list)
+    print("best func = ", best_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
 
 
