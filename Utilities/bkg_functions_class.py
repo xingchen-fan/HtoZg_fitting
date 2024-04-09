@@ -81,6 +81,7 @@ class Bern4Class:
 
 class Bern5Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
+        self.init_list = [p0, p_init, sigma_init, step_init]
         self.p0 = ROOT.RooRealVar("b5p0_" + cat, "b5p1_" + cat, p0)
         self.p1 = ROOT.RooRealVar("b5p1_" + cat, "b5p1_" + cat, p_init,-bond, bond)
         self.p2 = ROOT.RooRealVar("b5p2_" + cat, "b5p2_" + cat, p_init,-bond, bond)
@@ -96,6 +97,15 @@ class Bern5Class:
         par_list = [self.p1, self.p2, self.p3, self.p4, self.p5, self.sigma, self.stepval]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[1])
+         self.p3.setVal(self.init_list[1])
+         self.p4.setVal(self.init_list[1])
+         self.p5.setVal(self.init_list[1])
+         self.sigma.setVal(self.init_list[2])
+         self.stepval.setVal(self.init_list[3])
 
 
 #### Pow1 series
