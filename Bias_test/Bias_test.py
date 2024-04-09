@@ -131,7 +131,9 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
         c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), abs(r_sig) * (k - N_scan/2) * scan_size)
         tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
-        bias.minimize(skip_hesse = False)
+        if k == N_scan/2: 
+            bias.minimize(skip_hesse = True)
+        else: bias.minimize(skip_hesse = False)
         scan_list_.append(bias.corrNLL - min_nll + 0.5) # One fewer DOF
     return scan_list_
 
@@ -165,12 +167,6 @@ for entry in profile_seed:
             r_error_ = -1
         else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size
         
-        #r_sig.append(list[2])
-        #r_error.append(list[3]/N_sig)
-        #best_list.append(list[4])
-        # tot_model_ = ROOT.RooAddPdf("tot_model_", "tot_model_", ROOT.RooArgList(dscb_model.pdf, profile[ind].pdf), ROOT.RooArgList(c2, c1))
-        # BiasClass(tot_model_, hist_toy, False).minimize()
-        # plotClass(x, hist_toy, tot_model_, title = entry.pdf.GetName(), sideBand = False)
         
         xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
         fig = plt.figure()    
