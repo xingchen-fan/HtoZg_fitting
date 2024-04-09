@@ -73,7 +73,7 @@ bern5_model = Bern5Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model]
+profile = [bern2_model, bern3_model, bern4_model, bern5_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -186,9 +186,9 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
     return dNLL_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
-# Scan N_scan/2 points of signal_yield * scan_size around 0
-N_toy = 10
-N_scan = 40
+# Scan points of signal_yield * scan_size around 0
+N_toy = 200
+# N_scan = 40
 scan_size = 0.25
 for entry in profile_seed:
     r_sig = []
@@ -225,11 +225,11 @@ for entry in profile_seed:
 
         # Method2 #############################
         dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        xs = [x for x in range(len(dNLL))]
-        fig = plt.figure()
-        plt.plot(xs, dNLL)
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        plt.close(fig)
+        # xs = [x for x in range(len(dNLL))]
+        # fig = plt.figure()
+        # plt.plot(xs, dNLL)
+        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        # plt.close(fig)
         #######################################
 
         left = []
@@ -255,7 +255,7 @@ for entry in profile_seed:
         print("Finish toy ", j+1)
 
     pull.Draw("HIST")
-    # can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_100.pdf")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
 
 
     print("r = ", sum(r_sig)/N_toy)
