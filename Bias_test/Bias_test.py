@@ -114,7 +114,7 @@ def profileFit(profile_, sig_model, hist, fix = False, str = 0.):
             best_= ele.pdf.GetName()
     return [ind, min_nll, r_sig_, r_error_, best_]
 
-def scanFitPlot(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20):
+def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_scan_ = 20):
     # c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
     # c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
     # tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
@@ -127,9 +127,9 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_sc
     # for k in range(N_scan):
     #     c2.setVal(abs(r_sig) * (k - N_scan/2) * scan_size)
     #     scan_list_.append(pll.getVal() + offset - min_nll)
-    for k in range(N_scan):
+    for k in range(N_scan_):
         c1 = ROOT.RooRealVar("c1_"+ bkgclass.pdf.GetName(), "c1_"+ bkgclass.pdf.GetName(), N, 0, 3.*N)
-        c2 = ROOT.RooRealVar("c2_"+ bkgclass.pdf.GetName(), "c2_"+ bkgclass.pdf.GetName(), abs(r_sig) * (k - N_scan/2) * scan_size)
+        c2 = ROOT.RooRealVar("c2_"+ bkgclass.pdf.GetName(), "c2_"+ bkgclass.pdf.GetName(), abs(r_sig_) * (k - N_scan_/2) * scan_size_)
         tot_model = ROOT.RooAddPdf("tot_model_"+ bkgclass.pdf.GetName(), "tot_model_"+ bkgclass.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, bkgclass.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
         if k == N_scan/2: 
@@ -154,14 +154,14 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
             bias = BiasClass(tot_model, hist, False)
             if step==0: 
                 bias.minimize(skip_hesse = True)
-            else: bias.minimize(skip_hesse = False)
+            else: bias.minimize(skip_hesse = True)
             choose.append(bias.corrNLL)
         chose = min(choose)
         if step==0: offset_nll = chose
         scan_list_.insert(0, chose)
         step += 1
         if chose - offset_nll > 2.: scan = False
-        elif step > 30: scan = False
+        elif step > 40: scan = False
     
     # Right r > 0
     step = 1
@@ -174,13 +174,13 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), abs(r_sig_) * step * scan_size_)
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, hist, False)
-            bias.minimize(skip_hesse = False)
+            bias.minimize(skip_hesse = True)
             choose.append(bias.corrNLL)
         chose = min(choose)
         scan_list_.append(chose)
         step += 1
         if chose - offset_nll > 2.: scan = False
-        elif step > 30: scan = False
+        elif step > 40: scan = False
 
     dNLL_ = [x - min(scan_list_) for x in scan_list_ ]
     return dNLL_
