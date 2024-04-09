@@ -113,7 +113,7 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0.):
             best_= ele.pdf.GetName()
     return [ind, min_nll, r_sig_, r_error_, best_]
 
-def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20):
+def scanFit(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20):
     # c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
     # c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
     # tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
@@ -127,9 +127,9 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
     #     c2.setVal(abs(r_sig) * (k - N_scan/2) * scan_size)
     #     scan_list_.append(pll.getVal() + offset - min_nll)
     for k in range(N_scan):
-        c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
-        c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), abs(r_sig) * (k - N_scan/2) * scan_size)
-        tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
+        c1 = ROOT.RooRealVar("c1_"+ bkgclass.pdf.GetName(), "c1_"+ bkgclass.pdf.GetName(), N, 0, 3.*N)
+        c2 = ROOT.RooRealVar("c2_"+ bkgclass.pdf.GetName(), "c2_"+ bkgclass.pdf.GetName(), abs(r_sig) * (k - N_scan/2) * scan_size)
+        tot_model = ROOT.RooAddPdf("tot_model_"+ bkgclass.pdf.GetName(), "tot_model_"+ bkgclass.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, bkgclass.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
         if k == N_scan/2: 
             bias.minimize(skip_hesse = True)
@@ -139,7 +139,7 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
 
 # Discrete profiling - Find minimum and (r_down, r_up)
 # Scan N_scan/2 points of signal_yield * scan_size around 0
-N_toy = 20
+N_toy = 10
 N_scan = 40
 scan_size = 0.2
 for entry in profile_seed:
@@ -147,12 +147,12 @@ for entry in profile_seed:
     r_error = []
     best_list = []
     best_error = []
-    scan_list = []
     bad = 0
     pull_list = []
     pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
     can = ROOT.TCanvas("can", "can", 500, 500)
-    for j in range(N_toy):      
+    for j in range(N_toy):
+        scan_list = []      
         x.setBins(260)
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profilefFit(profile, dscb_model, hist_toy)
