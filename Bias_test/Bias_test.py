@@ -86,7 +86,7 @@ modg_model = ModGausClass(x, "bin1", 105., 170.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model, bern5_model]
+profile = [bern2_model, bern3_model, bern4_model, bern5_model, pow1_model, exp1_model, exp2_model, lau1_model, lau2_model, modg_model]
 
 # Set best-fit values
 for entry in profile_seed:
@@ -248,10 +248,8 @@ for entry in profile_seed:
         xs = [x for x in range(len(dNLL))]
         fig = plt.figure()
         # plt.plot(xs, dNLL)
-        plt.plot(xs, output[0])
-        plt.plot(xs, output[1])
-        plt.plot(xs, output[2])
-        plt.plot(xs, output[3])
+        for x in range(len(profile)): plt.plot(xs, output[x])
+        
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
         #######################################
