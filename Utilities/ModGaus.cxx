@@ -25,7 +25,7 @@ ClassImp(ModGaus);
                         RooAbsReal& _s0,
                         RooAbsReal& _sl,
                         RooAbsReal& _sh,
-		        double xlow_,
+		                double xlow_,
                         double xhigh_) :
    RooAbsPdf(name,title), 
    m("m","m",this,_m),
