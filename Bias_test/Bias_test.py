@@ -83,13 +83,13 @@ for entry in profile_seed:
 print("Done seed PDFs")
 
 # Define profile Fit
-def profileFit(profile, sig_model, hist, fix = False, str = 0.):
+def profileFit(profile_, sig_model, hist, fix = False, str = 0.):
     min_nll = 0
     ind = 999
     r_sig_ = 0
     r_error_ = 0
     best_=''
-    for i, ele in enumerate(profile):
+    for i, ele in enumerate(profile_):
         #ele.reset()
         if (fix): 
             c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), N)
@@ -138,7 +138,7 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_sc
         scan_list_.append(bias.corrNLL - min_nll + 0.5) # One fewer DOF
     return scan_list_
 
-def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
+def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
     scan_list_ = []
     # Left r < 0
     step = 0
@@ -146,10 +146,10 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
     scan = True
     while scan:
         choose = []
-        for pdf_ in profile:
-            pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 3.*N)
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), - abs(r_sig) * step * scan_size)
+        for pdf_ in profile_:
+            #pdf_.reset()
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 2.*N)
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), - abs(r_sig_) * step * scan_size_)
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, hist, False)
             if step==0: 
@@ -168,10 +168,10 @@ def scanFit(profile, sig_model, hist, r_sig, scan_size = 0.5):
     scan = True
     while scan:
         choose = []
-        for pdf_ in profile:
-            pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 3.*N)
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), abs(r_sig) * step * scan_size)
+        for pdf_ in profile_:
+            if step == 1: pdf_.reset()
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 2.*N)
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), abs(r_sig_) * step * scan_size_)
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, hist, False)
             bias.minimize(skip_hesse = False)
@@ -205,29 +205,33 @@ for entry in profile_seed:
         hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
         list = profileFit(profile, dscb_model, hist_toy)
         
-        # Debug plot only!!! 
-        for ele in profile:
-            ele.reset()
-            scan_list.append(scanFitPlot(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
-        dNLL_offset = []
-        for m in range(N_scan):
-            dNLL_offset.append(min([scan_list[n][m] for n in range(len(profile))]))
-        dNLL = [x - min(dNLL_offset) for x in dNLL_offset]
-        xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        fig = plt.figure()    
-        plt.plot(xs, scan_list[0])
-        plt.plot(xs, scan_list[1])
-        plt.plot(xs, scan_list[2])
-        plt.plot(xs, dNLL)
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        plt.close(fig)
-        # dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        # xs = [x for x in range(len(dNLL))]
-        # fig = plt.figure()
+        # Method1 ##########################
+        # for ele in profile:
+        #     ele.reset()
+        #     scan_list.append(scanFitPlot(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
+        # dNLL_offset = []
+        # for m in range(N_scan):
+        #     dNLL_offset.append(min([scan_list[n][m] for n in range(len(profile))]))
+        # dNLL = [x - min(dNLL_offset) for x in dNLL_offset]
+        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
+        # fig = plt.figure()    
+        # plt.plot(xs, scan_list[0])
+        # plt.plot(xs, scan_list[1])
+        # plt.plot(xs, scan_list[2])
         # plt.plot(xs, dNLL)
         # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         # plt.close(fig)
-        
+        #######################################
+
+        # Method2 #############################
+        dNLL = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
+        xs = [x for x in range(len(dNLL))]
+        fig = plt.figure()
+        plt.plot(xs, dNLL)
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        plt.close(fig)
+        #######################################
+
         left = []
         right = []
         r_error_ = 0
