@@ -75,8 +75,7 @@ exp1_model = Exp1Class(x, mu_gauss, "bin1")
 exp2_model = Exp2Class(x, mu_gauss, "bin1")
 lau1_model = Lau1Class(x, mu_gauss, "bin1")
 lau2_model = Lau2Class(x, mu_gauss, "bin1")
-modg_model = ModGausClass(x, "bin1", 105., 170.
-                          )
+modg_model = ModGausClass(x, "bin1", 105., 170.)
 #extmodel = ROOT.RooExtendPdf("extmodel", "Extended model", bern2_model.pdf, N, 'full');
 #extmodel = ROOT.RooAddPdf("extmodel","extmodel", ROOT.RooArgList(bern3_model.pdf, dummy_sig), ROOT.RooArgList(N, dummy_N))
 #r = bern2_model.pdf.fitTo(reader.data_hist_untagged1_bkg,ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.SumW2Error(True))
