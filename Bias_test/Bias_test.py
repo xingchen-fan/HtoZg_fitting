@@ -14,9 +14,7 @@ from plot_utility import *
 from sample_reader import *
 from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-# ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-# ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
@@ -249,7 +247,6 @@ for entry in profile_seed:
         fig = plt.figure()
         # plt.plot(xs, dNLL)
         for x in range(len(profile)): plt.plot(xs, output[x])
-        
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
         #######################################
