@@ -131,7 +131,7 @@ def scanFit(entry, sig_model, hist, r_sig, min_nll, scan_size = 0.1, N_scan = 20
         c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), abs(r_sig) * (k - N_scan/2) * scan_size)
         tot_model = ROOT.RooAddPdf("tot_model_"+ entry.pdf.GetName(), "tot_model_"+ entry.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
-        bias.minimize(skip_hesse = True)
+        bias.minimize(skip_hesse = False)
         scan_list_.append(bias.corrNLL - min_nll + 0.5) # One fewer DOF
     return scan_list_
 
