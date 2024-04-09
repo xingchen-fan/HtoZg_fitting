@@ -175,8 +175,8 @@ for entry in profile_seed:
         xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
         fig = plt.figure()    
         plt.plot(xs, scan_list[0])
-        plt.plot(xs, scan_list[1])
-        plt.plot(xs, dNLL)
+        # plt.plot(xs, scan_list[1])
+        # plt.plot(xs, dNLL)
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + ".pdf")
         plt.close(fig)
         r_sig.append(list[2])
