@@ -72,7 +72,7 @@ bern4_model = Bern4Class(x, mu_gauss, "bin1", 10, 0.3, 10, 3., 106.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model]
+profile = [bern4_model]#, bern3_model, bern4_model]
 
 # Set best-fit values
 for entry in profile_seed:
