@@ -136,6 +136,7 @@ for entry in profile_seed:
     r_sig = []
     r_error = []
     best_list = []
+    best_error = []
     scan_list = []
     for j in range(N_toy):      
         x.setBins(260)
@@ -172,9 +173,11 @@ for entry in profile_seed:
         plt.close(fig)
         r_sig.append(list[2])
         best_list.append(list[4])
+        best_error.append(list[3])
         r_error.append(r_error_)
 
     print("r = ", r_sig)
+    print("best error = ", best_error)
     print("r error = ", r_error)
     print("best func = ", best_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
