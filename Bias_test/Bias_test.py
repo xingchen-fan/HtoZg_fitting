@@ -17,7 +17,6 @@ from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.gSystem.Load('../Utilities/ModGuas_cxx.so')
-ROOT.gSystem.Load('../Utilities/xc_dummy_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
@@ -25,7 +24,6 @@ parser = argparse.ArgumentParser(description = "Number of toy samples")
 parser.add_argument("N_toy")
 args = parser.parse_args()
 
-A = ROOT.dummy(3.5)
 # Define variables
 lowx = 105.
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
@@ -81,7 +79,7 @@ exp1_model = Exp1Class(x, mu_gauss, "bin1")
 exp2_model = Exp2Class(x, mu_gauss, "bin1")
 lau1_model = Lau1Class(x, mu_gauss, "bin1")
 lau2_model = Lau2Class(x, mu_gauss, "bin1")
-# modg_model = ModGausClass(x, "bin1", 105., 170.)
+modg_model = ModGausClass(x, "bin1", 105., 170.)
 #extmodel = ROOT.RooExtendPdf("extmodel", "Extended model", bern2_model.pdf, N, 'full');
 #extmodel = ROOT.RooAddPdf("extmodel","extmodel", ROOT.RooArgList(bern3_model.pdf, dummy_sig), ROOT.RooArgList(N, dummy_N))
 #r = bern2_model.pdf.fitTo(reader.data_hist_untagged1_bkg,ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.SumW2Error(True))
