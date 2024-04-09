@@ -96,12 +96,12 @@ def profilefFit(profile, sig_model, hist, fix = False, str = 0., scan_size = 0.1
     for i, ele in enumerate(profile):
         #ele.reset()
         if (fix): 
-            c1 = ROOT.RooRealVar("c1_"+str(i), "c1_"+str(i), N)
-            c2 = ROOT.RooRealVar("c2_"+str(i), "c2_"+str(i), str)
+            c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), N)
+            c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), str)
         else:
-            c1 = ROOT.RooRealVar("c1_"+str(i), "c1_"+str(i), N, 0, 3.*N)
-            c2 = ROOT.RooRealVar("c2_"+str(i), "c2_"+str(i), 0., -100.*N_sig, 100.*N_sig)
-        tot_model = ROOT.RooAddPdf("tot_model_"+str(i), "tot_model_"+str(i), ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
+            c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), N, 0, 3.*N)
+            c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), 0., -100.*N_sig, 100.*N_sig)
+        tot_model = ROOT.RooAddPdf("tot_model_"+ele.pdf.GetName(), "tot_model_"+ele.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
         bias.minimize()
         sig_list.append(c2)
