@@ -247,7 +247,7 @@ for entry in profile_seed:
         fig = plt.figure()
         # plt.plot(xs, dNLL)
         for inx in range(len(profile)): plt.plot(xs, output[inx])
-        plt.legend([tit.pdf.GetName for tit in profile])
+        plt.legend([tit.pdf.GetName() for tit in profile])
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
         #######################################
