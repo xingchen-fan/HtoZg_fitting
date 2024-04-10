@@ -165,7 +165,7 @@ class Pow3Class:
         self.t = ROOT.RooRealVar("pow3t_" + cat, "t pow3" + cat, step_init, 95., 115.)
         self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p_init, -11., -1.)
         self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p_init, -11., -1.)
-        self.p3 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p_init, -11., -1.)
+        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p_init, -11., -1.)
         self.f1 = ROOT.RooRealVar("pow3f1_" + cat, "f1 pow3" + cat, f_init, 0., 1.)
         self.f2 = ROOT.RooRealVar("pow3f2_" + cat, "f2 pow3" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow3_" + cat,"sigma_pow3_"+cat, sigma_init,  1., 15.)
