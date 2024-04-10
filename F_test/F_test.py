@@ -193,18 +193,18 @@ bern5_model_good = Bern5Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
 bern_list = [bern2_model_good, bern3_model_good, bern4_model_good,bern5_model_good]
 
 pow1_model = Pow1Class(x, mu_gauss, "bin1")
-pow2_model = Pow1Class(x, mu_gauss, "bin1")
-pow3_model = Pow1Class(x, mu_gauss, "bin1")
+pow2_model = Pow2Class(x, mu_gauss, "bin1")
+pow3_model = Pow3Class(x, mu_gauss, "bin1")
 pow_list = [pow1_model, pow2_model, pow3_model]
 
 exp1_model = Exp1Class(x, mu_gauss, "bin1")
 exp2_model = Exp2Class(x, mu_gauss, "bin1")
-exp3_model = Exp2Class(x, mu_gauss, "bin1")
+exp3_model = Exp3Class(x, mu_gauss, "bin1")
 exp_list = [exp1_model, exp2_model, exp3_model]
 
 lau1_model = Lau1Class(x, mu_gauss, "bin1")
 lau2_model = Lau2Class(x, mu_gauss, "bin1")
-lau3_model = Lau2Class(x, mu_gauss, "bin1")
+lau3_model = Lau3Class(x, mu_gauss, "bin1")
 lau_list = [lau1_model, lau2_model, lau3_model]
 
 modg_model = ModGausClass(x, "bin1", lowx, lowx+65)
