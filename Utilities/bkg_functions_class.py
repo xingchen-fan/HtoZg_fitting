@@ -108,7 +108,7 @@ class Bern5Class:
          self.stepval.setVal(self.init_list[3])
 
 
-#### Pow1 series
+#### Pow series
 class Pow1Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7.):
         self.init_list = [sigma_init, step_init, p_init]
@@ -130,6 +130,64 @@ class Pow1Class:
     def reset(self):
         self.t.setVal(self.init_list[1])
         self.p.setVal(self.init_list[2])
+        self.sigma.setVal(self.init_list[0])
+
+class Pow2Class:
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7., f_init = 0.5):
+        self.init_list = [sigma_init, step_init, p_init, f_init]
+        self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 95., 115.)
+        self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p_init, -11., -1.)
+        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p_init, -11., -1.)
+        self.f = ROOT.RooRealVar("pow2f_" + cat, "f pow2" + cat, f_init, 0., 1.)
+        self.sigma = ROOT.RooRealVar("sigma_pow2_" + cat,"sigma_pow2_"+cat, sigma_init,  1., 15.)
+        self.gauss = ROOT.RooGaussian("gaussxpow2_"+cat, "gaussian PDF pow2 " + cat, x, gauss_mu, self.sigma)
+        self.step = ROOT.RooGenericPdf("step_pow2_" + cat, "step_pow2" + cat,\
+                                        "( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*(@4 * @0^@2 + (1-@4) * @0^@3)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.f))
+        x.setBins(20000, "cache")
+        self.pdf = ROOT.RooFFTConvPdf("pow2_" + cat + "_model", "step pow2 (X) gauss " + cat, x, self.step, self.gauss)
+        self.pdf.setBufferFraction(0.5)
+        self.name = "pow2_"+ cat
+    def checkBond(self):
+        tol = 0.0001
+        par_list = [self.t, self.p1, self.p2, self.f, self.sigma]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[2])
+        self.f.setVal(self.init_list[3])
+        self.sigma.setVal(self.init_list[0])
+
+class Pow3Class:
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7., f_init = 0.3):
+        self.init_list = [sigma_init, step_init, p_init, f_init]
+        self.t = ROOT.RooRealVar("pow3t_" + cat, "t pow3" + cat, step_init, 95., 115.)
+        self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p_init, -11., -1.)
+        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p_init, -11., -1.)
+        self.p3 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p_init, -11., -1.)
+        self.f1 = ROOT.RooRealVar("pow3f1_" + cat, "f1 pow3" + cat, f_init, 0., 1.)
+        self.f2 = ROOT.RooRealVar("pow3f2_" + cat, "f2 pow3" + cat, f_init, 0., 1.)
+        self.sigma = ROOT.RooRealVar("sigma_pow3_" + cat,"sigma_pow3_"+cat, sigma_init,  1., 15.)
+        self.gauss = ROOT.RooGaussian("gaussxpow3_"+cat, "gaussian PDF pow3 " + cat, x, gauss_mu, self.sigma)
+        self.step = ROOT.RooGenericPdf("step_pow3_" + cat, "step_pow3" + cat,\
+                                        "( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*(@5 * @0^@2 + @6 * @0^@3 + (1-@5-@6) * @0^@4)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.p3, self.f1, self.f2))
+        x.setBins(20000, "cache")
+        self.pdf = ROOT.RooFFTConvPdf("pow3_" + cat + "_model", "step pow3 (X) gauss " + cat, x, self.step, self.gauss)
+        self.pdf.setBufferFraction(0.5)
+        self.name = "pow3_"+ cat
+    def checkBond(self):
+        tol = 0.0001
+        par_list = [self.t, self.p1, self.p2, self.p3, self.f1, self.f2, self.sigma]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[2])
+        self.p3.setVal(self.init_list[2])
+        self.f1.setVal(self.init_list[3])
+        self.f2.setVal(self.init_list[3])
         self.sigma.setVal(self.init_list[0])
 
 #### Exp series
@@ -158,7 +216,7 @@ class Exp1Class:
 
 class Exp2Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -0.02, p2_init = -0.02, f_init = 0.5):
-        self.init_list = [sigma_init, step_init, p1_init, p2_init]
+        self.init_list = [sigma_init, step_init, p1_init, p2_init, f_init]
         self.sigma = ROOT.RooRealVar("sigma_exp2_" + cat,"sigma_exp2" + cat       ,sigma_init,  1., 15.)
         self.t = ROOT.RooRealVar("exp2_t1_" + cat, "t exp2 " + cat, step_init, 90., 115.)
         self.p1 = ROOT.RooRealVar("exp2_p1_" + cat, "p1 exp2 " +cat, p1_init, -2., 0)
@@ -181,6 +239,39 @@ class Exp2Class:
         self.t.setVal(self.init_list[1])
         self.p1.setVal(self.init_list[2])
         self.p2.setVal(self.init_list[3])
+        self.f.setVal(self.init_list[4])
+        self.sigma.setVal(self.init_list[0])
+
+class Exp3Class:
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -0.02, p2_init = -0.02, p3_init = -0.02, f_init = 0.33):
+        self.init_list = [sigma_init, step_init, p1_init, p2_init, p3_init, f_init]
+        self.sigma = ROOT.RooRealVar("sigma_exp3_" + cat,"sigma_exp3" + cat       ,sigma_init,  1., 15.)
+        self.t = ROOT.RooRealVar("exp3_t1_" + cat, "t exp3 " + cat, step_init, 90., 115.)
+        self.p1 = ROOT.RooRealVar("exp3_p1_" + cat, "p1 exp3 " +cat, p1_init, -2., 0)
+        self.p2 = ROOT.RooRealVar("exp3_p2_" + cat, "p2 exp3 " +cat, p2_init, -3., 0)
+        self.p3 = ROOT.RooRealVar("exp3_p3_" + cat, "p3 exp3 " +cat, p3_init, -5., 0)
+        self.f1 = ROOT.RooRealVar("exp3_f1_" + cat, "f1 exp3 "+ cat, f_init, 0., 1.)
+        self.f2 = ROOT.RooRealVar("exp3_f2_" + cat, "f2 exp3 "+ cat, f_init, 0., 1.)
+        self.step = ROOT.RooGenericPdf("step_exp3_" + cat, "step_exp3_" + cat, "( ((@0-@1)*153.85<0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85) ) )*(@4 * TMath::Exp(@0*@2) + (1-@4)*TMath::Exp(@0*@3))", \
+                                      ROOT.RooArgList(x,self.t,self.p1,self.p2,self.f))
+        self.gauss = ROOT.RooGaussian("gaussxexp3_" + cat, "gaussian PDF exp3 " + cat, x, gauss_mu, self.sigma)
+
+        x.setBins(20000, "cache")
+        self.pdf = ROOT.RooFFTConvPdf("exp3_"+cat + "_model", "step exp3 (X) gauss " + cat, x, self.step, self.gauss)
+        self.pdf.setBufferFraction(0.5)
+        self.name = "exp3_"+ cat
+    def checkBond(self):
+        tol = 0.0001
+        par_list = [self.t, self.p1, self.p2, self.p3, self.f1, self.f2, self.sigma]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[3])
+        self.p3.setVal(self.init_list[4])
+        self.f1.setVal(self.init_list[5])
+        self.f2.setVal(self.init_list[5])
         self.sigma.setVal(self.init_list[0])
 
 #### Laurent series
@@ -201,7 +292,7 @@ class Lau1Class:
         self.pdf.setBufferFraction(0.5)
         self.name = "lau1_"+ cat
     def checkBond(self):
-        tol = 0.001
+        tol = 0.0001
         par_list = [self.t, self.p1, self.p2, self.f, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
@@ -231,7 +322,7 @@ class Lau2Class:
         self.pdf.setBufferFraction(0.5)
         self.name = "lau2_"+ cat
     def checkBond(self):
-        tol = 0.001
+        tol = 0.0001
         par_list = [self.t, self.p1, self.p2, self.p3, self.f1, self.f2, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
@@ -264,7 +355,7 @@ class Lau3Class:
         self.pdf.setBufferFraction(0.5)
         self.name = "lau3_"+ cat
     def checkBond(self):
-        tol = 0.001
+        tol = 0.0001
         par_list = [self.t, self.p1, self.p2, self.p3, self.p4, self.f1, self.f2, self.f3, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
