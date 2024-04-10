@@ -14,7 +14,7 @@ from plot_utility import *
 from sample_reader import *
 from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-# ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
