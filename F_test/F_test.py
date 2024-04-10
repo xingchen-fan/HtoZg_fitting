@@ -139,8 +139,11 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     multiPlotClass(x, histogram, pdfList, title=calssName+"_multi_" + cat, output_dir="plots/", sideBand=True, fitRange= range_)
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
+    dif = []
     for i in range(len(stats) - 1):
         fs.append(ROOT.Math.chisquared_cdf_c(2*(stats[i].getVal() - stats[i+1].getVal()), fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize()))
+        dif.append(fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize())
+    print("DOF diff = ", dif)
     print("P-value = ", fs)
 
         
