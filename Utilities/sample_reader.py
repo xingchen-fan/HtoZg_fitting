@@ -15,17 +15,20 @@ class readDat: #Cornell MC sampleS
         njet = list[8]
 
         # Read dat samples
-        bkg_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        sig_run2 = ROOT.RooDataSet.read("FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        tot_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat,FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-#        bkg_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet),"", dir)
-#        sig_run2 = ROOT.RooDataSet.read("Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-#        tot_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat,Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        
-        bdt1 = -0.36#-0.5 #-0.36
-        bdt2 = -0.06#0.02 #-0.06
-        bdt3 = 0.08#0.34 #0.08
-        bdt4 = 0.15#0.66 #0.15
+        #bkg_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        #sig_run2 = ROOT.RooDataSet.read("FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        #tot_run2 = ROOT.RooDataSet.read("SMZg_deathvalley_v3_untagged.dat,DY_deathvalley_v3_untagged.dat,FullSig_deathvalley_v3_untagged.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        bkg_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet),"", dir)
+        sig_run2 = ROOT.RooDataSet.read("Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        tot_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat,Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
+        data_dir = "/afs/cern.ch/user/f/fanx/rui_newdat/"
+        data = ROOT.RooDataSet.read("data_ggF1_newbdt_trig.dat,data_ggF2_newbdt_trig.dat,data_ggF3_newbdt_trig.dat,data_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", data_dir)
+
+
+        bdt1 = -0.5 #-0.36
+        bdt2 = 0.02 #-0.06
+        bdt3 = 0.34 #0.08
+        bdt4 = 0.66 #0.15
 
         # Make RooDataSet
         # u1_bkg_run2_el = ROOT.RooDataSet("u1_bkg_run2_el", "u1_bkg_run2_el", bkg_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "lep < 1 && nlep <= 2 && njet < 2 && bdt > " + str(bdt4), "w")
@@ -73,6 +76,11 @@ class readDat: #Cornell MC sampleS
         u3_tot_run2 = ROOT.RooDataSet("u3_tot_run2", "u3_tot_run2", tot_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt2) +" && bdt < " + str(bdt3) , "w")
         u4_tot_run2 = ROOT.RooDataSet("u4_tot_run2", "u4_tot_run2", tot_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt1) +" && bdt < " + str(bdt2) , "w")
 
+        u1_data = ROOT.RooDataSet("u1_data", "u1_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt4))
+        u2_data = ROOT.RooDataSet("u2_data", "u2_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt3) +" && bdt < " + str(bdt4))
+        u3_data = ROOT.RooDataSet("u3_data", "u3_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt2) +" && bdt < " + str(bdt3))
+        u4_data = ROOT.RooDataSet("u4_data", "u4_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt1) +" && bdt < " + str(bdt2))
+
         self.data_hist_untagged1 = ROOT.RooDataHist("data_hist_untagged1", "data_hist_untagged1", x, u1_tot_run2)
         self.data_hist_untagged2 = ROOT.RooDataHist("data_hist_untagged2", "data_hist_untagged2", x, u2_tot_run2)
         self.data_hist_untagged3 = ROOT.RooDataHist("data_hist_untagged3", "data_hist_untagged3", x, u3_tot_run2)
@@ -88,11 +96,23 @@ class readDat: #Cornell MC sampleS
         self.data_hist_untagged3_sig = ROOT.RooDataHist("data_hist_untagged3_sig", "data_hist_untagged3_sig", x, u3_sig_run2)
         self.data_hist_untagged4_sig = ROOT.RooDataHist("data_hist_untagged4_sig", "data_hist_untagged4_sig", x, u4_sig_run2)
         
+        self.data_u1 = ROOT.RooDataHist("data_u1", "data_u1", x, u1_data)
+        self.data_u2 = ROOT.RooDataHist("data_u2", "data_u2", x, u2_data)
+        self.data_u3 = ROOT.RooDataHist("data_u3", "data_u3", x, u3_data)
+        self.data_u4 = ROOT.RooDataHist("data_u4", "data_u4", x, u4_data)
+
     def numCheck(self):
         print("# bin1 bkg = ", self.data_hist_untagged1_bkg.sumEntries())
         print("# bin2 bkg = ", self.data_hist_untagged2_bkg.sumEntries())
         print("# bin3 bkg = ", self.data_hist_untagged3_bkg.sumEntries())
         print("# bin4 bkg = ", self.data_hist_untagged4_bkg.sumEntries())
+
+    def dataNumCheck(self):
+        print("# bin1 data = ", self.data_u1.sumEntries())
+        print("# bin2 data = ", self.data_u2.sumEntries())
+        print("# bin3 data = ", self.data_u3.sumEntries())
+        print("# bin4 data = ", self.data_u4.sumEntries())
+
 
 class readRoot: #Beijing data sample
     def __init__(self, x, dir=""):
