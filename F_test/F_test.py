@@ -201,7 +201,7 @@ bern_list = [bern2_model_good, bern3_model_good, bern4_model_good,bern5_model_go
 pow1_model = Pow1Class(x, mu_gauss, "bin1")
 pow2_model = Pow2Class(x, mu_gauss, "bin1")
 pow3_model = Pow3Class(x, mu_gauss, "bin1")
-pow_list = [pow1_model, pow2_model, pow3_model]
+pow_list = [pow1_model, pow2_model]
 
 exp1_model = Exp1Class(x, mu_gauss, "bin1")
 exp2_model = Exp2Class(x, mu_gauss, "bin1")
