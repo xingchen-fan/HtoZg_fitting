@@ -217,7 +217,7 @@ modg_model = ModGausClass(x, "bin1", lowx, lowx+65)
 
 # Goodness of fit test
 #goodness(bern_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
