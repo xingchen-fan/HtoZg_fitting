@@ -137,7 +137,7 @@ class Pow2Class:
         self.init_list = [sigma_init, step_init, p1_init, p2_init, f_init]
         self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 95., 115.)
         self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p1_init, -10., 0.)
-        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p2_init, -20., -5.)
+        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p2_init, -30., -5.)
         self.f = ROOT.RooRealVar("pow2f_" + cat, "f pow2" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow2_" + cat,"sigma_pow2_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow2_"+cat, "gaussian PDF pow2 " + cat, x, gauss_mu, self.sigma)
@@ -164,8 +164,8 @@ class Pow3Class:
         self.init_list = [sigma_init, step_init, p1_init, p2_init, p3_init, f_init]
         self.t = ROOT.RooRealVar("pow3t_" + cat, "t pow3" + cat, step_init, 95., 115.)
         self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p1_init, -10., 0.)
-        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p2_init, -20., -5.)
-        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p3_init, -25., -7.)
+        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p2_init, -30., -5.)
+        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p3_init, -35., -7.)
         self.f1 = ROOT.RooRealVar("pow3f1_" + cat, "f1 pow3" + cat, f_init, 0., 1.)
         self.f2 = ROOT.RooRealVar("pow3f2_" + cat, "f2 pow3" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow3_" + cat,"sigma_pow3_"+cat, sigma_init,  1., 15.)
