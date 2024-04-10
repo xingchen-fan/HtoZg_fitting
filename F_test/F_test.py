@@ -48,14 +48,19 @@ if not(args.method == "Chi2" or args.method == "NLL") :
 #     print(method, " = ", stat)
 #     print("P-value = ", fs)
 
-def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260):
+def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, className = "Default"):
     if e_type == "Poisson": error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
     elif e_type == "SumW2": error = ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)
-    stat =  ROOT.RooChi2Var("stat_goodness", "goodness test", pdfClass.pdf,  histogram, error)
-    Minimizer_Chi2(stat, -1, 100, False, 0)
-    r = Minimizer_Chi2(stat, -1, eps, False, 0)
-    pdfClass.checkBond()
-    print(pdfClass.pdf.GetName(), " goodness = ", ROOT.Math.chisquared_cdf_c(stat.getVal(), n_bins - r.floatParsFinal().getSize()))
+    good_PV = []
+    for entry in pdfClass:
+        stat =  ROOT.RooChi2Var("stat_goodness", "goodness test", entry.pdf,  histogram, error)
+        Minimizer_Chi2(stat, -1, 100, False, 0)
+        r = Minimizer_Chi2(stat, -1, eps, False, 0)
+        if r.status() != 0: 
+                print(entry.pdf.GetName(), " Minimization fails!")
+        entry.checkBond()
+        good_PV.append(ROOT.Math.chisquared_cdf_c(stat.getVal(), n_bins - r.floatParsFinal().getSize()))
+    print(className, " goodness = ", good_PV)
 
     
 
@@ -116,7 +121,29 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     plotClass(x, histogram, bern5_model.pdf, title="Bern5 u1", output_dir="plots/", sideBand = True, fitRange = range_)
 
     multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi", output_dir="plots/", sideBand=True, fitRange= range_)
-    
+
+def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", calssName = "Default"):
+    stats = []
+    fitres = []
+    for entry in pdfList:
+        entry.reset()
+        stats.append(ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range(range_)))
+        Minimizer_NLL(entry, -1, 100, False, strategy)
+        r_=Minimizer_NLL(entry, -1, eps, offset, strategy)
+        r_.Print("V")
+        fitres.append(r_)
+        entry.checkBond()
+        plotClass(x, histogram, entry.pdf, title=entry.pdf.GetName(), output_dir="plots/", sideBand = True, fitRange = range_)
+
+    multiPlotClass(x, histogram, pdfList, title=calssName+"_multi", output_dir="plots/", sideBand=True, fitRange= range_)
+    print("NLL = ", [ele.getVal() for ele in stats])
+    fs = []
+    for i in range(len(stats) - 1):
+        fs.append(ROOT.Math.chisquared_cdf_c(2*(stats[i].getVal() - stats[i+1].getVal()), fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize()))
+    print("P-value = ", fs)
+
+        
+
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 lowx = 100.
@@ -157,19 +184,42 @@ x.setRange('full', lowx, lowx+105)
 
 CAT = "u1"
 
-# Goodness of fit test
+# Define PDF classes
 bern2_model_good = Bern2Class(x, mu_gauss, CAT, 10, 0.3, 10, 7., 105.)
 bern3_model_good = Bern3Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
 bern4_model_good = Bern4Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
 bern5_model_good = Bern5Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
-pdf_list = [bern2_model_good, bern3_model_good, bern4_model_good,bern5_model_good]
-for entry in pdf_list:
-    goodness(entry, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260)
+bern_list = [bern2_model_good, bern3_model_good, bern4_model_good,bern5_model_good]
 
-singleBernFTest(x, mu_gauss, reader.data_u1, CAT, args.method, "Poisson", eps = 0.1, offset = False, strategy = 0, range_ = "left,right", n_bins = 220)
-# singleBernFTest(x, mu_gauss, reader.data_hist_untagged2_bkg, "u2", args.method, "Poisson", False)
-# singleBernFTest(x, mu_gauss, reader.data_hist_untagged3_bkg, "u3", args.method, "Poisson", False)
-# singleBernFTest(x, mu_gauss, reader.data_hist_untagged4_bkg, "u4", args.method, "Poisson", False)
+pow1_model = Pow1Class(x, mu_gauss, "bin1")
+pow2_model = Pow1Class(x, mu_gauss, "bin1")
+pow3_model = Pow1Class(x, mu_gauss, "bin1")
+pow_list = [pow1_model, pow2_model, pow3_model]
+
+exp1_model = Exp1Class(x, mu_gauss, "bin1")
+exp2_model = Exp2Class(x, mu_gauss, "bin1")
+exp3_model = Exp2Class(x, mu_gauss, "bin1")
+exp_list = [exp1_model, exp2_model, exp3_model]
+
+lau1_model = Lau1Class(x, mu_gauss, "bin1")
+lau2_model = Lau2Class(x, mu_gauss, "bin1")
+lau3_model = Lau2Class(x, mu_gauss, "bin1")
+lau_list = [lau1_model, lau2_model, lau3_model]
+
+modg_model = ModGausClass(x, "bin1", lowx, lowx+65)
+
+# Goodness of fit test
+goodness(bern_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+
+# F Tset
+singleBernFTest(x, mu_gauss, reader.data_u1, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
+# singleFTestSidebandNLL(x, pow_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
+# singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
+# singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
+
 
 
 
