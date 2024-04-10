@@ -252,7 +252,7 @@ class Exp3Class:
         self.p3 = ROOT.RooRealVar("exp3_p3_" + cat, "p3 exp3 " +cat, p3_init, -5., 0)
         self.f1 = ROOT.RooRealVar("exp3_f1_" + cat, "f1 exp3 "+ cat, f_init, 0., 1.)
         self.f2 = ROOT.RooRealVar("exp3_f2_" + cat, "f2 exp3 "+ cat, f_init, 0., 1.)
-        self.step = ROOT.RooGenericPdf("step_exp3_" + cat, "step_exp3_" + cat, "( ((@0-@1)*153.85<0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85) ) )*(@5 * TMath::Exp(@0*@2) + @6*TMath::Exp(@0*@3) + (1-@5-@6) TMath::Exp(@0*@4))", \
+        self.step = ROOT.RooGenericPdf("step_exp3_" + cat, "step_exp3_" + cat, "( ((@0-@1)*153.85<0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85) ) )*(@5 * TMath::Exp(@0*@2) + @6*TMath::Exp(@0*@3) + (1-@5-@6) * TMath::Exp(@0*@4))", \
                                       ROOT.RooArgList(x,self.t,self.p1,self.p2, self.p3, self.f1, self.f2))
         self.gauss = ROOT.RooGaussian("gaussxexp3_" + cat, "gaussian PDF exp3 " + cat, x, gauss_mu, self.sigma)
 
