@@ -115,12 +115,12 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     print(method, " = ", output)
     if method == "Chi2": print("goodness = ", [ROOT.Math.chisquared_cdf_c(output[i], n_bins - 4 -i)for i in range(len(output))])
     print("P-value = ", fs)
-    plotClass(x, histogram, bern2_model.pdf, title="Bern2 u1", output_dir="plots/", sideBand = True, fitRange = range_)
-    plotClass(x, histogram, bern3_model.pdf, title="Bern3 u1", output_dir="plots/", sideBand = True, fitRange = range_)
-    plotClass(x, histogram, bern4_model.pdf, title="Bern4 u1", output_dir="plots/", sideBand = True, fitRange = range_)
-    plotClass(x, histogram, bern5_model.pdf, title="Bern5 u1", output_dir="plots/", sideBand = True, fitRange = range_)
+    plotClass(x, histogram, bern2_model.pdf, title="Bern2 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
+    plotClass(x, histogram, bern3_model.pdf, title="Bern3 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
+    plotClass(x, histogram, bern4_model.pdf, title="Bern4 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
+    plotClass(x, histogram, bern5_model.pdf, title="Bern5 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
 
-    multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi", output_dir="plots/", sideBand=True, fitRange= range_)
+    multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi " + cat, output_dir="plots/", sideBand=True, fitRange= range_)
 
 def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", calssName = "Default"):
     stats = []
@@ -133,9 +133,9 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         r_.Print("V")
         fitres.append(r_)
         entry.checkBond()
-        plotClass(x, histogram, entry.pdf, title=entry.pdf.GetName(), output_dir="plots/", sideBand = True, fitRange = range_)
+        plotClass(x, histogram, entry.pdf, title=entry.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = True, fitRange = range_)
 
-    multiPlotClass(x, histogram, pdfList, title=calssName+"_multi", output_dir="plots/", sideBand=True, fitRange= range_)
+    multiPlotClass(x, histogram, pdfList, title=calssName+"_multi_" + cat, output_dir="plots/", sideBand=True, fitRange= range_)
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
     for i in range(len(stats) - 1):
