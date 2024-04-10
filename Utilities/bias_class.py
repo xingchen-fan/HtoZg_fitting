@@ -2,7 +2,7 @@ import ROOT
 from Xc_Minimizer import *
 
 class BiasClass:
-    def __init__(self, pdf, hist, sideBand = False, fitRange = ''):
+    def __init__(self, pdf, hist, sideBand = False, fitRange = ""):
         if sideBand:
             self.nll = ROOT.RooNLLVar("nll_"+pdf.GetName(), "nll_"+pdf.GetName(), pdf, hist, ROOT.RooFit.Range(fitRange))
         else:

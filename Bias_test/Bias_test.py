@@ -88,7 +88,7 @@ profile = [bern2_model, bern3_model, bern4_model, bern5_model, pow1_model, exp1_
 
 # Set best-fit values
 for entry in profile_seed:
-    BiasClass(entry.pdf, reader.data_hist_bin1, False).minimize() #True, 'left,right'
+    BiasClass(entry.pdf, reader.data_hist_bin1, True, "left,right").minimize() #True, 'left,right'
     entry.checkBond()
 
 print("Done seed PDFs")
