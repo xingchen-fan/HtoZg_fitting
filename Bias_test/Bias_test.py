@@ -84,7 +84,7 @@ modg_model = ModGausClass(x, "bin1", 105., 170.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model, bern5_model, pow1_model, exp1_model, exp2_model, lau1_model, lau2_model, modg_model]
+profile = [bern2_model, bern3_model, bern4_model, bern5_model, pow1_model, exp1_model, exp2_model,  modg_model]
 
 # Set best-fit values
 for entry in profile_seed:
