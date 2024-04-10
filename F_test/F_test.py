@@ -223,7 +223,7 @@ goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "SumW2", eps = 0.1,
 
 # F Tset
 #singleBernFTest(x, mu_gauss, reader.data_u1, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-singleFTestSidebandNLL(x, pow_list, reader.data_u1, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
+singleFTestSidebandNLL(x, pow_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
