@@ -16,8 +16,6 @@ from sample_reader import *
 from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-cppyy.include("fftw3.h")
-ROOT.gSystem.Load("libfftw3")
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
@@ -202,9 +200,9 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
 
     min_nll_ = min(scan_list_)
     for i in range(len(profile_)):
-        output_all_.append([x[i] - min_nll_ for x in scan_all_])
+        output_all_.append([inx[i] - min_nll_ for inx in scan_all_])
     
-    dNLL_ = [x - min_nll_ for x in scan_list_ ]
+    dNLL_ = [inx - min_nll_ for inx in scan_list_ ]
     return dNLL_, output_all_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
@@ -246,10 +244,10 @@ for entry in profile_seed:
 
         # Method2 #############################
         dNLL, output = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        xs = [x for x in range(len(dNLL))]
+        xs = [inx for inx in range(len(dNLL))]
         fig = plt.figure()
         # plt.plot(xs, dNLL)
-        for x in range(len(profile)): plt.plot(xs, output[x])
+        for inx in range(len(profile)): plt.plot(xs, output[inx])
         plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
         plt.close(fig)
         #######################################
