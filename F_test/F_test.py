@@ -52,6 +52,7 @@ def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, 
     if e_type == "Poisson": error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
     elif e_type == "SumW2": error = ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)
     good_PV = []
+    chi2_=[]
     for entry in pdfClass:
         stat =  ROOT.RooChi2Var("stat_goodness", "goodness test", entry.pdf,  histogram, error)
         Minimizer_Chi2(stat, -1, 100, False, 0)
@@ -59,8 +60,10 @@ def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, 
         if r.status() != 0: 
                 print(entry.pdf.GetName(), " Minimization fails!")
         entry.checkBond()
+        chi2_.append(stat.getVal())
         good_PV.append(ROOT.Math.chisquared_cdf_c(stat.getVal(), n_bins - r.floatParsFinal().getSize()))
     print(className, " goodness = ", good_PV)
+    print(className, " Chi2 = ", chi2_)
 
     
 
