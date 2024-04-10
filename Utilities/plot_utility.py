@@ -77,5 +77,36 @@ def plotClass (x, datahist, pdf, title="Histogram", output_dir="plots/", sideBan
     can.SaveAs(output_dir + title+".pdf")
     x.setBins(260)
 
-    
+def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = ''):
+    ROOT.gStyle.SetOptStat(0)
+    CMS_lumi.lumi_sqrtS = "13 TeV"
+    CMS_lumi.writeExtraText = 1
+    CMS_lumi.extraText = "          Preliminary"
+    can2 = ROOT.TCanvas("c2","c2", 500, 500)
+    can2.cd()
+    plot2 = x.frame()
+    x.setBins(65)
+    show_hist = ROOT.RooDataHist("show_multi_hist", "show_multi_hist", x, datahist)
+    if sideBand: show_hist = show_hist.reduce(ROOT.RooFit.CutRange(fitRange))
+    show_hist.plotOn(plot2,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+    for i,entry in enumerate(classList):
+        if sideBand: entry.pdf.plotOn(plot2, ROOT.RooFit.LineColor(i+2), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name(entry.pdf.GetName()),ROOT.RooFit.NormRange(fitRange))
+        else: entry.pdf.plotOn(plot2, ROOT.RooFit.LineColor(i+2), ROOT.RooFit.LineWidth(3), ROOT.RooFit.Name(entry.pdf.GetName()))
+    plot2.Draw()
+    plot2.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma} (GeV)")
+    plot2.GetYaxis().SetTitleOffset(1)
+    plot2.SetTitle("")
+    leg = ROOT.TLegend(.55,.7,.9,.9)
+    leg.SetBorderSize(0)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(0)
+    leg.SetTextFont(35)
+    leg.SetTextSize(0.035)
+    for entry in classList:
+        leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName(),"L")
+    leg.Draw("same")
+    CMS_lumi.CMS_lumi(can2, 0, 0)
+    #    can2.Draw()
+    can2.SaveAs(output_dir + title + ".pdf")
+    x.setBins(260)
     
