@@ -133,11 +133,11 @@ class Pow1Class:
         self.sigma.setVal(self.init_list[0])
 
 class Pow2Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7., f_init = 0.5):
-        self.init_list = [sigma_init, step_init, p_init, f_init]
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -5., p2_init = -9., f_init = 0.5):
+        self.init_list = [sigma_init, step_init, p1_init, p2_init, f_init]
         self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 95., 115.)
-        self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p_init, -11., -1.)
-        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p_init, -11., -1.)
+        self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p1_init, -11., -1.)
+        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p2_init, -20., -5.)
         self.f = ROOT.RooRealVar("pow2f_" + cat, "f pow2" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow2_" + cat,"sigma_pow2_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow2_"+cat, "gaussian PDF pow2 " + cat, x, gauss_mu, self.sigma)
@@ -155,17 +155,17 @@ class Pow2Class:
     def reset(self):
         self.t.setVal(self.init_list[1])
         self.p1.setVal(self.init_list[2])
-        self.p2.setVal(self.init_list[2])
-        self.f.setVal(self.init_list[3])
+        self.p2.setVal(self.init_list[3])
+        self.f.setVal(self.init_list[4])
         self.sigma.setVal(self.init_list[0])
 
 class Pow3Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7., f_init = 0.3):
-        self.init_list = [sigma_init, step_init, p_init, f_init]
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -5., p2_init = -7., p3_init = -9., f_init = 0.3):
+        self.init_list = [sigma_init, step_init, p1_init, p2_init, p3_init, f_init]
         self.t = ROOT.RooRealVar("pow3t_" + cat, "t pow3" + cat, step_init, 95., 115.)
-        self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p_init, -11., -1.)
-        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p_init, -11., -1.)
-        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p_init, -11., -1.)
+        self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p1_init, -11., -1.)
+        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p2_init, -20., -5.)
+        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p3_init, -25., -7.)
         self.f1 = ROOT.RooRealVar("pow3f1_" + cat, "f1 pow3" + cat, f_init, 0., 1.)
         self.f2 = ROOT.RooRealVar("pow3f2_" + cat, "f2 pow3" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow3_" + cat,"sigma_pow3_"+cat, sigma_init,  1., 15.)
@@ -184,10 +184,10 @@ class Pow3Class:
     def reset(self):
         self.t.setVal(self.init_list[1])
         self.p1.setVal(self.init_list[2])
-        self.p2.setVal(self.init_list[2])
-        self.p3.setVal(self.init_list[2])
-        self.f1.setVal(self.init_list[3])
-        self.f2.setVal(self.init_list[3])
+        self.p2.setVal(self.init_list[3])
+        self.p3.setVal(self.init_list[4])
+        self.f1.setVal(self.init_list[5])
+        self.f2.setVal(self.init_list[5])
         self.sigma.setVal(self.init_list[0])
 
 #### Exp series
