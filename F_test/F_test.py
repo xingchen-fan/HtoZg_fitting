@@ -127,9 +127,10 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     fitres = []
     for entry in pdfList:
         entry.reset()
-        stats.append(ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range(range_)))
-        Minimizer_NLL(entry, -1, 100, False, strategy)
-        r_=Minimizer_NLL(entry, -1, eps, offset, strategy)
+        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range(range_))
+        stats.append(nll_)
+        Minimizer_NLL(nll_, -1, 100, False, strategy)
+        r_=Minimizer_NLL(nll_, -1, eps, offset, strategy)
         r_.Print("V")
         fitres.append(r_)
         entry.checkBond()
@@ -209,14 +210,14 @@ lau_list = [lau1_model, lau2_model, lau3_model]
 modg_model = ModGausClass(x, "bin1", lowx, lowx+65)
 
 # Goodness of fit test
-goodness(bern_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-# goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+#goodness(bern_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
 # F Tset
-singleBernFTest(x, mu_gauss, reader.data_u1, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-# singleFTestSidebandNLL(x, pow_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
+#singleBernFTest(x, mu_gauss, reader.data_u1, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
+singleFTestSidebandNLL(x, pow_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
