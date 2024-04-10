@@ -100,8 +100,8 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     leg.SetBorderSize(0)
     leg.SetFillColor(0)
     leg.SetFillStyle(0)
-    leg.SetTextFont(35)
-    leg.SetTextSize(0.35)
+    leg.SetTextFont(42)
+    leg.SetTextSize(0.030)
     for entry in classList:
         leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName(),"L")
     leg.Draw("same")
