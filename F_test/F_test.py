@@ -152,7 +152,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
-ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 lowx = 100.
 
 # Define variables
