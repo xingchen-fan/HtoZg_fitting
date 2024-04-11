@@ -951,6 +951,7 @@ NormPow::NormPow(const char *name, const char *title,
       RooAbsReal& _t,
       RooAbsReal& _p,
       double xhigh_):
+      RooAbsPdf(name,title),
       m("m","m",this,_m),
       t("t","t",this,_t),
       p("p","p",this,_p),
