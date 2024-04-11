@@ -122,4 +122,27 @@ class dummy{
         dummy(float k);
 };
 
+class NormPow : public RooAbsPdf {
+  public:
+    NormPow() {};
+    NormPow(const char *name, const char *title,
+      RooAbsReal& _m,
+      RooAbsReal& _t,
+      RooAbsReal& _p,
+      double xhigh_);
+    NormPow(const NormPow& other, const char* name=0) ;
+    virtual TObject* clone(const char* newname) const { return new NormPow(*this,newname); }
+    inline virtual ~NormPow() { }
+    virtual bool selfNormalized() const {
+      return true;
+    }
+  protected:
+    RooRealProxy m ;
+    RooRealProxy t ;
+    RooRealProxy p ;
+    double xhigh;
+    Double_t evaluate() const ;
+
+    ClassDef(NormPow,1)
+};
 #endif

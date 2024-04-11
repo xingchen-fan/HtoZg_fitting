@@ -850,7 +850,7 @@ Double_t RooGaussStepBernstein::analyticalIntegral(Int_t code,
 }
 
 
-
+// Modified Guass--------------------------------------------------------------------------------------
 
 ClassImp(ModGaus); 
 
@@ -892,7 +892,6 @@ ClassImp(ModGaus);
  { 
  } 
 
-// Modified Guass--------------------------------------------------------------------------------------
  // Original
  
  Double_t mfunc(Double_t* x, Double_t* pr){
@@ -944,4 +943,30 @@ void ModGaus::updateNorm(std::vector<Double_t> fitpars) const{
 
 dummy::dummy(float k){
     std::cout << "test = "<<k << std::endl;
+}
+
+ClassImp(NormPow); 
+NormPow::NormPow(const char *name, const char *title,
+      RooAbsReal& _m,
+      RooAbsReal& _t,
+      RooAbsReal& _p,
+      double xhigh_):
+      m("m","m",this,_m),
+      t("t","t",this,_t),
+      p("p","p",this,_p),
+      xhigh(xhigh_)
+      {}
+
+NormPow::NormPow(const NormPow& other, const char* name) :  
+  RooAbsPdf(other,name), 
+  m("m",this,other.m),
+  t("t",this,other.t),
+  p("p",this,other.p),
+  xhigh(other.xhigh)
+  {}
+
+Double_t ModGaus::evaluate() const {
+  Double_t norm = (pow(xhigh, 1+p) - pow(t, 1+p))/(1+p);
+  if (m <= t) return 0;
+  else return pow(m, p)/norm;
 }
