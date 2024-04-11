@@ -237,12 +237,12 @@ plot2 = x.frame()
 show_hist_data = reader.data_u2.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
 show_hist_mc = reader.data_hist_untagged2_bkg.createHistogram("h_hist_mc", x, ROOT.RooFit.Binning(65))
 
-h1 = show_hist_data.Scale(1./show_hist_data.Integral())
-h2 = show_hist_mc.Scale(1./show_hist_mc.Integral())
-h1.SetLineColor(2)
-h2.SetLineColor(3)
-h1.Draw("HIST")
-h2.Draw("SAME HIST")
+show_hist_data.Scale(1./show_hist_data.Integral())
+show_hist_mc.Scale(1./show_hist_mc.Integral())
+show_hist_data.SetLineColor(2)
+show_hist_mc.SetLineColor(3)
+show_hist_data.Draw("HIST")
+show_hist_mc.Draw("SAME HIST")
 can2.SaveAs("test.pdf")
 
 
