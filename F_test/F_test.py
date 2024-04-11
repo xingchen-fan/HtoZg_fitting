@@ -230,8 +230,21 @@ modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
-res = pow1_model.pdf.fitTo(reader.data_u2, ROOT.RooFit.Range('left,right'))
-plotClass(x, reader.data_u2, pow1_model.pdf, title=pow1_model.pdf.GetName() + "_" + CAT, output_dir="plots/", sideBand = True, fitRange = 'left,right')
+can2 = ROOT.TCanvas("c2","c2", 500, 500)
+can2.cd()
+plot2 = x.frame()
+# x.setBins(65)
+show_hist_data = reader.data_u2.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
+show_hist_mc = reader.data_hist_untagged2_bkg.createHistogram("h_hist_mc", x, ROOT.RooFit.Binning(65))
+
+h1 = show_hist_data.Scale(1./show_hist_data.Integral())
+h2 = show_hist_mc.Scale(1./show_hist_mc.Integral())
+h1.SetLineColor(2)
+h2.SetLineColor(3)
+h1.Draw("HIST")
+h2.Draw("SAME HIST")
+can2.SaveAs("test.pdf")
+
 
 
 
