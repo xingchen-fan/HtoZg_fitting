@@ -220,17 +220,18 @@ modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 
 # Goodness of fit test
 # goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
 # F Tset
 # singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
+# singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
-
+res = pow1_model.pdf.fitTo(reader.data_u2, ROOT.RooFit.Range('left,right'))
+plotClass(x, reader.data_u2, pow1_model.pdf, title=pow1_model.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = True, fitRange = 'left,right')
 
 
 
