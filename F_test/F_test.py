@@ -153,7 +153,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
-lowx = 100.
+lowx = 105.
 
 # Define variables
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
@@ -189,7 +189,7 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+105)
 
-CAT = "u1"
+CAT = "u2"
 
 # Define PDF classes
 bern2_model_good = Bern2Class(x, mu_gauss, CAT, 10, 0.3, 10, 7., 105.)
@@ -198,32 +198,32 @@ bern4_model_good = Bern4Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
 bern5_model_good = Bern5Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
 bern_list = [bern2_model_good, bern3_model_good, bern4_model_good,bern5_model_good]
 
-pow1_model = Pow1Class(x, mu_gauss, "bin1")
-pow2_model = Pow2Class(x, mu_gauss, "bin1")
-pow3_model = Pow3Class(x, mu_gauss, "bin1")
+pow1_model = Pow1Class(x, mu_gauss, "bin2")
+pow2_model = Pow2Class(x, mu_gauss, "bin2")
+pow3_model = Pow3Class(x, mu_gauss, "bin2")
 pow_list = [pow1_model, pow2_model]
 
-exp1_model = Exp1Class(x, mu_gauss, "bin1")
-exp2_model = Exp2Class(x, mu_gauss, "bin1")
-exp3_model = Exp3Class(x, mu_gauss, "bin1")
+exp1_model = Exp1Class(x, mu_gauss, "bin2")
+exp2_model = Exp2Class(x, mu_gauss, "bin2")
+exp3_model = Exp3Class(x, mu_gauss, "bin2")
 exp_list = [exp1_model, exp2_model, exp3_model]
 
-lau1_model = Lau1Class(x, mu_gauss, "bin1")
-lau2_model = Lau2Class(x, mu_gauss, "bin1")
-lau3_model = Lau3Class(x, mu_gauss, "bin1")
+lau1_model = Lau1Class(x, mu_gauss, "bin2")
+lau2_model = Lau2Class(x, mu_gauss, "bin2")
+lau3_model = Lau3Class(x, mu_gauss, "bin2")
 lau_list = [lau1_model, lau2_model, lau3_model]
 
-modg_model = ModGausClass(x, "bin1", lowx, lowx+65)
+modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 
 # Goodness of fit test
 #goodness(bern_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-goodness(pow_list, reader.data_hist_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
 # F Tset
 #singleBernFTest(x, mu_gauss, reader.data_u1, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-singleFTestSidebandNLL(x, pow_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
+singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
