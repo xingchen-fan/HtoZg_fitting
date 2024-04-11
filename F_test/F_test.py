@@ -125,12 +125,14 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
 
     multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi " + cat, output_dir="plots/", sideBand=True, fitRange= range_)
 
-def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", calssName = "Default"):
+def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", className = "Default"):
     stats = []
     fitres = []
     for entry in pdfList:
         entry.reset()
-        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range(range_))
+        nll1_= ROOT.RooNLLVar("stat1_" + entry.pdf.GetName(), "stat1 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('left'))
+        nll2_= ROOT.RooNLLVar("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
+        nll_ = ROOT.RooAddition("stat", "stat", ROOT.RooArgList(nll1_, nll2_))
         stats.append(nll_)
         Minimizer_NLL(nll_, -1, 100, False, strategy)
         r_=Minimizer_NLL(nll_, -1, eps, offset, strategy)
@@ -139,7 +141,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         entry.checkBond()
         plotClass(x, histogram, entry.pdf, title=entry.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = True, fitRange = range_)
 
-    multiPlotClass(x, histogram, pdfList, title=calssName+"_multi_" + cat, output_dir="plots/", sideBand=True, fitRange= range_)
+    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=True, fitRange= range_)
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
     dif = []
@@ -217,14 +219,14 @@ lau_list = [lau1_model, lau2_model, lau3_model]
 modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 
 # Goodness of fit test
-goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-# goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
 # F Tset
-singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-# singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Pow")
+# singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
+singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
