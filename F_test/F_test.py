@@ -231,7 +231,7 @@ modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
 res = pow1_model.pdf.fitTo(reader.data_u2, ROOT.RooFit.Range('left,right'))
-plotClass(x, reader.data_u2, pow1_model.pdf, title=pow1_model.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = True, fitRange = 'left,right')
+plotClass(x, reader.data_u2, pow1_model.pdf, title=pow1_model.pdf.GetName() + "_" + CAT, output_dir="plots/", sideBand = True, fitRange = 'left,right')
 
 
 
