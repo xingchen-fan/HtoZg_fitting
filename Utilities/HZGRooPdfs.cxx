@@ -965,7 +965,7 @@ NormPow::NormPow(const NormPow& other, const char* name) :
   xhigh(other.xhigh)
   {}
 
-Double_t ModGaus::evaluate() const {
+Double_t NormPow::evaluate() const {
   Double_t norm = (pow(xhigh, 1+p) - pow(t, 1+p))/(1+p);
   if (m <= t) return 0;
   else return pow(m, p)/norm;
