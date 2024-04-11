@@ -304,8 +304,10 @@ class Exp1Class:
         self.gauss = ROOT.RooGaussian("gaussxexp1_" + cat, "gaussian PDF exp1 " + cat, x, gauss_mu, self.sigma)
 
         x.setBins(20000, "cache")
-        self.pdf = ROOT.RooFFTConvPdf("exp1_"+cat + "_model", "step exp1 (X) gauss " + cat, x, self.step, self.gauss)
-        self.pdf.setBufferFraction(0.5)
+        self.pdfConv = ROOT.RooFFTConvPdf("exp1_conv_"+cat + "_model", "step exp1 (X) gauss conv" + cat, x, self.step, self.gauss)
+        self.pdfConv.setBufferFraction(0.5)
+        self.negate = ROOT.RooGenericPdf("negate_exp1_"+cat, "negate_exp1_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.pdf = ROOT.RooProdPdf("exp1_"+cat + "_model", "step exp1 (X) gauss " + cat, self.negate, self.pdfConv)
         self.name = "exp1_"+ cat
     def checkBond(self):
         tol = 0.001
@@ -330,8 +332,10 @@ class Exp2Class:
         self.gauss = ROOT.RooGaussian("gaussxexp2_" + cat, "gaussian PDF exp2 " + cat, x, gauss_mu, self.sigma)
 
         x.setBins(20000, "cache")
-        self.pdf = ROOT.RooFFTConvPdf("exp2_"+cat + "_model", "step exp2 (X) gauss " + cat, x, self.step, self.gauss)
-        self.pdf.setBufferFraction(0.5)
+        self.pdfConv = ROOT.RooFFTConvPdf("exp2_conv_"+cat + "_model", "step exp2 (X) gauss conv" + cat, x, self.step, self.gauss)
+        self.pdfConv.setBufferFraction(0.5)
+        self.negate = ROOT.RooGenericPdf("negate_exp1_"+cat, "negate_exp1_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.pdf = ROOT.RooProdPdf("exp2_"+cat + "_model", "step exp2 (X) gauss " + cat, self.negate, self.pdfConv)
         self.name = "exp2_"+ cat
     def checkBond(self):
         tol = 0.001

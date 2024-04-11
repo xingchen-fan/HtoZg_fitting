@@ -216,7 +216,7 @@ pow_list = [pow1_model, pow2_model]
 exp1_model = Exp1Class(x, mu_gauss, "bin2")
 exp2_model = Exp2Class(x, mu_gauss, "bin2")
 exp3_model = Exp3Class(x, mu_gauss, "bin2")
-exp_list = [exp1_model, exp2_model, exp3_model]
+exp_list = [exp1_model, exp2_model]#, exp3_model]
 
 lau1_model = Lau1Class(x, mu_gauss, "bin2")
 lau2_model = Lau2Class(x, mu_gauss, "bin2")
@@ -234,8 +234,8 @@ modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 # F Tset
 # singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
 # singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
-singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
-# singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
+singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
+#singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
 # can2 = ROOT.TCanvas("c2","c2", 500, 500)
 # can2.cd()
