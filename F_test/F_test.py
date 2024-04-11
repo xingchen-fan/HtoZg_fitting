@@ -155,7 +155,10 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     print("DOF diff = ", dif)
     print("P-value = ", fs)
 
-        
+# def customNLL(x, histogram, modelClass):
+#     x_list = ROOT.RooArgList("x_list")
+#     nx_list = 
+#     nll_list = ROOT.RooArgList("nll_list")
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
@@ -230,8 +233,8 @@ modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 
 # F Tset
 # singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
-# singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
+# singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
+singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
 # can2 = ROOT.TCanvas("c2","c2", 500, 500)
