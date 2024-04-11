@@ -110,9 +110,9 @@ class Bern5Class:
 
 #### Pow series
 class Pow1Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 110., p_init = -7.):
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 102., p_init = -7.):
         self.init_list = [sigma_init, step_init, p_init]
-        self.t = ROOT.RooRealVar("pow1t_" + cat, "t pow1" + cat, step_init, 105., 120.)
+        self.t = ROOT.RooRealVar("pow1t_" + cat, "t pow1" + cat, step_init, 95., 115.)
         self.p = ROOT.RooRealVar("pow1p_" + cat, "p1 pow1" + cat, p_init, -10., 0.)
         self.sigma = ROOT.RooRealVar("sigma_pow1_" + cat,"sigma_pow1_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow1_"+cat, "gaussian PDF pow1 " + cat, x, gauss_mu, self.sigma)
@@ -195,18 +195,18 @@ class Pow1Class:
 #         self.sigma.setVal(self.init_list[0])
 
 class Pow2Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 110., p1_init = -5., p2_init = -9, f_init = 0.9):
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -6.5, p2_init = -8, f_init = 0.9):
         self.init_list = [sigma_init, step_init, p1_init, p2_init, f_init]
-        self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 105., 120.)
-        self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p1_init, -10., -1.)
-        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p2_init, -100, -1.)
+        self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 95., 115.)
+        self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p1_init, -8., -5.)
+        self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p2_init, -11., -1.)
         self.f = ROOT.RooRealVar("pow2f_" + cat, "f pow2" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow2_" + cat,"sigma_pow2_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow2_"+cat, "gaussian PDF pow2 " + cat, x, gauss_mu, self.sigma)
-        self.step1 = ROOT.NormPow("step1_pow2_" + cat, "step1_pow2_" + cat, x,self.t,self.p1, 170)
-        self.step2 = ROOT.NormPow("step2_pow2_" + cat, "step2_pow2_" + cat,x,self.t,self.p2, 170)
-        self.step = ROOT.RooAddPdf("step_pow2_"+ cat, "step_pow2_" + cat, self.step1, self.step2, self.f)
-        #self.step = ROOT.RooGenericPdf("step_pow2_" + cat, "step_pow2" + cat,"( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*((1-@4)/((1700^(1+@2) - @1^(1+@2))/(1+@2)) * @0^@2 + @4 /((170^(1+@3) - @1^(1+@3))/(1+@3)) * @0^@3)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.f))
+        #self.step1 = ROOT.NormPow("step1_pow2_" + cat, "step1_pow2_" + cat, x,self.t,self.p1, 170)
+        #self.step2 = ROOT.NormPow("step2_pow2_" + cat, "step2_pow2_" + cat,x,self.t,self.p2, 170)
+        #self.step = ROOT.RooAddPdf("step_pow2_"+ cat, "step_pow2_" + cat, self.step1, self.step2, self.f)
+        self.step = ROOT.RooGenericPdf("step_pow2_" + cat, "step_pow2" + cat,"( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*((1-@4)/((170^(1+@2) - @1^(1+@2))/(1+@2)) * @0^@2 + @4 /((170^(1+@3) - @1^(1+@3))/(1+@3)) * @0^@3)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.f))
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("pow2_" + cat + "_model", "step pow2 (X) gauss" + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
@@ -256,20 +256,21 @@ class Pow2Class:
 #         self.sigma.setVal(self.init_list[0])
 
 class Pow3Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -5., p2_init = -7., p3_init = -9., f1_init = 0.9, f2_init = 0.2):
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -6.5, p2_init = -5., p3_init = -8., f1_init = 0.9, f2_init = 0.2):
         self.init_list = [sigma_init, step_init, p1_init, p2_init, p3_init, f1_init, f2_init]
         self.t = ROOT.RooRealVar("pow3t_" + cat, "t pow3" + cat, step_init, 95., 115.)
-        self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p1_init, -10., -1.)
-        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p2_init, -30., -5.)
-        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p3_init, -100., -7.)
+        self.p1 = ROOT.RooRealVar("pow3p1_" + cat, "p1 pow3" + cat, p1_init, -8., -5.)
+        self.p2 = ROOT.RooRealVar("pow3p2_" + cat, "p2 pow3" + cat, p2_init, -9., -1.)
+        self.p3 = ROOT.RooRealVar("pow3p3_" + cat, "p3 pow3" + cat, p3_init, -7., -1.)
         self.f1 = ROOT.RooRealVar("pow3f1_" + cat, "f1 pow3" + cat, f1_init, 0., 1.)
         self.f2 = ROOT.RooRealVar("pow3f2_" + cat, "f2 pow3" + cat, f2_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow3_" + cat,"sigma_pow3_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow3_"+cat, "gaussian PDF pow3 " + cat, x, gauss_mu, self.sigma)
-        self.step1 = ROOT.RooGenericPdf("step1_pow3_" + cat, "step1_pow3" + cat, "(@0>@1)*(@0^@2)", ROOT.RooArgList(x,self.t,self.p1))
-        self.step2 = ROOT.RooGenericPdf("step2_pow3_" + cat, "step2_pow3" + cat, "(@0>@1)*(@0^@2)", ROOT.RooArgList(x,self.t,self.p2))
-        self.step3 = ROOT.RooGenericPdf("step3_pow3_" + cat, "step3_pow3" + cat, "(@0>@1)*(@0^@2)", ROOT.RooArgList(x,self.t,self.p3))
-        self.step = ROOT.RooAddPdf("step_pow3_"+ cat, "step_pow3_" + cat, ROOT.RooArgList(self.step1, self.step2, self.step3), ROOT.RooArgList(self.f1, self.f2))
+        #self.step1 = ROOT.RooGenericPdf("step1_pow3_" + cat, "step1_pow3" + cat, "(@0>@1)*(@0^@2)", ROOT.RooArgList(x,self.t,self.p1))
+        #self.step2 = ROOT.RooGenericPdf("step2_pow3_" + cat, "step2_pow3" + cat, "(@0>@1)*(@0^@2)", ROOT.RooArgList(x,self.t,self.p2))
+        #self.step3 = ROOT.RooGenericPdf("step3_pow3_" + cat, "step3_pow3" + cat, "(@0>@1)*(@0^@2)", ROOT.RooArgList(x,self.t,self.p3))
+        #self.step = ROOT.RooAddPdf("step_pow3_"+ cat, "step_pow3_" + cat, ROOT.RooArgList(self.step1, self.step2, self.step3), ROOT.RooArgList(self.f1, self.f2))
+        self.step = ROOT.RooGenericPdf("step_pow3_" + cat, "step_pow3" + cat, "( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*( (1-@5-@6)/((170^(1+@2) - @1^(1+@2))/(1+@2)) *@0^@2 + @5/ ((170^(1+@3) - @1^(1+@3))/(1+@3)) * @0^@3 + @6/((170^(1+@4) - @1^(1+@4))/(1+@4)) * @0^@4)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.p3, self.f1, self.f2))
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("pow3_" + cat + "_model", "step pow3 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdf.setBufferFraction(0.5)
@@ -434,9 +435,10 @@ class Lau2Class:
         self.sigma.setVal(self.init_list[0])
     
 class Lau3Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1 = -8, p2 = -7, p3 = -6, p4 = -5, f_init = 0.05):
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1 = -8, p2 = -7, p3 = -6, p4 = -5, f_init = 0.1):
+        self.init_list = [sigma_init, step_init, p1, p2, p3, p4, f_init]
         self.sigma = ROOT.RooRealVar("sigma_lau3_" + cat,"sigma_lau3_" + cat       ,sigma_init,  1., 15.)
-        self.t = ROOT.RooRealVar("lau3_t_" + cat, "t lau3 " + cat, step_init, 90., 115.)
+        self.t = ROOT.RooRealVar("lau3_t_" + cat, "t lau3 " + cat, step_init, 85., 110.)
         self.f1 = ROOT.RooRealVar("lau3_f1_" + cat, "f1 lau3 " + cat, f_init, 0., 1.)
         self.f2 = ROOT.RooRealVar("lau3_f2_" + cat, "f2 lau3 " + cat, f_init, 0., 1.)
         self.f3 = ROOT.RooRealVar("lau3_f3_" + cat, "f3 lau3 " + cat, f_init, 0., 1.)
@@ -457,6 +459,18 @@ class Lau3Class:
         par_list = [self.t, self.p1, self.p2, self.p3, self.p4, self.f1, self.f2, self.f3, self.sigma]
         if any(bondComp(par, tol) for par in par_list):
             print ("The pdf ", self.pdf.GetName(), " needs refit.")
+
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2])
+        self.p2.setVal(self.init_list[3])
+        self.p3.setVal(self.init_list[4])
+        self.p4.setVal(self.init_list[5])
+        self.f1.setVal(self.init_list[6])
+        self.f2.setVal(self.init_list[6])
+        self.f2.setVal(self.init_list[6])
+        self.f3.setVal(self.init_list[6])
+        self.sigma.setVal(self.init_list[0])
 
 class ModGausClass:
     def __init__(self, x, cat="", lowx = 105., highx = 170.):

@@ -136,7 +136,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         entry.reset()
         # nll1_= ROOT.RooNLLVar("stat1_" + entry.pdf.GetName(), "stat1 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('left'))
         # nll2_= ROOT.RooNLLVar("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
-        nll_= ROOT.RooChi2Var("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram)
+        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram)
         #nll2_= ROOT.RooChi2Var("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
 
         #nll_ = ROOT.RooAddition("stat", "stat", ROOT.RooArgList(nll1_, nll2_))
@@ -226,16 +226,16 @@ bern_list = [bern2_model, bern3_model, bern4_model,bern5_model]
 pow1_model = Pow1Class(x, mu_gauss, CAT)
 pow2_model = Pow2Class(x, mu_gauss, CAT)
 pow3_model = Pow3Class(x, mu_gauss, CAT)
-pow_list = [pow1_model, pow2_model]
+pow_list = [pow1_model, pow2_model, pow3_model]
 
 exp1_model = Exp1Class(x, mu_gauss, CAT)
-exp2_model = Exp2Class(x, mu_gauss, CAT)
-exp3_model = Exp3Class(x, mu_gauss, CAT)
+exp2_model = Exp2Class(x, mu_gauss, CAT,  p1_init = -0.06, p2_init = -0.02)
+exp3_model = Exp3Class(x, mu_gauss, CAT,  p1_init = -0.08, p2_init = -0.05,  p3_init = -0.02)
 exp_list = [exp1_model, exp2_model, exp3_model]
 
-lau1_model = Lau1Class(x, mu_gauss, CAT)
+lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -8, p2 = -7)
 lau2_model = Lau2Class(x, mu_gauss, CAT)
-lau3_model = Lau3Class(x, mu_gauss, CAT)
+lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -10+1, p2 = -9+1, p3 = -8+1, p4 = -7+1)
 lau_list = [lau1_model, lau2_model, lau3_model]
 
 modg_model = ModGausClass(x, CAT, lowx, lowx+65)
@@ -255,11 +255,11 @@ if args.function == 'bern':
     goodness(bern_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
     singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern")
 elif args.function == 'pow':
-    goodness(pow_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Pow")
-    singleFTestSidebandNLL(x, pow_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
+#    goodness(pow_list, mc_hist,  e_type = "SumW2", eps = 1, n_bins = 260, className="Pow")
+    singleFTestSidebandNLL(x, pow_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 elif args.function == 'exp':
     goodness(exp_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
-    singleFTestSidebandNLL(x, exp_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
+    singleFTestSidebandNLL(x, exp_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 elif args.function == 'lau':
     goodness(lau_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Lau")
     singleFTestSidebandNLL(x, lau_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
