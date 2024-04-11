@@ -130,7 +130,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     fitres = []
     for entry in pdfList:
         entry.reset()
-        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram)
+        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range(range_))
         stats.append(nll_)
         Minimizer_NLL(nll_, -1, 100, False, strategy)
         r_=Minimizer_NLL(nll_, -1, eps, offset, strategy)
@@ -177,6 +177,9 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 
 # Cornell MC sample dat reader and make RooDataHist
 x.setBins(260)
+x.setRange('left', lowx, 120)
+x.setRange('right', 130, lowx+65)
+x.setRange('full', lowx, lowx+65)
 #reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
 reader = readDat(list, "../../sample/")
 reader.numCheck()
@@ -185,9 +188,7 @@ reader.dataNumCheck()
 #x.setBins(260)
 #reader = readRoot(x, "~/beijing_sample/data.root")
 
-x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+65)
+
 
 CAT = "u2"
 
