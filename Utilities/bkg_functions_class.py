@@ -80,7 +80,7 @@ class Bern4Class:
          self.stepval.setVal(self.init_list[3])
 
 class Bern5Class:
-    def __init__(self, x, gauss_mu, cat="", p0=10, p_init=0.3, bond=20, sigma_init=7., step_init=105.):
+    def __init__(self, x, gauss_mu, cat="", p0=1., p_init=0.3, bond=20, sigma_init=7., step_init=105.):
         self.init_list = [p0, p_init, sigma_init, step_init]
         self.p0 = ROOT.RooRealVar("b5p0_" + cat, "b5p1_" + cat, p0)
         self.p1 = ROOT.RooRealVar("b5p1_" + cat, "b5p1_" + cat, p_init,-bond, bond)

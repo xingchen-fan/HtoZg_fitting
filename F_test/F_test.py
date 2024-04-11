@@ -220,7 +220,7 @@ elif CAT=='u4':
 bern2_model = Bern2Class(x, mu_gauss, CAT, 10, 0.3, 10, 7., 105.)
 bern3_model = Bern3Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
 bern4_model = Bern4Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
-bern5_model = Bern5Class(x, mu_gauss, CAT, 10, 0.3, 50, 7., 105.)
+bern5_model = Bern5Class(x, mu_gauss, CAT, 1., 0.3, 50, 7., 105.)
 bern_list = [bern2_model, bern3_model, bern4_model,bern5_model]
 
 pow1_model = Pow1Class(x, mu_gauss, CAT)
@@ -233,9 +233,9 @@ exp2_model = Exp2Class(x, mu_gauss, CAT,  p1_init = -0.06, p2_init = -0.02)
 exp3_model = Exp3Class(x, mu_gauss, CAT,  p1_init = -0.08, p2_init = -0.05,  p3_init = -0.02)
 exp_list = [exp1_model, exp2_model, exp3_model]
 
-lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -8, p2 = -7)
-lau2_model = Lau2Class(x, mu_gauss, CAT)
-lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -10+1, p2 = -9+1, p3 = -8+1, p4 = -7+1)
+lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -7, p2 = -6)
+lau2_model = Lau2Class(x, mu_gauss, CAT, p1 = -7, p2 = -6, p3 = -5)
+lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -7, p2 = -6, p3 = -5, p4 = -4)
 lau_list = [lau1_model, lau2_model, lau3_model]
 
 modg_model = ModGausClass(x, CAT, lowx, lowx+65)
@@ -261,7 +261,7 @@ elif args.function == 'exp':
     goodness(exp_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
     singleFTestSidebandNLL(x, exp_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 elif args.function == 'lau':
-    goodness(lau_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Lau")
+    goodness(lau_list, mc_hist,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Lau")
     singleFTestSidebandNLL(x, lau_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
 
 
