@@ -130,7 +130,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     fitres = []
     for entry in pdfList:
         entry.reset()
-        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range(range_))
+        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram)
         stats.append(nll_)
         Minimizer_NLL(nll_, -1, 100, False, strategy)
         r_=Minimizer_NLL(nll_, -1, eps, offset, strategy)
