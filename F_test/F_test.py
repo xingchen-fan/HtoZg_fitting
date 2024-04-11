@@ -130,12 +130,15 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     fitres = []
     for entry in pdfList:
         entry.reset()
-        nll1_= ROOT.RooNLLVar("stat1_" + entry.pdf.GetName(), "stat1 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('left'))
-        nll2_= ROOT.RooNLLVar("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
+        # nll1_= ROOT.RooNLLVar("stat1_" + entry.pdf.GetName(), "stat1 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('left'))
+        # nll2_= ROOT.RooNLLVar("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
+        nll1_= ROOT.RooChi2Var("stat1_" + entry.pdf.GetName(), "stat1 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('left'))
+        nll2_= ROOT.RooChi2Var("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
+
         nll_ = ROOT.RooAddition("stat", "stat", ROOT.RooArgList(nll1_, nll2_))
         stats.append(nll_)
-        Minimizer_NLL(nll_, -1, 100, False, strategy)
-        r_=Minimizer_NLL(nll_, -1, eps, offset, strategy)
+        Minimizer_Chi2(nll_, -1, 100, False, strategy)
+        r_=Minimizer_Chi2(nll_, -1, eps, offset, strategy)
         r_.Print("V")
         fitres.append(r_)
         entry.checkBond()
@@ -220,30 +223,30 @@ modg_model = ModGausClass(x, "bin2", lowx, lowx+65)
 
 # Goodness of fit test
 # goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-# goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 # goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
 # F Tset
 # singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-# singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
+singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 # singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Exp")
 # singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 
-can2 = ROOT.TCanvas("c2","c2", 500, 500)
-can2.cd()
-plot2 = x.frame()
-# x.setBins(65)
-show_hist_data = reader.data_u2.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
-show_hist_mc = reader.data_hist_untagged2_bkg.createHistogram("h_hist_mc", x, ROOT.RooFit.Binning(65))
+# can2 = ROOT.TCanvas("c2","c2", 500, 500)
+# can2.cd()
+# plot2 = x.frame()
+# # x.setBins(65)
+# show_hist_data = reader.data_u2.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
+# show_hist_mc = reader.data_hist_untagged2_bkg.createHistogram("h_hist_mc", x, ROOT.RooFit.Binning(65))
 
-show_hist_data.Scale(1./show_hist_data.Integral())
-show_hist_mc.Scale(1./show_hist_mc.Integral())
-show_hist_data.SetLineColor(2)
-show_hist_mc.SetLineColor(3)
-show_hist_data.Draw("HIST")
-show_hist_mc.Draw("SAME HIST")
-can2.SaveAs("test.pdf")
+# show_hist_data.Scale(1./show_hist_data.Integral())
+# show_hist_mc.Scale(1./show_hist_mc.Integral())
+# show_hist_data.SetLineColor(2)
+# show_hist_mc.SetLineColor(3)
+# show_hist_data.Draw("HIST")
+# show_hist_mc.Draw("SAME HIST")
+# can2.SaveAs("test.pdf")
 
 
 
