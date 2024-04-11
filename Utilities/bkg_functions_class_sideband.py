@@ -119,8 +119,11 @@ class Pow1Class:
         self.step = ROOT.RooGenericPdf("step_pow1_" + cat, "step_pow1_" + cat,\
                                         "( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*(@0^@2)", ROOT.RooArgList(x,self.t,self.p))
         x.setBins(20000, "cache")
-        self.pdf = ROOT.RooFFTConvPdf("pow1_" + cat + "_model", "step pow1 (X) gauss" + cat, x, self.step, self.gauss)
-        self.pdf.setBufferFraction(0.5)
+        self.negate = ROOT.RooGenericPdf("negate_pow1_"+cat, "negate_pow1_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.pdfConv = ROOT.RooFFTConvPdf("pow1_conv_" + cat + "_model", "step pow1 (X) gauss conv" + cat, x, self.step, self.gauss)
+        self.pdfConv.setBufferFraction(0.5)
+        self.pdf = ROOT.RooProdPdf("pow1_" + cat + "_model", "step pow1 (X) gauss " + cat, self.pdfConv, self.negate)
+
         self.name = "pow1_"+ cat
     def checkBond(self):
         tol = 0.001
@@ -203,13 +206,15 @@ class Pow2Class:
         self.f = ROOT.RooRealVar("pow2f_" + cat, "f pow2" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow2_" + cat,"sigma_pow2_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow2_"+cat, "gaussian PDF pow2 " + cat, x, gauss_mu, self.sigma)
-        self.step1 = ROOT.NormPow("step1_pow2_" + cat, "step1_pow2_" + cat, x,self.t,self.p1, 170)
-        self.step2 = ROOT.NormPow("step2_pow2_" + cat, "step2_pow2_" + cat,x,self.t,self.p2, 170)
-        self.step = ROOT.RooAddPdf("step_pow2_"+ cat, "step_pow2_" + cat, self.step1, self.step2, self.f)
-        #self.step = ROOT.RooGenericPdf("step_pow2_" + cat, "step_pow2" + cat,"( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*((1-@4)/((1700^(1+@2) - @1^(1+@2))/(1+@2)) * @0^@2 + @4 /((170^(1+@3) - @1^(1+@3))/(1+@3)) * @0^@3)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.f))
+        #self.step1 = ROOT.NormPow("step1_pow2_" + cat, "step1_pow2_" + cat, x,self.t,self.p1, 170)
+        #self.step2 = ROOT.NormPow("step2_pow2_" + cat, "step2_pow2_" + cat,x,self.t,self.p2, 170)
+        #self.step = ROOT.RooAddPdf("step_pow2_"+ cat, "step_pow2_" + cat, self.step1, self.step2, self.f)
+        self.step = ROOT.RooGenericPdf("step_pow2_" + cat, "step_pow2" + cat,"( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*((1-@4)/((1700^(1+@2) - @1^(1+@2))/(1+@2)) * @0^@2 + @4 /((170^(1+@3) - @1^(1+@3))/(1+@3)) * @0^@3)", ROOT.RooArgList(x,self.t,self.p1, self.p2, self.f))
         x.setBins(20000, "cache")
-        self.pdf = ROOT.RooFFTConvPdf("pow2_" + cat + "_model", "step pow2 (X) gauss" + cat, x, self.step, self.gauss)
-        self.pdf.setBufferFraction(0.5)
+        self.pdfConv = ROOT.RooFFTConvPdf("pow2_conv_" + cat + "_model", "step pow2 (X) gauss conv" + cat, x, self.step, self.gauss)
+        self.pdfConv.setBufferFraction(0.5)
+        self.negate = ROOT.RooGenericPdf("negate_pow2_"+cat, "negate_pow2_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.pdf = ROOT.RooProdPdf("pow2_" + cat + "_model", "step pow2 (X) gauss " + cat, self.pdfConv, self.negate)
         self.name = "pow2_"+ cat
     def checkBond(self):
         tol = 0.0001
@@ -299,8 +304,10 @@ class Exp1Class:
         self.gauss = ROOT.RooGaussian("gaussxexp1_" + cat, "gaussian PDF exp1 " + cat, x, gauss_mu, self.sigma)
 
         x.setBins(20000, "cache")
-        self.pdf = ROOT.RooFFTConvPdf("exp1_"+cat + "_model", "step exp1 (X) gauss" + cat, x, self.step, self.gauss)
-        self.pdf.setBufferFraction(0.5)
+        self.pdfConv = ROOT.RooFFTConvPdf("exp1_conv_"+cat + "_model", "step exp1 (X) gauss conv" + cat, x, self.step, self.gauss)
+        self.pdfConv.setBufferFraction(0.5)
+        self.negate = ROOT.RooGenericPdf("negate_exp1_"+cat, "negate_exp1_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.pdf = ROOT.RooProdPdf("exp1_"+cat + "_model", "step exp1 (X) gauss " + cat, self.negate, self.pdfConv)
         self.name = "exp1_"+ cat
     def checkBond(self):
         tol = 0.001
@@ -325,8 +332,10 @@ class Exp2Class:
         self.gauss = ROOT.RooGaussian("gaussxexp2_" + cat, "gaussian PDF exp2 " + cat, x, gauss_mu, self.sigma)
 
         x.setBins(20000, "cache")
-        self.pdf = ROOT.RooFFTConvPdf("exp2_"+cat + "_model", "step exp2 (X) gauss" + cat, x, self.step, self.gauss)
-        self.pdf.setBufferFraction(0.5)
+        self.pdfConv = ROOT.RooFFTConvPdf("exp2_conv_"+cat + "_model", "step exp2 (X) gauss conv" + cat, x, self.step, self.gauss)
+        self.pdfConv.setBufferFraction(0.5)
+        self.negate = ROOT.RooGenericPdf("negate_exp1_"+cat, "negate_exp1_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.pdf = ROOT.RooProdPdf("exp2_"+cat + "_model", "step exp2 (X) gauss " + cat, self.negate, self.pdfConv)
         self.name = "exp2_"+ cat
     def checkBond(self):
         tol = 0.001
