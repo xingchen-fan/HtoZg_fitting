@@ -128,7 +128,7 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
 
     multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi " + cat, output_dir="plots/", sideBand=True, fitRange= range_)
 
-def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", className = "Default"):
+def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", className = "Default", FT = True):
     stats = []
     fitres = []
     # cuthistogram = histogram.reduce(ROOT.RooFit.CutRange(range_))
@@ -152,9 +152,10 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
     dif = []
-    for i in range(len(stats) - 1):
-        fs.append(ROOT.Math.chisquared_cdf_c(2*(stats[i].getVal() - stats[i+1].getVal()), fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize()))
-        dif.append(fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize())
+    if FT:
+        for i in range(len(stats) - 1):
+            fs.append(ROOT.Math.chisquared_cdf_c(2*(stats[i].getVal() - stats[i+1].getVal()), fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize()))
+            dif.append(fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize())
     print("DOF diff = ", dif)
     print("P-value = ", fs)
 
@@ -233,13 +234,13 @@ exp2_model = Exp2Class(x, mu_gauss, CAT,  p1_init = -0.06, p2_init = -0.02)
 exp3_model = Exp3Class(x, mu_gauss, CAT,  p1_init = -0.08, p2_init = -0.05,  p3_init = -0.02)
 exp_list = [exp1_model, exp2_model, exp3_model]
 
-lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -7, p2 = -6)
-lau2_model = Lau2Class(x, mu_gauss, CAT, p1 = -7, p2 = -6, p3 = -5)
-lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -7, p2 = -6, p3 = -5, p4 = -4)
+lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -8, p2 = -7)
+lau2_model = Lau2Class(x, mu_gauss, CAT, p1 = -8, p2 = -7, p3 = -6)
+lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -8, p2 = -7, p3 = -6, p4 = -5)
 lau_list = [lau1_model, lau2_model, lau3_model]
 
 modg_model = ModGausClass(x, CAT, lowx, lowx+65)
-
+best_list = [bern3_model, bern4_model, pow1_model, pow2_model, exp2_model, modg_model]
 # Goodness of fit test
 # goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 #goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
@@ -263,7 +264,8 @@ elif args.function == 'exp':
 elif args.function == 'lau':
     goodness(lau_list, mc_hist,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Lau")
     singleFTestSidebandNLL(x, lau_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
-
+elif args.function == 'best':
+    singleFTestSidebandNLL(x, best_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Best", FT = False)
 
 
 # can2 = ROOT.TCanvas("c2","c2", 500, 500)
