@@ -119,7 +119,7 @@ class Pow1Class:
         self.step = ROOT.RooGenericPdf("step_pow1_" + cat, "step_pow1_" + cat,\
                                         "( ((@0-@1)*153.85 <0.0) ? 0.0 : (((@0-@1)*153.85 >1.0) ? 1.0 : ((@0-@1)*153.85/4) ) )*(@0^@2)", ROOT.RooArgList(x,self.t,self.p))
         x.setBins(20000, "cache")
-        self.negate = ROOT.RooGenericPdf("negate_pow1_"+cat, "negate_pow1_"+cat,, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
+        self.negate = ROOT.RooGenericPdf("negate_pow1_"+cat, "negate_pow1_"+cat, "(@0<120)? 1.0 : ((@0>130)? 1.0: 0.0)", ROOT.RooArgList(x))
         self.pdfConv = ROOT.RooFFTConvPdf("pow1_" + cat + "_model", "step pow1 (X) gauss " + cat, x, self.step, self.gauss)
         self.pdfConv.setBufferFraction(0.5)
         self.pdf = ROOT.RooProdPdf("pow1_" + cat + "_model", "step pow1 (X) gauss " + cat, self.pdfConv, self.negate)
