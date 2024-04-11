@@ -205,7 +205,7 @@ reader.dataNumCheck()
 CAT = args.category
 if CAT=='u1':
     mc_hist = reader.data_hist_untagged1_bkg
-    data_hist = reader.data_u2
+    data_hist = reader.data_u1
 elif CAT=='u2':
     mc_hist = reader.data_hist_untagged2_bkg
     data_hist = reader.data_u2
