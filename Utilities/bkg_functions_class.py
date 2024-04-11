@@ -110,9 +110,9 @@ class Bern5Class:
 
 #### Pow series
 class Pow1Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p_init = -7.):
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 110., p_init = -7.):
         self.init_list = [sigma_init, step_init, p_init]
-        self.t = ROOT.RooRealVar("pow1t_" + cat, "t pow1" + cat, step_init, 95., 115.)
+        self.t = ROOT.RooRealVar("pow1t_" + cat, "t pow1" + cat, step_init, 105., 120.)
         self.p = ROOT.RooRealVar("pow1p_" + cat, "p1 pow1" + cat, p_init, -10., 0.)
         self.sigma = ROOT.RooRealVar("sigma_pow1_" + cat,"sigma_pow1_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow1_"+cat, "gaussian PDF pow1 " + cat, x, gauss_mu, self.sigma)
@@ -195,16 +195,16 @@ class Pow1Class:
 #         self.sigma.setVal(self.init_list[0])
 
 class Pow2Class:
-    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 105., p1_init = -5., p2_init = -9, f_init = 0.9):
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 110., p1_init = -5., p2_init = -9, f_init = 0.9):
         self.init_list = [sigma_init, step_init, p1_init, p2_init, f_init]
-        self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 95., 115.)
+        self.t = ROOT.RooRealVar("pow2t_" + cat, "t pow2" + cat, step_init, 105., 120.)
         self.p1 = ROOT.RooRealVar("pow2p1_" + cat, "p1 pow2" + cat, p1_init, -10., -1.)
         self.p2 = ROOT.RooRealVar("pow2p2_" + cat, "p2 pow2" + cat, p2_init, -50, -1.)
         self.f = ROOT.RooRealVar("pow2f_" + cat, "f pow2" + cat, f_init, 0., 1.)
         self.sigma = ROOT.RooRealVar("sigma_pow2_" + cat,"sigma_pow2_"+cat, sigma_init,  1., 15.)
         self.gauss = ROOT.RooGaussian("gaussxpow2_"+cat, "gaussian PDF pow2 " + cat, x, gauss_mu, self.sigma)
-        self.step1 = ROOT.NormPow("step1_pow2_" + cat, "step1_pow2_" + cat, x,self.t,self.p1, 165)
-        self.step2 = ROOT.NormPow("step2_pow2_" + cat, "step2_pow2_" + cat,x,self.t,self.p2, 165)
+        self.step1 = ROOT.NormPow("step1_pow2_" + cat, "step1_pow2_" + cat, x,self.t,self.p1, 170)
+        self.step2 = ROOT.NormPow("step2_pow2_" + cat, "step2_pow2_" + cat,x,self.t,self.p2, 170)
         self.step = ROOT.RooAddPdf("step_pow2_"+ cat, "step_pow2_" + cat, self.step1, self.step2, self.f)
         x.setBins(20000, "cache")
         self.pdf = ROOT.RooFFTConvPdf("pow2_" + cat + "_model", "step pow2 (X) gauss " + cat, x, self.step, self.gauss)
