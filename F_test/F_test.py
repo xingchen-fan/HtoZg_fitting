@@ -187,7 +187,7 @@ reader.dataNumCheck()
 
 x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+105)
+x.setRange('full', lowx, lowx+65)
 
 CAT = "u2"
 
