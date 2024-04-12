@@ -3,7 +3,7 @@ import ROOT
 # Cornell sample in dat format
 
 class readDat: #Cornell MC sampleS
-    def __init__(self, list, dir=""):
+    def __init__(self, list, dir="", data_dir = "/afs/cern.ch/user/f/fanx/rui_newdat/"):
         x = list[0]
         y = list[1]
         w = list[2]
@@ -21,7 +21,9 @@ class readDat: #Cornell MC sampleS
         bkg_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet),"", dir)
         sig_run2 = ROOT.RooDataSet.read("Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
         tot_run2 = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat,DY_ggF1_newbdt_trig.dat,DY_ggF2_newbdt_trig.dat,DY_ggF3_newbdt_trig.dat,DY_ggF4_newbdt_trig.dat,Signal_ggF1_newbdt_trig.dat,Signal_ggF2_newbdt_trig.dat,Signal_ggF3_newbdt_trig.dat,Signal_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", dir)
-        data_dir = "/afs/cern.ch/user/f/fanx/rui_newdat/"
+        bkg_SM = ROOT.RooDataSet.read("SMZg_ggF1_newbdt_trig.dat,SMZg_ggF2_newbdt_trig.dat,SMZg_ggF3_newbdt_trig.dat,SMZg_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet),"", dir)
+
+
         data = ROOT.RooDataSet.read("data_ggF1_newbdt_trig.dat,data_ggF2_newbdt_trig.dat,data_ggF3_newbdt_trig.dat,data_ggF4_newbdt_trig.dat", ROOT.RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "", data_dir)
 
 
@@ -76,10 +78,21 @@ class readDat: #Cornell MC sampleS
         u3_tot_run2 = ROOT.RooDataSet("u3_tot_run2", "u3_tot_run2", tot_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt2) +" && bdt < " + str(bdt3) , "w")
         u4_tot_run2 = ROOT.RooDataSet("u4_tot_run2", "u4_tot_run2", tot_run2, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt1) +" && bdt < " + str(bdt2) , "w")
 
+        u1_bkg_SM = ROOT.RooDataSet("u1_bkg_SM", "u1_bkg_SM", bkg_SM, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt4), "w")
+        u2_bkg_SM = ROOT.RooDataSet("u2_bkg_SM", "u2_bkg_SM", bkg_SM, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt3) +" && bdt < " + str(bdt4), "w")
+        u3_bkg_SM = ROOT.RooDataSet("u3_bkg_SM", "u3_bkg_SM", bkg_SM, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt2) +" && bdt < " + str(bdt3), "w")
+        u4_bkg_SM = ROOT.RooDataSet("u4_bkg_SM", "u4_bkg_SM", bkg_SM, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt1) +" && bdt < " + str(bdt2), "w")
+
+
         u1_data = ROOT.RooDataSet("u1_data", "u1_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt4))
         u2_data = ROOT.RooDataSet("u2_data", "u2_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt3) +" && bdt < " + str(bdt4))
         u3_data = ROOT.RooDataSet("u3_data", "u3_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt2) +" && bdt < " + str(bdt3))
         u4_data = ROOT.RooDataSet("u4_data", "u4_data", data, ROOT.RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "x > 100. && nlep <= 2 && njet < 2 && bdt > " + str(bdt1) +" && bdt < " + str(bdt2))
+
+        self.data_hist_u1_SM =  ROOT.RooDataHist("data_hist_u1_SM", "data_hist_u1_SM", x, u1_bkg_SM)
+        self.data_hist_u2_SM =  ROOT.RooDataHist("data_hist_u2_SM", "data_hist_u2_SM", x, u2_bkg_SM)
+        self.data_hist_u3_SM =  ROOT.RooDataHist("data_hist_u3_SM", "data_hist_u3_SM", x, u3_bkg_SM)
+        self.data_hist_u4_SM =  ROOT.RooDataHist("data_hist_u4_SM", "data_hist_u4_SM", x, u4_bkg_SM)
 
         self.data_hist_untagged1 = ROOT.RooDataHist("data_hist_untagged1", "data_hist_untagged1", x, u1_tot_run2)
         self.data_hist_untagged2 = ROOT.RooDataHist("data_hist_untagged2", "data_hist_untagged2", x, u2_tot_run2)
