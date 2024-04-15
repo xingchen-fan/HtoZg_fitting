@@ -25,7 +25,7 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 LOG = False
 
 # Specify the lower bond of mllg
-lowx = 105.
+lowx = 100.
 
 # Define variables
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
@@ -46,9 +46,9 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 x.setBins(260)
 reader = readDat(list, dir="../../sample/")
 reader.numCheck()
-cat = "u3"
-sig_hist = reader.data_hist_untagged3_sig
-bkg_hist = reader.data_u3
+cat = "u1"
+sig_hist = reader.data_hist_untagged1_sig
+bkg_hist = reader.data_hist_untagged1_bkg#reader.data_u1
 N = bkg_hist.sumEntries()
 N_sig = sig_hist.sumEntries()
 
@@ -58,8 +58,7 @@ print("N sig = ", N_sig)
 bern2 = Bern2Class(x, mu_gauss, cat)
 pow1 = Pow1Class(x, mu_gauss, cat)
 exp1 = Exp1Class(x, mu_gauss, cat)
-exp2 = Exp2Class(x, mu_gauss, cat)
-lau2 = Lau2Class(x, mu_gauss, cat, p1 = -6, p2 = -5, p3 = -4)
+lau2 = Lau2Class(x, mu_gauss, cat, p1 = -8, p2 = -7, p3 = -6)
 modg = ModGausClass(x,cat, lowx, lowx+65)
 
 sig_model = DSCB_Class(x, MH, cat)
@@ -109,23 +108,26 @@ w_bkg = ROOT.RooWorkspace("workspace_bkg","workspace_bkg")
 getattr(w_bkg, "import")(cate)
 getattr(w_bkg, "import")(norm)
 getattr(w_bkg, "import")(multipdf)
+getattr(w_bkg, "import")(bkg_hist)
 w_bkg.Print()
 w_bkg.Write()
 f_out2.Close()
 
 # Create toy histogram
 bias = False
-N_toy = 2
+N_toy = 10
+
 if bias:
-    f_out3 = ROOT.TFile("workspaces/workspace_toy_" + cat + ".root", "RECREATE")
+    f_out3 = ROOT.TFile("~/EOS_space/toy_wsp/workspace_toy_" + cat + ".root", "RECREATE")
     w_toy = ROOT.RooWorkspace("workspace_toy","workspace_toy")
     for entry in profile:
         x.setBins(260)
         for i in range(N_toy):
             hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
-            hist_toy.SetNameTitle("hist_"+entry.name()+"_"+cat +"_"+ str(i), "hist_"+entry.name()+"_"+cat +"_"+ str(i))
+            hist_toy.SetNameTitle("hist_"+entry.pdf.GetName()+"_"+str(i), "hist_"+entry.pdf.GetName()+"_"+str(i))
             getattr(w_toy, "import")(hist_toy)
     w_toy.Write()
+    w_toy.Print()
     f_out3.Close()
 
 
