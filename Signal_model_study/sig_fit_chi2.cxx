@@ -758,22 +758,31 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   RooRealVar njet("njet", "njet", 0, 10);
   gStyle->SetOptStat(0);
 
-  RooDataSet* ULsample = RooDataSet::read("../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged4_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged3_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged2_ratio_extended.dat,../../../../CMSSW_11_3_4/src/HToZg_combine/rui_datasamples/Signal_untagged1_ratio_extended.dat", RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet));
+  RooDataSet* ULsample = RooDataSet::read("../../sample/Signal_ggF1_newbdt_trig.dat,../../sample/Signal_ggF2_newbdt_trig.dat,../../sample/Signal_ggF3_newbdt_trig.dat,../../sample/Signal_ggF4_newbdt_trig.dat", RooArgList(x, y, bdt, w, year, lep, ph_eta, nlep, njet));
+  //~/CMSSW_12_6_0_patch1/src/sample/Signal_ggF1_newbdt_trig.dat,~/CMSSW_12_6_0_patch1/src/sample/Signal_ggF2_newbdt_trig.dat,~/CMSSW_12_6_0_patch1/src/sample/Signal_ggF3_newbdt_trig.dat,~/CMSSW_12_6_0_patch1/src/sample/Signal_ggF4_newbdt_trig.dat
+  //  RooDataSet* f_data_sig = new RooDataSet("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "","w");
+  RooDataSet* f_data_sig;
+  if (yr == "all"){
+    RooDataSet f_data_sig_("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), "","w");
+    f_data_sig = (RooDataSet*) f_data_sig_.Clone();
+  }
+  else{
+    string year_sel = "year == " + yr;
+    RooDataSet f_data_sig_("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), year_sel.c_str(),"w");
+    f_data_sig = (RooDataSet*) f_data_sig_.Clone();
+  }
 
 
-  RooDataSet f_data_sig("f_data_sig", "f_data_sig", ULsample, RooArgSet(x, y, bdt, w, year, lep, ph_eta, nlep, njet), yr.c_str(),"w");
 
+  RooDataSet * d_el_u1 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt > 0.66");
+  RooDataSet *  d_el_u2 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt < 0.66 && bdt > 0.34");
+  RooDataSet * d_el_u3 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt < 0.34 && bdt > 0.02");
+  RooDataSet * d_el_u4 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt < 0.02 && bdt > -0.5");
 
-
-  RooDataSet * d_el_u1 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt > 0.66");
-  RooDataSet *  d_el_u2 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt < 0.66 && bdt > 0.38");
-  RooDataSet * d_el_u3 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt < 0.38 && bdt > 0.02");
-  RooDataSet * d_el_u4 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep < 1 && nlep <= 2 && njet < 2 && bdt < 0.02 && bdt > -0.58");
-
-  RooDataSet * d_mu_u1 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt > 0.66");
-  RooDataSet *  d_mu_u2 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt < 0.66 && bdt > 0.38");
-  RooDataSet * d_mu_u3 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt < 0.38 && bdt > 0.02");
-  RooDataSet * d_mu_u4 = (RooDataSet*)f_data_sig.reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt < 0.02 && bdt > -0.58");
+  RooDataSet * d_mu_u1 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt > 0.66");
+  RooDataSet *  d_mu_u2 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt < 0.66 && bdt > 0.34");
+  RooDataSet * d_mu_u3 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt < 0.34 && bdt > 0.02");
+  RooDataSet * d_mu_u4 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"lep > 0 && nlep <= 2 && njet < 2 && bdt < 0.02 && bdt > -0.5");
 
   RooDataSet *d_el_B_u1 = (RooDataSet*)d_el_u1->reduce(RooArgSet(x),"ph_eta > -1.4442 && ph_eta < 1.4442");
   RooDataSet *  d_el_E_u1 = (RooDataSet*)d_el_u1->reduce(RooArgSet(x),"(ph_eta > -2.5 && ph_eta < -1.566) || (ph_eta > 1.566 && ph_eta < 2.5)");
@@ -784,6 +793,12 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   RooDataSet *  d_el_B_u4 = (RooDataSet*)d_el_u4->reduce(RooArgSet(x),"ph_eta > -1.4442 && ph_eta < 1.4442");
   RooDataSet *  d_el_E_u4 = (RooDataSet*)d_el_u4->reduce(RooArgSet(x),"(ph_eta > -2.5 && ph_eta < -1.566) || (ph_eta > 1.566 && ph_eta < 2.5)");
 
+  RooDataSet * d_u1 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"nlep <= 2 && njet < 2 && bdt > 0.66");
+  RooDataSet * d_u2 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"nlep <= 2 && njet < 2 && bdt < 0.66 && bdt > 0.34");
+  RooDataSet * d_u3 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"nlep <= 2 && njet < 2 && bdt < 0.34 && bdt > 0.02");
+  RooDataSet * d_u4 = (RooDataSet*)f_data_sig->reduce(RooArgSet(x,ph_eta),"nlep <= 2 && njet < 2 && bdt < 0.02 && bdt > -0.5");
+
+  //Double lep trigger bdt: (-0.58, 0.02, 0.38, 0.66))
   TCanvas *c4 = new TCanvas("c4", "c4", 1200, 1000);
   TLegend *leg = new TLegend(0.1,0.9,0.45,0.5);
   leg->SetTextSize(0.015);
@@ -822,12 +837,29 @@ void sig_fit_chi2(string yr, string cat, string lepton){
     RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_mu_u4);
     h_fit = (RooDataHist *)h_fit_.Clone();
   }
+  else if (cat == "Cat 1" && lepton == "all"){
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_u1);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+  else if (cat == "Cat 2" && lepton == "all"){
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_u2);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+   else if (cat == "Cat 3" && lepton == "all"){
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_u3);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+   else if (cat == "Cat 4" && lepton == "all"){
+    RooDataHist h_fit_("h_fit", "h_fit", RooArgSet(x), *d_u4);
+    h_fit = (RooDataHist *)h_fit_.Clone();
+  }
+
 
   string some_title = yr + " " + lepton +" GGF " + cat;
   
-  int status1 = fit_hist_sum4Gaus_order0(*h_fit, x, some_title.c_str(), c4, leg, true);
+  //int status1 = fit_hist_sum4Gaus_order0(*h_fit, x, some_title.c_str(), c4, leg, true);
   int status2 = fit_hist_DSCB(*h_fit, x, some_title.c_str(), c4, leg, true);
-  int status3 = fit_hist_CBGauss(*h_fit, x, some_title.c_str(), c4, leg, true); 
+  //int status3 = fit_hist_CBGauss(*h_fit, x, some_title.c_str(), c4, leg, true); 
   //RooPlot *xframe_hist = x.frame();
   // h_fit->plotOn(xframe_hist);
   
@@ -837,7 +869,7 @@ void sig_fit_chi2(string yr, string cat, string lepton){
   c4->Draw();
   c4->SaveAs(("plots/" + some_title + ".pdf").c_str());
   
-  if (status1==0 && status2==0 && status3==0) std::cout <<"Minimization all good!" << std::endl;
+  if (status2==0) std::cout <<"Minimization all good!" << std::endl;
   else std::cout << "Minimization fails!" << std::endl;
 
 }
