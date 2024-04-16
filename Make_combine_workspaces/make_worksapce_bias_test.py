@@ -25,7 +25,7 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 LOG = False
 
 # Specify the lower bond of mllg
-lowx = 100.
+lowx = 105.
 
 # Define variables
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
@@ -46,9 +46,9 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 x.setBins(260)
 reader = readDat(list, dir="../../sample/")
 reader.numCheck()
-cat = "u1"
-sig_hist = reader.data_hist_untagged1_sig
-bkg_hist = reader.data_hist_untagged1_bkg#reader.data_u1
+cat = "u3"
+sig_hist = reader.data_hist_untagged3_sig
+bkg_hist = reader.data_u3
 N = bkg_hist.sumEntries()
 N_sig = sig_hist.sumEntries()
 
@@ -58,7 +58,7 @@ print("N sig = ", N_sig)
 bern2 = Bern2Class(x, mu_gauss, cat)
 pow1 = Pow1Class(x, mu_gauss, cat)
 exp1 = Exp1Class(x, mu_gauss, cat)
-lau2 = Lau2Class(x, mu_gauss, cat, p1 = -8, p2 = -7, p3 = -6)
+lau2 = Lau2Class(x, mu_gauss, cat, p1 = -7, p2 = -6, p3 = -5)
 modg = ModGausClass(x,cat, lowx, lowx+65)
 
 sig_model = DSCB_Class(x, MH, cat)
