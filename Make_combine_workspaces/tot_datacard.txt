@@ -1,0 +1,33 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    untag1   workspaces/workspace_bkg_profile_bias_u1.root   workspace_bkg:multipdf_u1 
+shapes sig    untag1   workspaces/workspace_sig_u1.root   workspace_sig:sig_model_DS_u1
+shapes data_obs   untag1   workspaces/workspace_bkg_profile_bias_u1.root     workspace_bkg:data_hist_untagged1
+shapes bkg    untag2   workspaces/workspace_bkg_profile_bias_u2.root   workspace_bkg:multipdf_u2
+shapes sig    untag2   workspaces/workspace_sig_u2.root   workspace_sig:sig_model_DS_u2
+shapes data_obs   untag2   workspaces/workspace_bkg_profile_bias_u2.root     workspace_bkg:data_hist_untagged2
+shapes bkg    untag3   workspaces/workspace_bkg_profile_bias_u3.root   workspace_bkg:multipdf_u3
+shapes sig    untag3   workspaces/workspace_sig_u3.root   workspace_sig:sig_model_DS_u3
+shapes data_obs   untag3   workspaces/workspace_bkg_profile_bias_u3.root     workspace_bkg:data_hist_untagged3
+shapes bkg    untag4   workspaces/workspace_bkg_profile_bias_u4.root   workspace_bkg:multipdf_u4
+shapes sig    untag4   workspaces/workspace_sig_u4.root   workspace_sig:sig_model_DS_u4
+shapes data_obs   untag4   workspaces/workspace_bkg_profile_bias_u4.root     workspace_bkg:data_hist_untagged4
+
+-------------------------------------------------
+bin		untag1		untag2		untag3		untag4
+observation	-1		-1		-1		-1
+--------------------------------------------------
+bin 		untag1		untag1		untag2		untag2		untag3		untag3		untag4		untag4
+process		bkg		sig		bkg		sig		bkg		sig		bkg		sig
+process		1		0		1		0		1		0		1		0
+rate		1.0  		12.2		1.0		44.5		1.0		59.3		1.0		52.7
+--------------------------------------------------
+
+pdfindex_u1         discrete
+pdfindex_u2         discrete
+pdfindex_u3         discrete
+pdfindex_u4         discrete
