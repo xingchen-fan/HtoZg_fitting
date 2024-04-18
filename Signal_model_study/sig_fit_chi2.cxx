@@ -17,6 +17,48 @@ int LOWX = 115;
 int HIGHX = 131;
 int NBIN = 4*(HIGHX - LOWX);
 
+//From FlashggFinalFit-----------------------------------------------------------
+
+pair<double,double> getEffSigma(RooRealVar *mass, RooAbsPdf *pdf, double wmin=115., double wmax=131., double step=0.002, double epsilon=1.e-4){
+
+  RooAbsReal *cdf = pdf->createCdf(RooArgList(*mass));
+  cout << "Computing effSigma...." << endl;
+  TStopwatch sw;
+  sw.Start();
+  double point=wmin;
+  vector<pair<double,double> > points;
+
+  while (point <= wmax){
+    mass->setVal(point);
+    if (pdf->getVal() > epsilon){
+      points.push_back(pair<double,double>(point,cdf->getVal())); 
+    }
+    point+=step;
+  }
+  double low = wmin;
+  double high = wmax;
+  double width = wmax-wmin;
+  for (unsigned int i=0; i<points.size(); i++){
+    for (unsigned int j=i; j<points.size(); j++){
+      double wy = points[j].second - points[i].second;
+      if (TMath::Abs(wy-0.683) < epsilon){
+        double wx = points[j].first - points[i].first;
+        if (wx < width){
+          low = points[i].first;
+          high = points[j].first;
+          width=wx;
+        }
+      }
+    }
+  }
+  sw.Stop();
+  cout << "effSigma: [" << low << "-" << high << "] = " << width/2. << endl;
+  //cout << "\tTook: "; sw.Print();
+  pair<double,double> result(low,high);
+  return result;
+}
+//----------------------------------------------------------------------------------
+
 int calculateConvMatrix(RooMinimizer &minimizer, RooNLLVar &nll){
   std::vector<RooNLLVar *> nllComponents;
   std::unique_ptr<RooArgSet> comps{nll.getComponents()};
@@ -162,7 +204,7 @@ int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4
   //   qual = calculateConvMatrix(*mini1, nll11);
   res = (*mini1).save();
   //   res->setCovQual(qual);
-  res->Print("v");
+  //res->Print("v");
   //printQual(qual);
 
   if (nL.getVal() > 90 || nL.getError() > 100) {nL.setVal(50); nL.setError(0); nL.setConstant(true); np--;}
@@ -181,7 +223,7 @@ int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4
 //   qual = calculateConvMatrix(*mini02, nll12);
   res = (*mini02).save();
 //   res->setCovQual(qual);
-  res->Print("v");
+  //res->Print("v");
   int status1 = res->status();
   int qual1 = qual;
   //printQual(qual);
@@ -205,7 +247,7 @@ int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4
   cout <<endl <<  endl;
   //RooAbsReal* nll1 = sig_model.createNLL(h1);
 
-
+  pair<double, double> CI =  getEffSigma(&x, &sig_model);
   
   TCanvas *c2 = new TCanvas("c2", "c2", 600, 600);
   RooDataHist *pdfDataHis1 = sig_model.generateBinned(RooArgSet(x), h_ul.sumEntries(), true);
@@ -259,8 +301,8 @@ int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4
 
   string ul="#splitline{#splitline{DSCB MC fit #sigma = ";
   std::stringstream stream;
-  stream << std::fixed << std::setprecision(2) << s1 << "#pm" << e1  <<  "}{" << "nL = " << nl1 << "#pm" << nl1e << " nR = " << nr1 << "#pm" << nr1e << "}}{#splitline{" << 
-  "#alphaL = " << al1 << "#pm" << al1e << " #alphaR = " << ar1 << "#pm" << ar1e << "}{Status = " << status1 << " Reduced Chi2 = " << valChi21/(NBIN - np)  << "}}";
+  stream << std::fixed << std::setprecision(2) << s1 << "#pm" << e1  <<  " #sigma_{eff} = " << CI.second - CI.first << "}{" << "nL = " << nl1 << "#pm" << nl1e << " nR = " << nr1 << "#pm" << nr1e << "}}{#splitline{" << 
+    "#alphaL = " << al1 << "#pm" << al1e << " #alphaR = " << ar1 << "#pm" << ar1e << "}{Status = " << status1 << " Reduced Chi2 = " << valChi21/(NBIN - np) << "}}";
   std::string ss1 = stream.str();
   string full_ul = ul + ss1;
 
