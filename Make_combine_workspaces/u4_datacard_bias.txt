@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    untag4   workspaces/workspace_bkg_profile_bias_u4.root   workspace_bkg:multipdf_u4 
+shapes sig    untag4   workspaces/workspace_sig_u4.root   workspace_sig:sig_model_DS_u4
+shapes data_obs   untag4   workspaces/workspace_bkg_profile_bias_u4.root     workspace_bkg:data_hist_untagged4
+
+-------------------------------------------------
+bin		untag4
+observation	-1
+--------------------------------------------------
+bin 		untag4		untag4
+process	bkg		sig
+process	1		0
+rate		1.0  52.7
+--------------------------------------------------
+
+pdfindex_u4         discrete

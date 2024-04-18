@@ -6,7 +6,7 @@ kmax *
 
 shapes bkg    untag1   workspaces/workspace_bkg_profile_bias_u1.root   workspace_bkg:multipdf_u1 
 shapes sig    untag1   workspaces/workspace_sig_u1.root   workspace_sig:sig_model_DS_u1
-shapes data_obs   untag1   workspaces/workspace_bkg_profile_bias_u1.root     workspace_bkg:data_hist_untagged1_bkg
+shapes data_obs   untag1   workspaces/workspace_bkg_profile_bias_u1.root     workspace_bkg:data_hist_untagged1
 
 -------------------------------------------------
 bin		untag1
@@ -17,7 +17,5 @@ process	bkg		sig
 process	1		0
 rate		1.0  12.2
 --------------------------------------------------
-
-lumi lnN -   1.026
 
 pdfindex_u1         discrete
