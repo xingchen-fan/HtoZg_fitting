@@ -141,8 +141,8 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
 
         #nll_ = ROOT.RooAddition("stat", "stat", ROOT.RooArgList(nll1_, nll2_))
         stats.append(nll_)
-        Minimizer_Chi2(nll_, -1, 100, False, strategy)
-        r_=Minimizer_Chi2(nll_, -1, eps, offset, strategy)
+        Minimizer_NLL(nll_, -1, 100, False, strategy)
+        r_=Minimizer_NLL(nll_, -1, eps, offset, strategy)
         r_.Print("V")
         fitres.append(r_)
         entry.checkBond()
@@ -152,12 +152,16 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
     dif = []
+    corrNLL = []
     if FT:
         for i in range(len(stats) - 1):
             fs.append(ROOT.Math.chisquared_cdf_c(2*(stats[i].getVal() - stats[i+1].getVal()), fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize()))
             dif.append(fitres[i+1].floatParsFinal().getSize() - fitres[i].floatParsFinal().getSize())
     print("DOF diff = ", dif)
     print("P-value = ", fs)
+    for i in range(len(stats)):
+        corrNLL.append(stats[i].getVal()+ 0.5 * fitres[i].floatParsFinal().getSize())
+    print("corr NLL = ", corrNLL)
 
 # def customNLL(x, histogram, modelClass):
 #     x_list = ROOT.RooArgList("x_list")
@@ -194,7 +198,7 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 #reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
-reader = readDat(list, "../../sample/")
+reader = readDat(list, dir = "../../sample/")
 reader.numCheck()
 reader.dataNumCheck()
 # Beijing data sample root reader and make RooDataHist
