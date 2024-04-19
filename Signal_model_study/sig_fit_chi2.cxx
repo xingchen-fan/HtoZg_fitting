@@ -301,7 +301,7 @@ int fit_hist_DSCB(RooDataHist &h_ul, RooRealVar &x, string def_name, TCanvas *c4
 
   string ul="#splitline{#splitline{DSCB MC fit #sigma = ";
   std::stringstream stream;
-  stream << std::fixed << std::setprecision(2) << s1 << "#pm" << e1  <<  " #sigma_{eff} = " << CI.second - CI.first << "}{" << "nL = " << nl1 << "#pm" << nl1e << " nR = " << nr1 << "#pm" << nr1e << "}}{#splitline{" << 
+  stream << std::fixed << std::setprecision(2) << s1 << "#pm" << e1  <<  " #sigma_{eff} = " << (CI.second - CI.first)/2 << "}{" << "nL = " << nl1 << "#pm" << nl1e << " nR = " << nr1 << "#pm" << nr1e << "}}{#splitline{" << 
     "#alphaL = " << al1 << "#pm" << al1e << " #alphaR = " << ar1 << "#pm" << ar1e << "}{Status = " << status1 << " Reduced Chi2 = " << valChi21/(NBIN - np) << "}}";
   std::string ss1 = stream.str();
   string full_ul = ul + ss1;
