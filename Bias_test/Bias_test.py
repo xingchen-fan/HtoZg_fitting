@@ -14,7 +14,7 @@ from plot_utility import *
 from sample_reader import *
 from bias_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+#ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
@@ -45,19 +45,19 @@ dummy_sig =  ROOT.RooGaussian("dummy", "dummy for ext", x,dummy_mu, dummy_width)
 
 # Read samples
 #reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
-#reader = readDat(list, "../../sample/")
-reader = readRoot(x, "~/beijing_sample/data.root")
+reader = readDat(list, dir = "../../sample/")
+#reader = readRoot(x, "~/beijing_sample/data.root")
 #cutHist = reader.data_hist_bin1.reduce(ROOT.RooFit.CutRange('left,right'))
 #print ("cut norm = ", cutHist.sumEntries())
-N = reader.data_hist_bin1.sumEntries() *10
-print("10 times stats = ",N)
+N = reader.data_u2.sumEntries()
+#print("stats = ",N)
 x.setBins(260)
 x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 
 # Signal model (pre-fit)
-MH = ROOT.RooRealVar("MH","MH"       ,124.7, 120., 130.)
+MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
 dscb_model = DSCB_Class(x, MH, "bin1", 1.78,50, 100, 50, 100,0.845, 2.36)
 dscb_model.setConst(True)
 N_sig = 10
@@ -84,11 +84,11 @@ modg_model = ModGausClass(x, "bin1", 105., 170.)
 #r.Print("v")
 #ROOT.RooFit.Range('left,right'),
 profile_seed = [bern2_model_seed]#, bern3_model_seed, bern4_model_seed]
-profile = [bern2_model, bern3_model, bern4_model, bern5_model, pow1_model, exp1_model, exp2_model,  modg_model]
+profile = [bern2_model, bern3_model, pow1_model, exp1_model,  modg_model]
 
 # Set best-fit values
 for entry in profile_seed:
-    BiasClass(entry.pdf, reader.data_hist_bin1, True, "left,right").minimize() #True, 'left,right'
+    BiasClass(entry.pdf, reader.data_u2).minimize() #True, 'left,right'
     entry.checkBond()
 
 print("Done seed PDFs")
@@ -125,6 +125,7 @@ def profileFit(profile_, sig_model, hist, fix = False, str = 0.):
             best_= ele.pdf.GetName()
     return [ind, min_nll, r_sig_, r_error_, best_]
 
+# Method 1
 def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_scan_ = 20):
     # c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
     # c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
@@ -149,20 +150,22 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_
         scan_list_.append(bias.corrNLL - min_nll + 0.5) # One fewer DOF
     return scan_list_
 
-def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
+# Method 2
+def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
     scan_list_ = []
     scan_all_ = []
     output_all_ = []
-    # Left r < 0
+    # Left r <= 0
     step = 0
     offset_nll = 0.
     scan = True
     while scan:
         choose = []
+        scan_sig =  abs(r_sig_) * step * scan_size_
         for pdf_ in profile_:
             #pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 2.*N)
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), - abs(r_sig_) * step * scan_size_)
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N+scan_sig, 0, 2.*N)
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), -scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, hist, False)
             if step==0: 
@@ -184,8 +187,8 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.5):
         choose = []
         for pdf_ in profile_:
             if step == 1: pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N, 0, 2.*N)
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), abs(r_sig_) * step * scan_size_)
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N-scan_sig, 0, 2.*N)
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(),scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             bias = BiasClass(tot_model, hist, False)
             bias.minimize(skip_hesse = True)
@@ -248,7 +251,7 @@ for entry in profile_seed:
         # plt.plot(xs, dNLL)
         for inx in range(len(profile)): plt.plot(xs, output[inx])
         plt.legend([tit.pdf.GetName() for tit in profile])
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
+        plt.savefig("plots/NLL_"+entry.pdf.GetName() + "_" + str(j) + ".pdf")
         plt.close(fig)
         #######################################
 
@@ -270,13 +273,16 @@ for entry in profile_seed:
         r_error.append(r_error_)
         if r_error_ > 0: 
             pull.Fill(list[2]/r_error_)
-            pull_list.append(list[2]/r_error_)
+            #pull_list.append(list[2]/r_error_)
         else: bad += 1
         print("Finish toy ", j+1)
 
     pull.Fit("gaus")
+    pull.GetXaxis().SetTitle("Pull")
+    pull.SetTitle(entry.pdf.GetName() + " Pull")
+    ROOT.gStyle.SetOptFit(1)
     # pull.Draw("HIST")
-    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_1.pdf")
 
 
     print("r = ", sum(r_sig)/int(args.N_toy))
@@ -288,7 +294,7 @@ for entry in profile_seed:
     # print("best error = ", best_error)
     # print("r error = ", r_error)
     # print("bad toys = ", bad)
-    # print("best func = ", best_list)
+    print("best func = ", best_list)
     # print("pull = ", pull_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
 

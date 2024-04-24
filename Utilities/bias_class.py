@@ -14,7 +14,7 @@ class BiasClass:
         #print("Cov q = ", r.covQual(), " status = ", r.status(), end="\n")
         if r.status() != 0: 
             print(self.nll.GetName(), " Minimization fails!")
-            # r.Print("V")
+            r.Print("V")
         #r.Print("V")
         self.corrNLL = self.nll.getVal() + 0.5*r.floatParsFinal().getSize()
 
