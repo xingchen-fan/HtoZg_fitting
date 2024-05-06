@@ -52,7 +52,7 @@ In the `F_test.py`, please change the sample directory. F test of multiple categ
 
 One single F test is defined as
 ```
-singleBernFTest(x, gauss_mu, histogram, cat, method, e_type, eps, offset, strategy)
+singleFTestSidebandNLL(x, pdf_list, histogram, cat, eps, offset, strategy, range, className)
 ```
 where `x` is the fitting axis, `gauss_mu` is the mean of the convolution Gaussian, `histogram` is the `RooDataHist` to be fit, `cat` is the category name, `e_type` is the error type, `eps` is the EDM, `offset` controls whether using the offset, and `strategy` should be 0.
 
