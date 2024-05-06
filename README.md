@@ -16,6 +16,8 @@ Make sure `RooGaussStepBernstein` is properly installed!
   ```
 Please run it with your version of `ROOT` to overwirte the `.so` file. The `.so` and `.d` files in this repo are generated under `ROOT 6.30`, thus not working under other ROOT versions.
 
+Note: On the LXPLUS machine, the ROOT doesn't have the FFT package properly installed and when running the fit, you may see some errors accordingly. I suggest you use the ROOT in any CMSSW environment. 
+
 # User Guide
 
 ## Sample Reader
