@@ -65,6 +65,9 @@ Output has both the test statistics and the P-values.
 ## Spurious Signal Test
 In the `Spurious_signal_test.py`, please change the sample directory. Chi2 fit with SumW2 and Poisson options are used in this test. By default, the signal model is Double-sided Crystal Ball (DSCB), and the signal yield with the errors are reported. Both the signal fit and S+B fit plots are saved.
 
+## Bias Test
+
+
 ## Reference Log
 I upload some results when I run the scripts so that you can comapre with.
 
