@@ -68,7 +68,22 @@ In the `Spurious_signal_test.py`, please change the sample directory. Chi2 fit w
 ## Bias Test
 Two approaches are available for the envelope bias test: using the `combine`, or using `Bias_test/Bias_test.py`. 
 ### Using `Bias_test/Bias_test.py`
-The steps are the following: 1. Define varables. 2. Read samples. 3. 
+```
+bash$ python3 Bias_test.py N_toys
+```
+where you decided how many toy samples generated for each member of the profile.
+
+The steps can be summarized as the following: 1. Define varables. 2. Read samples. 3. Define signal model and fix it. 4. Define the seed bkg profile functions. 5. Define the fit bkg profile functions. 6. Fit the seed to the sample histogram. 7. Gnerate toy samples. 7. Discerete profiling fit. 8. NLL scan using the envelope.
+
+After reading the samples, select which category to do the test in the script. The seed functions are used to generate toy samples, and they are fit to the histogram of the category accoding to the selection. 
+
+The fit functions are the RooAbsPdf objects that are used to fit the toy samples. A single discrete profiling fit using the fit functions with the fixed signal model will report the best-fit signal yield. Then, an NLL scan over the signal strength will give an NLL curve for the envelope. The error should be obtained from the curve.
+
+Note: This script is still experimental. 
+
+### Using `combine`
+
+
 ## Reference Log
 I upload some results when I run the scripts so that you can comapre with.
 
