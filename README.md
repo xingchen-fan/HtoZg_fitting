@@ -92,11 +92,11 @@ In the script, firstly define the variables, read the samples and select the cat
 
 Run the `combine` command to generate toys for a certain member of the envelope:
 ```
-bash$: combine DATACARD_BIAS_CAT.txt -M GenerateOnly --setParameters pdfindex_CAT=MEMBER_FUNC_ID --toysFrequentist -t 1000 --expectSignal 0 --saveToys -m 125 --freezeParameters pdfindex_CAT -n .CAT.MEMBER_FUNC
+bash$ combine DATACARD_BIAS_CAT.txt -M GenerateOnly --setParameters pdfindex_CAT=MEMBER_FUNC_ID --toysFrequentist -t 1000 --expectSignal 0 --saveToys -m 125 --freezeParameters pdfindex_CAT -n .CAT.MEMBER_FUNC
 ```
 Next, run the `combine` command to get the pull distribution using the toys generated previously:
 ```
-bash$: combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCombine.CAT.MEMBER_FUNC.GenerateOnly.mH125.123456.root  -t 1000 --rMin -4 --rMax 4 --cminDefaultMinimizerStrategy=0 -n .CAT.MEMBER_FUNC
+bash$ combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCombine.CAT.MEMBER_FUNC.GenerateOnly.mH125.123456.root  -t 1000 --rMin -4 --rMax 4 --cminDefaultMinimizerStrategy=0 -n .CAT.MEMBER_FUNC
 ```
 
 ## Reference Log
