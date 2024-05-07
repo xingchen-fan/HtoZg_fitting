@@ -54,13 +54,17 @@ One single F test is defined as
 ```
 singleFTestSidebandNLL(x, pdf_list, histogram, cat, eps, offset, strategy, range, className)
 ```
-where `x` is the fitting axis, `gauss_mu` is the mean of the convolution Gaussian, `histogram` is the `RooDataHist` to be fit, `cat` is the category name, `e_type` is the error type, `eps` is the EDM, `offset` controls whether using the offset, and `strategy` should be 0.
+where `x` is the fitting axis, `pdf_list` is the list of the functions that you wnat to do F test over, `histogram` is the `RooDataHist` to be fit, `cat` is the category name, `eps` is the EDM, `offset` controls whether using the offset, and `strategy` should be 0, `range` specicies the range to plot, and `className` is the string added to the title of the multi-function plot output file.
 
-When calling the F test, please specify the fitting method (Chi2 or NLL).
+Note: Sideband fit of FFT evaluated function is not possible, thus the full range fit is conducted regardless of `range` 
+
+When calling the F test, NLL fit is used by default
 ```
-bash$ python3 F_test.py Chi2
+bash$ python3 F_test.py CAT XLOW FUNC
 ```
-Output has both the test statistics and the P-values.
+where `CAT` is the category name (u1, u2, u3 or u4 for now), `XLOW` is the lower boundary of mllg fitting range and `FUNC` is the family of the functions (bern, pow, exp or lau for now).
+
+Output has both the test statistics and the P-values, as well as a multi-function plot.
 
 ## Spurious Signal Test
 In the `Spurious_signal_test.py`, please change the sample directory. Chi2 fit with SumW2 and Poisson options are used in this test. By default, the signal model is Double-sided Crystal Ball (DSCB), and the signal yield with the errors are reported. Both the signal fit and S+B fit plots are saved.
