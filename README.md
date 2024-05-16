@@ -25,7 +25,7 @@ Right now, we have two types of files: `.dat` for Cornell MC samples and `.root`
 
 Cornell `.dat` files have specific columns for relevant variables, make sure assign them to the correct `RooRealVar`. Similarly, Peking `.root` files have specific branch names, the asignment is hard-coded in `sample_reader.py`.
 
-Cornell samples for synchronization only are at `/afs/cern.ch/user/f/fanx/public/samples/` which is hard-coded in the F-test script. If you wnat to try other samples, make sure you change it as well as the file names in `sample_reader.py`.
+The current Cornell samples are available at the [link](https://cernbox.cern.ch/s/EIUbbYia6JCpfC6). `readDat` has two directory inputs, first one for the MC and second for the data. If both MC and data samples are stored in the same directory, you still need to provide two same directories.
 
 ## Background Functions
 The functions are defined in `Utilities/bkg_functions_class.py`. A typical definition of a model is like this: 
