@@ -18,6 +18,7 @@ std::string to_string_with_precision(T a_value, int n = 3)
 
 void weightsample_test_toy1(){
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
+    TRandom *generator = new TRandom();
     RooRealVar x("x", "x", -1., 1.);
 
     RooRealVar b("b", "b", -0.5, -20, 20);
@@ -54,19 +55,21 @@ void weightsample_test_toy1(){
 
     int N = 10000;
     for (int i(0); i < N; i++){
-
+      int N1 = (int)generator->Gaus(10000, 100);
+      int N2 = (int)generator->Gaus(5000, 71);
+      int N3 = (int)generator->Gaus(20000, 141);
 //Simple 2 samples--------------
-        auto data1 = line1.generate(x, NumEvents(10000));
+        auto data1 = line1.generate(x, NumEvents(N1));
         data1->addColumn(w1);
         RooDataSet wdata1("wdata1", "wdata1", data1,  RooArgSet(x, w1), "", "w1");
-        auto data2 = line2.generate(x, NumEvents(5000));
+        auto data2 = line2.generate(x, NumEvents(N2));
         data2->addColumn(w2);
         RooDataSet wdata2("wdata2", "wdata2", data2, RooArgSet(x, w2),"", "w2");
         wdata1.append(wdata2);
 
         x.setBins(2);
         auto hist = RooDataHist("hist", "hist", x, wdata1);
-        auto dummy = fitline.generateBinned(x, NumEvents(20000));
+        auto dummy = fitline.generateBinned(x, NumEvents(N3));
         if (i==1) std::cout << "Sum = " << hist.sumEntries() << std::endl << std::endl;
 
         // auto res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(true), PrintLevel(-1));
