@@ -72,7 +72,7 @@ void weightsample_test_toy1(){
         auto dummy = fitline.generateBinned(x, NumEvents(N3));
         if (i==1) std::cout << "Sum = " << hist.sumEntries() << std::endl << std::endl;
 
-        // auto res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(true), PrintLevel(-1));
+	//auto res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(true), PrintLevel(-1));
         auto res = fitline.chi2FitTo(hist, Save(true), Strategy(0),Offset(false),  PrintLevel(-1), DataError(RooAbsData::SumW2));
         if (i == 1) res->Print("V");
         h_weight_cen->Fill(c.getVal());
@@ -81,7 +81,7 @@ void weightsample_test_toy1(){
         d.setVal(0);
         c.setVal(0);
         d.setError(0);
-        // res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(false), PrintLevel(-1));
+	//res = fitline.fitTo(hist, Save(true), Strategy(0),Offset(false), SumW2Error(false), PrintLevel(-1));
         res = fitline.chi2FitTo(hist, Save(true), Strategy(0),Offset(false), PrintLevel(-1), DataError(RooAbsData::Poisson));
         if (i == 1) res->Print("V");
         h_offsumw2->Fill(c.getVal()/c.getError());
@@ -96,7 +96,7 @@ void weightsample_test_toy1(){
         c.setVal(0);
         d.setVal(0);
         d.setError(0);
-        // res = fitline.fitTo(*dummy, Save(true), Strategy(0),Offset(false), PrintLevel(-1));
+	//res = fitline.fitTo(*dummy, Save(true), Strategy(0),Offset(false), PrintLevel(-1));
         res = fitline.chi2FitTo(*dummy, Save(true), Strategy(0),Offset(false), PrintLevel(-1));
         if (i == 1) res->Print("V");
         h_dummy_cen->Fill(c.getVal());
@@ -129,13 +129,13 @@ void weightsample_test_toy1(){
     h_sumw2->SetLineWidth(2);
     h_offsumw2->SetLineColor(2);
     h_offsumw2->SetLineWidth(2);
-    // h_asym->SetLineColor(3);
-    // h_asym->SetLineWidth(2);
+    //h_asym->SetLineColor(3);
+    //h_asym->SetLineWidth(2);
     h_dummy->SetLineColor(4);
     h_dummy->SetLineWidth(2);
     auto legend = new TLegend(0.1,0.6,0.4,0.9);
     legend->AddEntry(h_sumw2,("SumW2 RMS = " + to_string_with_precision(h_sumw2->GetRMS())).c_str(),"l");
-    // legend->AddEntry(h_asym,("Asymptotic RMS = " + to_string_with_precision(h_asym->GetRMS())).c_str(),"l");
+    //legend->AddEntry(h_asym,("Asymptotic RMS = " + to_string_with_precision(h_asym->GetRMS())).c_str(),"l");
     legend->AddEntry(h_offsumw2,("#splitline{Poisson RMS = " + to_string_with_precision(h_offsumw2->GetRMS()) + "}{}").c_str(),"l");
     legend->AddEntry(h_dummy,("Unweighted RMS = " + to_string_with_precision(h_dummy->GetRMS())).c_str(),"l");
     legend->SetTextSize(0.02);
@@ -150,14 +150,14 @@ void weightsample_test_toy1(){
 
 
     // h_dummy->Fit("gaus");
-    // h_asym->Fit("gaus");
+    //h_asym->Fit("gaus");
     TCanvas *c0 = new TCanvas("c0", "c0", 800, 800);
     gStyle->SetOptStat(0);
     c0->cd();
-    // h_asym->Draw();
-    // h_asym->SetTitle("Pull");
-    // h_asym->GetXaxis()->SetTitle("Pull (a/#sigma_{a})");
-    // h_asym->GetXaxis()->SetTitleOffset(1.);
+    //h_asym->Draw();
+    //h_asym->SetTitle("Pull");
+    //h_asym->GetXaxis()->SetTitle("Pull (a/#sigma_{a})");
+    //h_asym->GetXaxis()->SetTitleOffset(1.);
     h_sumw2->Draw();
     h_dummy->Draw("same");
     h_dummy->SetTitle("Pull");
