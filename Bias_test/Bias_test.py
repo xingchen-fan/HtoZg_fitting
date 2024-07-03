@@ -282,7 +282,7 @@ for entry in profile_seed:
             fig = plt.figure()
             for inx in range(len(profile)): plt.plot(xs, output[inx], marker = 'o')
             plt.legend([tit.pdf.GetName() for tit in profile])
-            #plt.plot(xs, dNLL, marker = 'o')
+            plt.plot(xs, dNLL, '--k')
             plt.savefig("plots/NLL_"+entry.pdf.GetName() + "_" + str(j) + ".pdf")
             plt.close(fig)
         #######################################
