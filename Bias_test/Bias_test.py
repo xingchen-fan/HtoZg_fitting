@@ -278,7 +278,7 @@ for entry in profile_seed:
         # Method2 #############################
         dNLL, output, n_left = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
         if j%20 == 0:
-            xs = [(inx - n_left) * list[2] * scan_size for inx in range(len(dNLL))]
+            xs = [(inx - n_left) * abs(list[2]) * scan_size for inx in range(len(dNLL))]
             fig = plt.figure()
             for inx in range(len(profile)): plt.plot(xs, output[inx], marker = 'o')
             plt.legend([tit.pdf.GetName() for tit in profile])
