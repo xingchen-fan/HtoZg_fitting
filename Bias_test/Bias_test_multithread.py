@@ -4,6 +4,8 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
+import threading
+
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
@@ -241,81 +243,80 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
 # Scan at steps of signal_yield * scan_size around 0
 # Stps when N_step >= 30 or deltaNLL > 1
 
-scan_size = 0.2
-for entry in profile_seed:
+def singleThread(thread_name, r_sig_, best_error_, r_error_list, bad_, pull_hist):
+    scan_size = 0.2
+    for entry in profile_seed:
+        for j in range(int(args.N_toy)):   
+            x.setBins(260)
+            hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N), ROOT.RooFit.Extended(True))
+            list = profileFit(profile, dscb_model, hist_toy)
+
+            # Method2 #############################
+            dNLL, output, n_left = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
+            if DEBUG:
+                if j%100 == 0:
+                    xs = [(inx - n_left) * abs(list[2]) * scan_size for inx in range(len(dNLL))]
+                    fig = plt.figure()
+                    for inx in range(len(profile)): plt.plot(xs, output[inx], marker = 'o')
+                    plt.legend([tit.pdf.GetName() for tit in profile])
+                    plt.plot(xs, dNLL, '--k')
+                    plt.savefig("plots/NLL_"+entry.pdf.GetName() + "_" + str(j) + ".pdf")
+                    plt.close(fig)
+            #######################################
+
+    # Find r_up and r_down
+            left = []
+            right = []
+            r_error_ = 0
+            for i in range(len(dNLL) - 1):
+                if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left.append(i)
+                if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right.append(i)
+            if len(left) == 0 or len(right) == 0: 
+                r_error_ = -1
+    # r_error is approximately (r_up - r_down)/2
+            else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size /2
+                    
+            r_sig_.append(list[2])
+            #best_list.append(list[4])
+            best_error_.append(list[3])
+            r_error_list.append(r_error_)
+            if r_error_ > 0: 
+                pull_hist.Fill(list[2]/r_error_)
+                #pull_list.append(list[2]/r_error_)
+            else: bad_ += 1
+            print("Finish toy ", j+1, " Thread", thread_name)
+
+if __name__ == "__main__":
     r_sig = []
     r_error = []
-    best_list = []
     best_error = []
     bad = 0
-    pull_list = []
-    pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
     can = ROOT.TCanvas("can", "can", 500, 500)
-    for j in range(int(args.N_toy)):
-        scan_list = []      
-        x.setBins(260)
-        hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
-        list = profileFit(profile, dscb_model, hist_toy)
-        
-        # Method1 ##########################
-        # for ele in profile:
-        #     ele.reset()
-        #     scan_list.append(scanFitPlot(ele, dscb_model, hist_toy, list[2], list[1], scan_size, N_scan))
-        # dNLL_offset = []
-        # for m in range(N_scan):
-        #     dNLL_offset.append(min([scan_list[n][m] for n in range(len(profile))]))
-        # dNLL = [x - min(dNLL_offset) for x in dNLL_offset]
-        # xs = [scan_size*(x - N_scan/2) for x in range(N_scan)]
-        # fig = plt.figure()    
-        # plt.plot(xs, scan_list[0])
-        # plt.plot(xs, scan_list[1])
-        # plt.plot(xs, scan_list[2])
-        # plt.plot(xs, dNLL)
-        # plt.savefig("plots/NLL_"+entry.pdf.GetName() + str(j) + ".pdf")
-        # plt.close(fig)
-        #######################################
+    pull = ROOT.TH1F("pull", "pull", 80, -4, 4)
 
-        # Method2 #############################
-        dNLL, output, n_left = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        if j%20 == 0:
-            xs = [(inx - n_left) * abs(list[2]) * scan_size for inx in range(len(dNLL))]
-            fig = plt.figure()
-            for inx in range(len(profile)): plt.plot(xs, output[inx], marker = 'o')
-            plt.legend([tit.pdf.GetName() for tit in profile])
-            plt.plot(xs, dNLL, '--k')
-            plt.savefig("plots/NLL_"+entry.pdf.GetName() + "_" + str(j) + ".pdf")
-            plt.close(fig)
-        #######################################
+    t1 = threading.Thread(target=singleThread, args=('1', r_sig, best_error, r_error, bad, pull))
+    t2 = threading.Thread(target=singleThread, args=('2', r_sig, best_error, r_error, bad, pull))
+    t3 = threading.Thread(target=singleThread, args=('3', r_sig, best_error, r_error, bad, pull))
+    t4 = threading.Thread(target=singleThread, args=('4', r_sig, best_error, r_error, bad, pull))
+    t5 = threading.Thread(target=singleThread, args=('5', r_sig, best_error, r_error, bad, pull))
+    t1.start()
+    t2.start()
+    t3.start()
+    t4.start()
+    t5.start()
 
-# Find r_up and r_down
-        left = []
-        right = []
-        r_error_ = 0
-        for i in range(len(dNLL) - 1):
-            if dNLL[i] > 0.5 and dNLL[i+1] < 0.5: left.append(i)
-            if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right.append(i)
-        if len(left) == 0 or len(right) == 0: 
-            r_error_ = -1
-# r_error is approximately (r_up - r_down)/2
-        else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size /2
-                
-        r_sig.append(list[2])
-        best_list.append(list[4])
-        best_error.append(list[3])
-        r_error.append(r_error_)
-        if r_error_ > 0: 
-            pull.Fill(list[2]/r_error_)
-            #pull_list.append(list[2]/r_error_)
-        else: bad += 1
-        print("Finish toy ", j+1)
+    t1.join()
+    t2.join()
+    t3.join()
+    t4.join()
+    t5.join()
 
     can.cd()
     pull.Fit("gaus")
     pull.GetXaxis().SetTitle("Pull")
     pull.SetTitle(entry.pdf.GetName() + " Pull")
     ROOT.gStyle.SetOptFit(1)
-    # pull.Draw("HIST")
-    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_1000.pdf")
 
 
     print("r = ", sum(r_sig)/int(args.N_toy))
@@ -323,26 +324,7 @@ for entry in profile_seed:
     print("r error = ", sum(r_error)/int(args.N_toy))
     print("bad toys = ", bad)
 
-    # print("r = ", r_sig)
-    # print("best error = ", best_error)
-    # print("r error = ", r_error)
-    # print("bad toys = ", bad)
-    print("best func = ", best_list)
-    # print("pull = ", pull_list)
     print("Finish ", entry.pdf.GetName()," toy sample")
 
 
 
-
-
-
-#print ("nll = ", bern2Bias.nll.getVal())
-#print ("corr nll = ", bern2Bias.corrNLL)
-#print ("norm = ", extmodel.getNorm())
-#i1 = bern2_model.pdf.createIntegral(x, ROOT.RooFit.Range('left,right'))
-#i2 = bern2_model.pdf.createIntegral(x, ROOT.RooFit.Range('full'))
-#print ("full int = ", i2.getVal(), " side int = ", i1.getVal())
-
-#plotClass(x, reader.data_hist_bin1, bern2_model.pdf, title = "Bern2", sideBand = True, fitRange = 'left,right')
-#plotClass(x, reader.data_hist_bin1, bern3_model.pdf, title = "Bern3", sideBand = True, fitRange = 'left,right')
-#plotClass(x, reader.data_hist_bin1, bern4_model.pdf, title = "Bern4", sideBand = True, fitRange = 'left,right')
