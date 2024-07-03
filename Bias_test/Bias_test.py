@@ -22,6 +22,9 @@ parser = argparse.ArgumentParser(description = "Number of toy samples")
 parser.add_argument("N_toy")
 args = parser.parse_args()
 
+# Debug Flag
+DEBUG = False
+
 # Define variables
 lowx = 105.
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
@@ -60,6 +63,7 @@ x.setRange('full', lowx, lowx+65)
 MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
 dscb_model = DSCB_Class(x, MH, "bin1", 1.78,50, 100, 50, 100,0.845, 2.36)
 dscb_model.setConst(True)
+MH.setConstant(True)
 N_sig = 10
 
 # Functions to test
@@ -107,25 +111,27 @@ def profileFit(profile_, sig_model, hist, fix = False, str = 0.):
             c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), str)
         else:
             c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), N, 0, 3.*N)
-            c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
+            c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), 0., -50.*N_sig, 50.*N_sig)
         tot_model = ROOT.RooAddPdf("tot_model_"+ele.pdf.GetName(), "tot_model_"+ele.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
-        bias = BiasClass(tot_model, hist, False)
+        bias = BiasClass(tot_model, hist, False, extend = True)
         bias.minimize()
+        #result = tot_model.fitTo(hist, ROOT.RooFit.PrintLevel(-1),  ROOT.RooFit.Save(True), ROOT.RooFit.Minimizer("Minuit2"), ROOT.RooFit.Strategy(0))
+        #result.Print("v")
         if i ==0: 
             ind = 0
-            min_nll=bias.corrNLL
+            min_nll= bias.corrNLL #result.minNll() + .5*result.floatParsFinal().getSize()
             r_sig_ = c2.getVal()
             r_error_ = c2.getError()
             best_= ele.pdf.GetName()
         elif bias.corrNLL< min_nll: 
             ind = i
-            min_nll = bias.corrNLL
+            min_nll = bias.corrNLL #result.minNll() + .5*result.floatParsFinal().getSize()
             r_sig_ = c2.getVal()
             r_error_ = c2.getError()
             best_= ele.pdf.GetName()
     return [ind, min_nll, r_sig_, r_error_, best_]
 
-# Method 1
+# Method 1 (WRONG)
 def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_scan_ = 20):
     # c1 = ROOT.RooRealVar("c1_"+ entry.pdf.GetName(), "c1_"+ entry.pdf.GetName(), N, 0, 3.*N)
     # c2 = ROOT.RooRealVar("c2_"+ entry.pdf.GetName(), "c2_"+ entry.pdf.GetName(), 0., -500.*N_sig, 500.*N_sig)
@@ -159,58 +165,83 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
     step = 0
     offset_nll = 0.
     scan = True
+    if DEBUG: print ('Start scanning, N = ', N)
     while scan:
         choose = []
+        if DEBUG: print ('Left step ', step)
         scan_sig =  abs(r_sig_) * step * scan_size_
         for pdf_ in profile_:
             #pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N+scan_sig, 0, 2.*N)
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N+scan_sig, 0., 5.*N)
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), -scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
-            bias = BiasClass(tot_model, hist, False)
+            #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
+            bias = BiasClass(tot_model, hist, False, extend = True)
             if step==0: 
                 bias.minimize(skip_hesse = True)
             else: bias.minimize(skip_hesse = True)
             choose.append(bias.corrNLL)
+            if DEBUG:
+                xframe = x.frame(ROOT.RooFit.Title("Left step " + str(step) + " " + pdf_.pdf.GetName()))
+                hist.plotOn(xframe)
+                tot_model.plotOn(xframe)
+                can2 = ROOT.TCanvas("can2", "can2", 500, 500)
+                can2.cd()
+                xframe.Draw()
+                can2.SaveAs("plots/Left_step" + str(step) + "_" + pdf_.pdf.GetName() + ".pdf")
         chose = min(choose)
         if step==0: offset_nll = chose
         scan_list_.insert(0, chose)
         scan_all_.insert(0, choose)
         step += 1
-        if chose - offset_nll > 2.: scan = False
-        elif step > 40: scan = False
-    
+        if chose - offset_nll > 1.: scan = False
+        elif step > 30: scan = False
+    n_left_ = step - 1
     # Right r > 0
     step = 1
     scan = True
     while scan:
         choose = []
+        if DEBUG: print ('Right step ', step)
+        pdf_.reset()
+        scan_sig =  abs(r_sig_) * step * scan_size_
         for pdf_ in profile_:
             if step == 1: pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N-scan_sig, 0, 2.*N)
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(),scan_sig )
+            #pdf_.reset()
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N-scan_sig, 0, 5.*N)
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
-            bias = BiasClass(tot_model, hist, False)
+            #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
+            bias = BiasClass(tot_model, hist, False, extend = True)
             bias.minimize(skip_hesse = True)
             choose.append(bias.corrNLL)
+            if DEBUG:
+                xframe = x.frame(ROOT.RooFit.Title("Right step " + str(step) + " " + pdf_.pdf.GetName()))
+                hist.plotOn(xframe)
+                tot_model.plotOn(xframe)
+                can2 = ROOT.TCanvas("can2", "can2", 500, 500)
+                can2.cd()
+                xframe.Draw()
+                can2.SaveAs("plots/Right_step" + str(step) + "_" + pdf_.pdf.GetName() + ".pdf")
         chose = min(choose)
         scan_list_.append(chose)
         scan_all_.append(choose)
         step += 1
-        if chose - offset_nll > 2.: scan = False
-        elif step > 40: scan = False
-
+        if chose - offset_nll > 1.: scan = False
+        elif step > 30: scan = False
+    
     min_nll_ = min(scan_list_)
     for i in range(len(profile_)):
         output_all_.append([inx[i] - min_nll_ for inx in scan_all_])
     
     dNLL_ = [inx - min_nll_ for inx in scan_list_ ]
-    return dNLL_, output_all_
+    return dNLL_, output_all_, n_left_
 
 # Discrete profiling - Find minimum and (r_down, r_up)
-# Scan points of signal_yield * scan_size around 0
-# N_scan = 40
-scan_size = 0.25
+# Scan at steps of signal_yield * scan_size around 0
+# Stps when N_step >= 30 or deltaNLL > 1
+
+scan_size = 0.2
 for entry in profile_seed:
     r_sig = []
     r_error = []
@@ -245,16 +276,18 @@ for entry in profile_seed:
         #######################################
 
         # Method2 #############################
-        dNLL, output = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
-        xs = [inx for inx in range(len(dNLL))]
-        fig = plt.figure()
-        # plt.plot(xs, dNLL)
-        for inx in range(len(profile)): plt.plot(xs, output[inx])
-        plt.legend([tit.pdf.GetName() for tit in profile])
-        plt.savefig("plots/NLL_"+entry.pdf.GetName() + "_" + str(j) + ".pdf")
-        plt.close(fig)
+        dNLL, output, n_left = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
+        if j%20 == 0:
+            xs = [(inx - n_left) * list[2] * scan_size for inx in range(len(dNLL))]
+            fig = plt.figure()
+            for inx in range(len(profile)): plt.plot(xs, output[inx], marker = 'o')
+            plt.legend([tit.pdf.GetName() for tit in profile])
+            #plt.plot(xs, dNLL, marker = 'o')
+            plt.savefig("plots/NLL_"+entry.pdf.GetName() + "_" + str(j) + ".pdf")
+            plt.close(fig)
         #######################################
 
+# Find r_up and r_down
         left = []
         right = []
         r_error_ = 0
@@ -263,10 +296,9 @@ for entry in profile_seed:
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right.append(i)
         if len(left) == 0 or len(right) == 0: 
             r_error_ = -1
-        else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size
-        
-        
-        
+# r_error is approximately (r_up - r_down)/2
+        else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size /2
+                
         r_sig.append(list[2])
         best_list.append(list[4])
         best_error.append(list[3])
@@ -277,12 +309,13 @@ for entry in profile_seed:
         else: bad += 1
         print("Finish toy ", j+1)
 
+    can.cd()
     pull.Fit("gaus")
     pull.GetXaxis().SetTitle("Pull")
     pull.SetTitle(entry.pdf.GetName() + " Pull")
     ROOT.gStyle.SetOptFit(1)
     # pull.Draw("HIST")
-    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_1.pdf")
+    can.SaveAs("plots/Pull_"+entry.pdf.GetName() + "_200.pdf")
 
 
     print("r = ", sum(r_sig)/int(args.N_toy))

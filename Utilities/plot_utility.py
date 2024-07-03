@@ -63,7 +63,7 @@ def plotClass (x, datahist, pdf, title="Histogram", output_dir="plots/", sideBan
     ROOT.gPad.SetPad(0.0, 0.3, 1.0, 0.99)
     ROOT.gPad.SetBottomMargin(0)
     show_hist.plotOn( plot, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-    if sideBand: pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2), ROOT.RooFit.NormRange(fitRange))
+    if sideBand: pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2), ROOT.RooFit.NormRange(fitRange), ROOT.RooFit.Range('full'))
     else: pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2))
     plot.Draw()
     leg.Draw("SAME")
