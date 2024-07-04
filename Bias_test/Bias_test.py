@@ -195,7 +195,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
         scan_all_.insert(0, choose)
         step += 1
         if chose - offset_nll > 1.: scan = False
-        elif step > 30: scan = False
+        elif step > 50: scan = False
     n_left_ = step - 1
     # Right r > 0
     step = 1
@@ -228,7 +228,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
         scan_all_.append(choose)
         step += 1
         if chose - offset_nll > 1.: scan = False
-        elif step > 30: scan = False
+        elif step > 50: scan = False
     
     min_nll_ = min(scan_list_)
     for i in range(len(profile_)):
