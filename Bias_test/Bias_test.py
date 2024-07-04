@@ -157,7 +157,7 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_
     return scan_list_
 
 # Method 2
-def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
+def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
     scan_list_ = []
     scan_all_ = []
     output_all_ = []
@@ -169,7 +169,7 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
     while scan:
         choose = []
         if DEBUG: print ('Left step ', step)
-        scan_sig =  abs(r_sig_) * step * scan_size_
+        scan_sig =  abs(r_scale_) * step * scan_size_
         for pdf_ in profile_:
             #pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N+scan_sig, 0., 5.*N)
@@ -204,7 +204,7 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
         choose = []
         if DEBUG: print ('Right step ', step)
         pdf_.reset()
-        scan_sig =  abs(r_sig_) * step * scan_size_
+        scan_sig =  abs(r_scale_) * step * scan_size_
         for pdf_ in profile_:
             if step == 1: pdf_.reset()
             #pdf_.reset()
