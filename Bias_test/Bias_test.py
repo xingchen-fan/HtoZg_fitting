@@ -276,9 +276,9 @@ for entry in profile_seed:
         #######################################
 
         # Method2 #############################
-        dNLL, output, n_left = scanFit(profile, dscb_model, hist_toy, list[2], scan_size)
+        dNLL, output, n_left = scanFit(profile, dscb_model, hist_toy, list[3], scan_size)
         if j%20 == 0:
-            xs = [(inx - n_left) * abs(list[2]) * scan_size for inx in range(len(dNLL))]
+            xs = [(inx - n_left) * abs(list[3]) * scan_size for inx in range(len(dNLL))]
             fig = plt.figure()
             for inx in range(len(profile)): plt.plot(xs, output[inx], marker = 'o')
             plt.legend([tit.pdf.GetName() for tit in profile])
@@ -296,8 +296,16 @@ for entry in profile_seed:
             if dNLL[i] < 0.5 and dNLL[i+1] > 0.5: right.append(i)
         if len(left) == 0 or len(right) == 0: 
             r_error_ = -1
+        
 # r_error is approximately (r_up - r_down)/2
-        else: r_error_ = (right[len(right) - 1] - left[0])*abs(list[2]) * scan_size /2
+        else: 
+            left1NLL = dNLL[left[0]]
+            left2NLL = dNLL[left[0] + 1]
+            acu_left = left[0] + (left1NLL - 0.5)/(left1NLL - left2NLL)
+            right1NLL = dNLL[right[len(right) - 1]]
+            right2NLL = dNLL[right[len(right) - 1] + 1]
+            acu_right = right[len(right) - 1] + (right2NLL - 0.5)/(right2NLL - right1NLL)
+            r_error_ = (acu_right - acu_left)*abs(list[3]) * scan_size /2
                 
         r_sig.append(list[2])
         best_list.append(list[4])
