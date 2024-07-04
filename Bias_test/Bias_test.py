@@ -241,7 +241,7 @@ def scanFit(profile_, sig_model, hist, r_sig_, scan_size_ = 0.3):
 # Scan at steps of signal_yield * scan_size around 0
 # Stps when N_step >= 30 or deltaNLL > 1
 
-scan_size = 0.2
+scan_size = 0.1
 for entry in profile_seed:
     r_sig = []
     r_error = []
