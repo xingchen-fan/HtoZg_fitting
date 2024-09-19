@@ -69,7 +69,7 @@ def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, 
     print(className, " Chi2 = ", chi2_)
 
     
-
+'''
 def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = "Poisson", eps = 0.1, offset = False, strategy = 0, range_ = "", n_bins = 260):
     bern2_model = Bern2Class(x, gauss_mu, cat, 10, 0.3, 10, 7., 105.)
     bern3_model = Bern3Class(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
@@ -127,16 +127,16 @@ def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = 
     plotClass(x, histogram, bern5_model.pdf, title="Bern5 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
 
     multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi " + cat, output_dir="plots/", sideBand=True, fitRange= range_)
-
+'''
 def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", className = "Default", FT = True):
     stats = []
     fitres = []
-    # cuthistogram = histogram.reduce(ROOT.RooFit.CutRange(range_))
+    cuthistogram = histogram.reduce(ROOT.RooFit.CutRange(range_))
     for entry in pdfList:
         entry.reset()
         # nll1_= ROOT.RooNLLVar("stat1_" + entry.pdf.GetName(), "stat1 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('left'))
         # nll2_= ROOT.RooNLLVar("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
-        nll_= ROOT.RooNLLVar("stat_" + entry.pdf.GetName(), "stat " + entry.pdf.GetName(), entry.pdf,  histogram)
+        nll_= ROOT.RooNLLVar("stat_" + entry.SBpdf.GetName(), "stat " + entry.SBpdf.GetName(), entry.SBpdf,  cuthistogram)
         #nll2_= ROOT.RooChi2Var("stat2_" + entry.pdf.GetName(), "stat2 " + entry.pdf.GetName(), entry.pdf,  histogram, ROOT.RooFit.Range('right'))
 
         #nll_ = ROOT.RooAddition("stat", "stat", ROOT.RooArgList(nll1_, nll2_))
@@ -146,7 +146,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         r_.Print("V")
         fitres.append(r_)
         entry.checkBond()
-        plotClass(x, histogram, entry.pdf, title=entry.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = True, fitRange = range_)
+        plotClass(x, histogram, entry.pdf, entry.SBpdf, title=entry.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = True, fitRange = range_)
 
     multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=True, fitRange= range_)
     print("NLL = ", [ele.getVal() for ele in stats])
@@ -257,7 +257,7 @@ best_list = [bern3_model, bern4_model, pow1_model, pow2_model, exp2_model, modg_
 #singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 #singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
 if args.function == 'bern':
-    goodness(bern_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+    #goodness(bern_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
     singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern")
 elif args.function == 'pow':
 #    goodness(pow_list, mc_hist,  e_type = "SumW2", eps = 1, n_bins = 260, className="Pow")
