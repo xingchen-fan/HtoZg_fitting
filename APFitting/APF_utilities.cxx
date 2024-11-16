@@ -1,5 +1,9 @@
 using namespace RooFit;
 using namespace std;
+#include <sstream>
+#include <iostream>
+
+#include <TFormula.h>
 #include "../Utilities/ModGaus.h"
 #include "../Utilities/ModGaus.cxx"
 
@@ -165,7 +169,7 @@ ModGaus* fit_modgauss_model(RooRealVar &x, const char *name, bool dont_fit=false
 }
 
 //This is the analytical form of exp1 function with fewer degrees of freedom
-EXModGaus* fit_exmg_model(RooRealVar &x, const char *name, double low_d=100, double high_d=180, bool dont_fit=false){
+EXModGaus* fit_exmg_model(RooRealVar &x, const char *name, double low_d=100, double high_d=180){
   //Modified Gaussian fitting function
   //new range is -1 to 1
   double range_d = 2;
@@ -175,9 +179,27 @@ EXModGaus* fit_exmg_model(RooRealVar &x, const char *name, double low_d=100, dou
   RooRealVar* sig    = new RooRealVar("exmg_sigma", "width g",  10,   0,  80); // 1,   0.,   5); sig -> setError(1);
   RooRealVar* lambda = new RooRealVar("exmg_lambda","lambda",  0.5,  -5,  10); //0.5,   0.,   5); lambda -> setError(1);
   EXModGaus* exmg_model = new EXModGaus(name,"Analytic Exp. (N=1)", x, *mu, *sig, *lambda, low_d, high_d);
+
   return exmg_model;
 }
 
+RooProdPdf* fit_saxon_wood_model(RooRealVar &x, const char *name){
+
+  RooRealVar* x_off    = new RooRealVar("sw_x_off",    "x offset", 100, 50, 180);
+  RooRealVar* x_scale  = new RooRealVar("sw_x_scale",   "x scale",  10,   0,  40);
+  RooRealVar* n_poly   = new RooRealVar("sw_n_poly",     "n poly",   8,   1,  10);
+  RooRealVar* c_exp    = new RooRealVar("sw_c_exp",       "c exp",   4,   0,  10);
+  RooRealVar* d_exp    = new RooRealVar("sw_d_exp",       "d exp", 0.5,   0,   4);
+  RooRealVar* mu_gaus  = new RooRealVar("sw_mu_gaus",   "mu_gaus",   2,   0,  10);
+  RooRealVar* sig_gaus = new RooRealVar("sw_sig_gaus", "sig_gaus",  10,   0,  50);
+
+  RooFormulaVar* x_prime = new RooFormulaVar("x_prime", "x_prime", "(@0 - @1)/@2", RooArgList(x,*x_off,*x_scale) );
+
+  RooGenericPdf*    sw_exp = new RooGenericPdf("sw_exp", "sw_exp", "(@0^@1)/(1 + expo(@0, [2..3]))", RooArgList(*x_prime, *n_poly, *d_exp, *c_exp));
+  RooGaussian* sw_gaussian = new RooGaussian("sw_g", "sw_g", *x_prime, *mu_gaus, *sig_gaus);
+
+  return (new RooProdPdf("sw_potential", "sw_potential", RooArgList(*sw_exp, *sw_gaussian)));
+}
 
 
 //Result was a double pointer , RooFitResult **result=nullptr
@@ -408,7 +430,7 @@ void make_signal_plot_with_residual(RooRealVar &x, RooDataHist &signal_rdh, RooA
 
   signal_rdh.plotOn( data_and_fit, Binning(nbins), RooFit::Name("hist_signal_rdh_fr"));
   signal_fit -> plotOn( data_and_fit, RooFit::Components(func), LineStyle(kDashed), LineColor(TColor::GetColor("#ff0000")), RooFit::Name((static_cast<string>(func)+"_fr").c_str()), RooFit::Range(""));
-
+   
   //Debug 3
   cout << "data_and_fit plot made." << endl;
 
@@ -484,49 +506,21 @@ void make_signal_plot_with_residual(RooRealVar &x, RooDataHist &signal_rdh, RooA
   return;
 }
 
-void make_sideband_plot_with_residual(RooRealVar &x, RooDataHist &signal_rdh, RooAddPdf *signal_fit, const char *func, string outfile, int x_low=100, int x_high=180, int nbins=160, 
-                                      int x_sideband_low = 122, int x_sideband_high=128){
-
-  //Define different plots for the data/fit plot and the residual plot
-  //Both will be placed on the same canvas  
-  
-  RooPlot* data_and_fit  = x.frame();//x_low, x_high);
-  
-  x.setRange("FullRange",x_low,x_high);
-
-  //int bins_per_GeV = nbins/(x_high-x_low);
-  //x.setRange("sideband_low",x_low,x_sideband_low);
-  //x.setRange("sideband_high",x_sideband_high,x_high);
-  //x.setBins((x_sideband_low-x_low)*bins_per_GeV,"sideband_low");
-  //x.setBins((x_high-x_sideband_high)*bins_per_GeV,"sideband_high");
-
-
-  signal_rdh.plotOn( data_and_fit, Binning(nbins), RooFit::Name("hist_signal_rdh_fr"));
-
-  //signal_rdh.plotOn( data_and_fit, Binning("sideband_low"), RooFit::Name("hist_signal_rdh_fr") );
-  //signal_rdh.plotOn( data_and_fit, Binning("sideband_high"), RooFit::Name("hist_signal_rdh_fr") );
-
-  signal_fit -> plotOn( data_and_fit, RooFit::Components(func), LineStyle(kDashed), LineColor(TColor::GetColor("#ff0000")), RooFit::Name((static_cast<string>(func)+"_fr").c_str()), RooFit::Range("FullRange"));
-
-  //Debug 3
-  cout << "data_and_fit plot made." << endl;
-
-  //Residual plot created from the data_and_fit frame
-  RooHist *residual_rdh = data_and_fit -> residHist("hist_signal_rdh_fr",(static_cast<string>(func)+"_fr").c_str());//func.c_str()); 
-
-  //Debug 4
-  cout << "Residual plot made." << endl;
-
-  TString pdf= outfile + ".pdf";
-  TCanvas *canvas_plot     = new TCanvas("canvas_plot", "outplot", 1920, 1440);
+void draw_legend(TCanvas *plot, RooPlot* plotting_objects, vector<string> object_names, vector<string> object_labels){
   TLegend *legend          = new TLegend(0.6,0.8,0.9,0.9);
-  TLine   *resid_plot_line = new TLine(x_low,0,x_high,0);
 
   //Add only entry to legend, make transparent?
-  legend->AddEntry(data_and_fit -> findObject("hist_signal_rdh_fr"), "Data sideband");//,"L");
-  legend->AddEntry(data_and_fit -> findObject((static_cast<string>(func)+"_fr").c_str()) , "Bkg. fit", "L");//,"L");
-  legend->SetFillStyle(0);  legend->SetLineColorAlpha(kWhite,0);
+  for(unsigned int idx=0; idx < object_names.size(); idx++){
+    legend -> AddEntry( plotting_objects -> findObject((object_names[idx]).c_str()), (object_labels[idx]).c_str() );
+  }
 
+  legend -> SetFillStyle(0);  
+  legend -> SetLineColorAlpha(kWhite,0);
+  legend -> Draw();
+}
+
+/*
+void plot_components(TCanvas *plot, RooPlot *fit_plot, RooHist *Residual,)
   //Divide canvas into two pieces
   canvas_plot -> Divide(1,2,0.0,0.0);
 
@@ -578,13 +572,170 @@ void make_sideband_plot_with_residual(RooRealVar &x, RooDataHist &signal_rdh, Ro
   resid_plot_line -> SetLineStyle(kDashed);
   resid_plot_line -> SetLineColorAlpha(kBlue,0.75);
   resid_plot_line -> Draw("SAME");
+*/
+
+
+void make_plot_w_gen_data(RooRealVar &x, RooDataHist &data, RooDataHist &gen_data, RooAddPdf *sideband_fit, string func, string outfile, int x_low=100, int x_high=180, int nbins=160){
+  x.setRange("FullRange",x_low,x_high);
+ 
+  RooPlot* data_and_fit  = x.frame();//x_low, x_high);
+  data.plotOn( data_and_fit, Binning(nbins), RooFit::Name("data_rdh"));
+  gen_data.plotOn( data_and_fit, Binning(nbins), RooFit::Name("gen_data_rdh"), MarkerColor(TColor::GetColor("kRed+1")));
+
+  sideband_fit -> plotOn( data_and_fit, LineStyle(kDashed), LineColor(TColor::GetColor("#ff0000")), RooFit::Name(("sideband_" + func).c_str()), RooFit::Range("FullRange"));
+
+  TString pdf= outfile + ".pdf";
+  TCanvas *canvas_plot     = new TCanvas("canvas_plot", "outplot", 1920, 1440);
+  TLegend *legend          = new TLegend(0.6,0.8,0.9,0.9);
+
+  data_and_fit -> GetXaxis() -> SetLabelSize(0);
+  data_and_fit -> SetTitle("");
+  data_and_fit -> Draw();
 
   canvas_plot -> Print(pdf);
   return;
 }
 
+void make_fit_plot_with_residual(RooRealVar &x, RooDataHist &data, RooAddPdf *spb_fit, RooAddPdf *sideband_fit, string func, string outfile, int x_low=100, int x_high=180, int nbins=160){
 
-RooAbsPdf* bkg_fit(RooRealVar &x, RooDataHist bkg_rdh, std::string func, int x_low, int x_high, bool dont_fit = false){
+  //Define different plots for the data/fit plot and the residual plot
+  //Both will be placed on the same canvas  
+  x.setRange("FullRange",x_low,x_high);
+ 
+  RooPlot* data_and_fit  = x.frame();//x_low, x_high);
+  data.plotOn( data_and_fit, Binning(nbins), RooFit::Name("data_rdh"));
+  spb_fit      -> plotOn( data_and_fit, LineStyle(kSolid),  LineColor(TColor::GetColor("#0000ff")), RooFit::Name(("spb_" + func).c_str()));
+  sideband_fit -> plotOn( data_and_fit, LineStyle(kDashed), LineColor(TColor::GetColor("#ff0000")), RooFit::Name(("sideband_" + func).c_str()), RooFit::Range("FullRange"));
+
+  //signal_fit -> plotOn( data_and_fit, RooFit::Components(func), LineStyle(kDashed), LineColor(TColor::GetColor("#ff0000")), RooFit::Name((static_cast<string>(func)+"_fr").c_str()), RooFit::Range("FullRange"));
+  vector<string> object_names  = {"data_rdh", "spb_" + func, "sideband_" + func};
+  vector<string> object_labels = {"Data (toy data in blinded window)", "S + B fit", "Sideband fit"};
+
+  //Debug 3
+  cout << "data_and_fit plot made." << endl;
+
+  //Residual plot created from the data_and_fit frame
+  RooHist *residual_rdh = data_and_fit -> residHist("data_rdh", ("spb_" + func).c_str());//func.c_str()); 
+
+  //Debug 4
+  cout << "Residual plot made." << endl;
+
+  TString pdf= outfile + ".pdf";
+  TCanvas *canvas_plot     = new TCanvas("canvas_plot", "outplot", 1920, 1440);
+  TLegend *legend          = new TLegend(0.6,0.8,0.9,0.9);
+  TLine   *resid_plot_line = new TLine(x_low,0,x_high,0);
+
+
+  //Divide canvas into two pieces
+  canvas_plot -> Divide(1,2,0.0,0.0);
+
+  //Set minimum number of events to 0 (quality of life change)
+  data_and_fit -> SetMinimum(0.0);
+
+  //A couple of options that should make plotting look nice
+  canvas_plot -> Update();
+  gStyle      -> SetOptFit();
+  
+  cout << "plotting on canvas here" << endl;
+  double margin_lr  = 0.1;
+  double margin_top = 0.05;
+  double margin_bot = 0.1;
+
+  double split_point = 0.35;
+  double min_x = 0.05;
+  double max_x = 1.00;
+  double min_y = 0.15;
+   
+  //plot upper plot in upper 7/10ths of plot
+  canvas_plot -> cd(1);
+  gPad        -> SetPad(min_x, split_point, max_x, 1.0);
+  gPad        -> SetMargin(margin_lr, margin_lr, 0.0, margin_top);
+
+  data_and_fit -> GetXaxis() -> SetLabelSize(0);
+  data_and_fit -> SetTitle("");
+  data_and_fit -> Draw();
+  
+  //Add only entry to legend, make transparent?
+  draw_legend(canvas_plot, data_and_fit, object_names, object_labels);
+
+  //plot lower plot in lower 3/10ths of plot
+  canvas_plot -> cd(2);
+  gPad        -> SetPad(min_x, min_y,  1, split_point);
+  gPad        -> SetMargin(margin_lr, margin_lr, margin_bot, 0);
+
+  residual_rdh -> SetTitle(";m_{ll#gamma};data - fit");
+  residual_rdh -> GetXaxis() -> SetTitleSize(0.15);
+  residual_rdh -> GetXaxis() -> SetLabelSize(0.1);
+  residual_rdh -> GetXaxis() -> SetLimits(x_low, x_high);
+  residual_rdh -> GetXaxis() -> SetTitleOffset(1);
+
+  residual_rdh -> GetYaxis() -> SetTitleSize(0.15);
+  residual_rdh -> GetYaxis() -> SetLabelSize(0.10);
+  residual_rdh -> GetYaxis() -> SetTickLength(0.01);
+  residual_rdh -> GetYaxis() -> SetTitleOffset(1);
+  residual_rdh -> Draw("AP");
+
+  resid_plot_line -> SetLineStyle(kDashed);
+  resid_plot_line -> SetLineColorAlpha(kBlue,0.75);
+  resid_plot_line -> Draw("SAME");
+
+  canvas_plot -> Print(pdf);
+  return;
+}
+
+//This function exists to parse a string delimited by commas
+vector<string> get_component_vector(string component_names){
+  stringstream stream_components(component_names);
+  vector<string> components = {};
+
+  while(stream_components.good()){
+    string component;
+    getline(stream_components, component,',');
+    components.push_back(component);
+  }
+
+  return components; 
+}
+
+void fix_fit_parameters(RooArgSet* pdf_parameters, double error, bool const_vars = false){
+  vector<string> dscb_parameters = get_component_vector(pdf_parameters -> contentsString());
+  for(string parameter : dscb_parameters){
+    //Grab one parameter
+    RooRealVar* curr_parameter = static_cast<RooRealVar*>(pdf_parameters -> find(parameter.c_str()));
+
+    //Constrain fit parameters with a set error or set them to be constant
+    if(const_vars){
+      curr_parameter -> setConstant();
+    } else {
+      curr_parameter -> setError(error*(curr_parameter -> getValV()));
+      cout << "fixing parameter: " << endl;
+      curr_parameter -> Print();
+    }
+    
+  }
+}
+
+RooAbsPdf* signal_fit(RooRealVar &x, RooDataHist signal_rdh, std::string func, bool dont_fit = false, string name = "signal_fit"){
+  RooAbsPdf * signal_fit_model = nullptr;
+  if(func == "dscb"){
+    signal_fit_model = static_cast<RooAbsPdf*>(fit_sig_model(x, (name + "_" + func).c_str()));
+  } else {
+    signal_fit_model = static_cast<RooAbsPdf*>(fit_sig_gauss(x, (name + "_" + func).c_str())); 
+  }
+
+  //x.setRange("signal",110,140);
+  if(!dont_fit){
+    signal_fit_model -> fitTo(signal_rdh, SumW2Error(kTRUE), Save(kTRUE) );
+    fix_fit_parameters(signal_fit_model->getParameters(signal_rdh),0.0,true);
+  
+  }//, Range("signal")
+  //x.removeRange("signal");
+
+  return signal_fit_model;
+}
+
+
+RooAbsPdf* bkg_fit(RooRealVar &x, RooDataHist bkg_rdh, std::string func, int x_low, int x_high, bool dont_fit = false, bool constrain_fit = false){
   RooAbsPdf* bkg_fit_model = nullptr;
   if(func=="pow3"){
     bkg_fit_model = static_cast<RooAbsPdf*>(fit_pow3_model(x,func.c_str()));
@@ -600,25 +751,54 @@ RooAbsPdf* bkg_fit(RooRealVar &x, RooDataHist bkg_rdh, std::string func, int x_l
     bkg_fit_model = static_cast<RooAbsPdf*>(fit_gam_model(x,func.c_str()));
   } else if (func=="agg"){
     bkg_fit_model = static_cast<RooAbsPdf*>(fit_agg_model(x,func.c_str(),x_low,x_high));
+  } else if (func=="swoods"){
+    bkg_fit_model = static_cast<RooAbsPdf*>(fit_saxon_wood_model(x,func.c_str()));
   } else {
     std::cout << "Please use one of the allowed set of functions" << std::endl;
   }
 
-  if(!dont_fit){bkg_fit_model -> fitTo(bkg_rdh, SumW2Error(kTRUE), Save(kTRUE)); }
+  if(!dont_fit){
+    bkg_fit_model -> fitTo(bkg_rdh, SumW2Error(kTRUE), Save(kTRUE));
+    if(constrain_fit){fix_fit_parameters(bkg_fit_model->getParameters(bkg_rdh),0.0,constrain_fit);}
+  }
   return bkg_fit_model;
 }
 
-RooAbsPdf* signal_fit(RooRealVar &x, RooDataHist signal_rdh, std::string func, bool dont_fit = false){
-  RooAbsPdf * signal_fit_model = nullptr;
-  if(func == "dscb"){
-    signal_fit_model = static_cast<RooAbsPdf*>(fit_sig_model(x, func.c_str()));
-  } else {
-    signal_fit_model = static_cast<RooAbsPdf*>(fit_sig_gauss(x, func.c_str())); 
-  }
+//Want to return a fit that just uses the sideband
+RooAbsPdf *bkg_sideband_fit(RooRealVar &x, RooDataHist bkg_rdh, std::string func, int x_low=100, int x_high=180, int x_sideband_low=122, int x_sideband_high=128){
+  //Setting the ranges of the sideband
+  x.setRange("Range1", x_low,           x_sideband_low);
+  x.setRange("Range2", x_sideband_high, x_high);
 
-  if(!dont_fit){signal_fit_model -> fitTo(signal_rdh, SumW2Error(kTRUE), Save(kTRUE));}
-  return signal_fit_model;
+  //Fitting the background pdf
+  RooAbsPdf *bkg_fit_model = bkg_fit(x, bkg_rdh, func, x_low, x_high, true);
+  bkg_fit_model -> fitTo(bkg_rdh, SumW2Error(kTRUE), Save(kTRUE), Range("Range1,Range2"));
+
+  //Removing ranges just return the variable x to how it was when passed to this function
+  x.removeRange("Range1");
+  x.removeRange("Range2");
+
+  return bkg_fit_model;
+
 }
+
+int nev_bkg_extraction(RooRealVar &x, RooAbsPdf *sideband_fit, double nev_sideband, int x_low = 100, int x_high = 180, int x_sideband_low = 122, int x_sideband_high=128){
+  x.setRange("full_region", x_low,           x_high);
+  x.setRange("Range1",      x_low,           x_sideband_low);
+  x.setRange("Range2",      x_sideband_high, x_high);
+
+  double integral    = (sideband_fit -> createIntegral(x,x,"full_region")) -> getValV();
+  double integral_sl = (sideband_fit -> createIntegral(x,x,"Range1")) -> getValV();
+  double integral_sh = (sideband_fit -> createIntegral(x,x,"Range2")) -> getValV();
+
+  x.removeRange("Range1");
+  x.removeRange("Range2");
+  x.removeRange("full_region");
+  cout << "ERRURURURURURR" << endl;
+
+  return static_cast<int>( round(integral/(integral_sl+integral_sh)*nev_sideband) );
+}
+
 
 
 RooAddPdf* fit_splusb(RooRealVar &x, RooDataHist bkg_rdh, RooDataHist signal_rdh, string func, int x_low, int x_high){
@@ -653,6 +833,24 @@ RooAddPdf* fit_splusb_wyields(RooRealVar &x, RooDataHist bkg_rdh, RooDataHist si
 
   return splusb_fit;
 }
+
+RooAddPdf* fit_splusb_sideband(RooRealVar &x, RooDataHist bkg_rdh, RooDataHist signal_rdh, string func, int x_low, int x_high, double nbkg_init=10000, double nsig_init=10){
+  RooAbsPdf * signal_fit_model = signal_fit(x, signal_rdh, "dscb");
+
+  //Calls whichever function specified by the input variable "func"
+  RooAbsPdf * bkg_fit_model = bkg_fit(x, bkg_rdh, func, x_low, x_high);
+
+  RooRealVar *nbkg = new RooRealVar("nbkg", "nbkg", nbkg_init, 0, 1000000.0);
+  RooRealVar *nsig = new RooRealVar("nsig", "nsig", nsig_init, -1000000.0, 1000000.0);
+
+  RooAddPdf *splusb_fit = new RooAddPdf("splusb_fit", "splusb_fit", RooArgList(*bkg_fit_model,*signal_fit_model),   RooArgList(*nbkg,*nsig));
+
+  bkg_rdh.add(signal_rdh);
+  splusb_fit -> fitTo(bkg_rdh, SumW2Error(kTRUE) ,Save(kTRUE));
+
+  return splusb_fit;
+}
+
 
 RooAddPdf* fit_splusb_signalinjection(RooRealVar &x, TH1D* bkg_th1d, TH1D* signal_th1d, string func, int x_low, int x_high, double signal_boost = 1, bool perform_first_b_fit=true, RooFitResult **result=nullptr){
   
@@ -906,4 +1104,135 @@ std::vector<std::string> plot_list(std::string name_segment_one, std::string nam
   return list_o_hists;
 }
 
+double bkg_fraction_from_sideband(RooRealVar &x, RooAddPdf *sideband_fit, int x_low = 100, int x_high = 180, int x_sideband_low = 122, int x_sideband_high=128){
+  x.setRange("full_region", x_low,           x_high);
+  x.setRange("Range1",      x_low,           x_sideband_low);
+  x.setRange("Range2",      x_sideband_high, x_high);
+
+  double integral    = (sideband_fit -> createIntegral(x,x,"full_region")) -> getValV();
+  double integral_sl = (sideband_fit -> createIntegral(x,x,"Range1")) -> getValV();
+  double integral_sh = (sideband_fit -> createIntegral(x,x,"Range2")) -> getValV();
+  //cout << "(integral, integral_sl, integral_sh): (" << integral << ", " << integral_sl << ", " << integral_sh << ")" << endl; 
+  //cout << "ERRRUR" << endl;
+
+  x.removeRange("Range1");
+  x.removeRange("Range2");
+  x.removeRange("full_region");
+
+ return integral/(integral_sl+integral_sh);
 }
+
+double bkg_fraction_in_blinded_region(RooRealVar &x, RooAddPdf *sideband_fit, int x_sideband_low = 122, int x_sideband_high=128){
+  x.setRange("blinded_region",  x_sideband_low, x_sideband_high);
+  double integral    = (sideband_fit -> createIntegral(x,x,"blinded_region")) -> getValV();
+
+  std::cout << "integral: " << integral << std::endl;
+
+  x.removeRange("blinded_region");
+
+  x.setRange("whole_region",  x_sideband_low, x_sideband_high);
+  double integral_two    = (sideband_fit -> createIntegral(x,x,"whole_region")) -> getValV();
+
+  std::cout << "integral: " << integral_two << std::endl;
+
+
+  return integral;
+}
+
+
+RooDataHist* generate_bkg_data_from_fit(RooRealVar &x, RooAddPdf *sideband_fit, double nev_sideband, int scale_factor, bool isAsimov=false, int x_low = 100, int x_high = 180, int x_sideband_low = 122, int x_sideband_high=128){
+
+  //Get the normalization for the generated data. Either the expected events for the full range or just the blinded region
+  //std::cout << "nev_sideband ABSDASNDASDN: " << nev_sideband << std::endl;
+  double num_ev_full_range = static_cast<int>( round( bkg_fraction_from_sideband(x, sideband_fit, x_low, x_high, x_sideband_low, x_sideband_high)*nev_sideband) )*scale_factor;
+  //std::cout << "nev_fullrange ASDASBDASND: " << num_ev_full_range << std::endl;
+
+//nev_sideband;//
+  //
+  //Generate the data from the sideband fit
+  if(isAsimov){ return sideband_fit -> generateBinned(x, RooFit::NumEvents(num_ev_full_range), RooFit::Verbose(true), Asimov()); }
+  return sideband_fit -> generateBinned(x, RooFit::NumEvents(num_ev_full_range), RooFit::Verbose(true), Extended());
+}
+
+
+RooDataHist* generate_signal_data_from_fit(RooRealVar &x, RooAbsPdf *sideband_fit, double nev_signal, int scale_factor, bool isAsimov=false){
+  double num_ev_full_range = nev_signal*scale_factor;
+  if(isAsimov){ return sideband_fit -> generateBinned(x, RooFit::NumEvents(num_ev_full_range), RooFit::Verbose(true), Asimov()); }
+  return sideband_fit -> generateBinned(x, RooFit::NumEvents(num_ev_full_range), RooFit::Verbose(true), Extended());
+}
+
+//RooDataHist* generate_signal_data_from_fit(RooRealVar &x, RooAbsPdf *sideband_fit, int nev_signal){
+//  return sideband_fit -> generateBinned(x, RooFit::NumEvents(nev_signal), RooFit::Verbose(true));
+//}
+
+
+
+RooAddPdf* bkg_shape_from_sideband(RooRealVar &x, RooDataHist data, RooAbsPdf* bkg_shape, double n_events, int x_low = 100, int x_high = 180, int x_sideband_low = 122, int x_sideband_high=128, string name = "sideband_fit"){
+  RooRealVar *n_sideband = new RooRealVar("nev_sideband", "nev_sideband", n_events, 0.0, 1000000.0);
+
+  RooAddPdf* sideband_fit = new RooAddPdf(name.c_str(), "sideband_fit", RooArgList(*bkg_shape),   RooArgList(*n_sideband));
+  x.setRange("sideband_low",  x_low,           x_sideband_low);
+  x.setRange("sideband_high", x_sideband_high, x_high);
+
+  sideband_fit -> fitTo(data,SumW2Error(kTRUE), Save(kTRUE), Range("sideband_low,sideband_high"));
+  return sideband_fit;
+}
+
+
+RooAddPdf* fit_sideband(RooRealVar &x, RooDataHist sideband_data, double nev_sideband, std::string func, int x_low = 100, int x_high = 180, int nbins = 80, string name = "sideband_fit"){
+
+  //Complete fit giving the two histograms as inputs. Saves the result to the pointer result
+  //RooFitResult *result = new RooFitResult("fit_result","fit_result");
+
+  RooRealVar *n_sideband = new RooRealVar("nsideband", "nsideband", nev_sideband, 0.0, 1000000.0);
+  RooAbsPdf* sideband_bkg = bkg_fit(x, sideband_data, func, x_low, x_high, false);
+  RooAddPdf* sideband_fit = bkg_shape_from_sideband(x, sideband_data, sideband_bkg, nev_sideband, x_low, x_high, 122, 128, name);
+
+  return sideband_fit;
+}
+
+void add_to_workspace(RooWorkspace *workspace, RooDataHist data_hist, RooAbsPdf* sig_pdf, RooAbsPdf* bkg_pdf){
+  workspace -> import(*bkg_pdf);
+  workspace -> import(*sig_pdf);
+  workspace -> import(data_hist);
+}
+
+//Is not needed? Produce workspace says to create these classes in 
+void add_custom_class(RooWorkspace* workspace, string function ){
+  //gROOT -> ProcessLine((".x ./Utilities/" + function + ".cxx").c_str());
+
+  //TClass* import_class = TClass::GetClass(function.c_str());
+  TClass* import_class = new TClass(function.c_str());
+
+  import_class -> SetDeclFile(("./Utilities/" + function + ".h").c_str(), 0);
+  import_class -> SetImplFileName(("./Utilities/" + function + ".cxx").c_str());
+
+  workspace -> addClassDeclImportDir("./");
+  workspace -> addClassImplImportDir("./");
+  workspace -> importClassCode(import_class);
+}
+
+
+
+}
+
+/*
+  //Code is no longer needed, but I am a hoarder and dont want to delete it just yet
+  RooRealVar* k_poisson = new RooRealVar("k_poisson", "k_poisson", 0, 0, 100);
+  RooRealVar* mu_poisson = new RooRealVar("mu_poisson", "mu_poisson", nev_signal);
+  k_poisson -> setBins(100);
+
+  RooPoisson* poisson_function = new RooPoisson("poisson_func", "poisson_func", *k_poisson, *mu_poisson, kFALSE);
+  poisson_function -> generateEvent(1);
+  int num_sampled_signal = static_cast<int>(round(k_poisson -> getValV()));
+
+  delete poisson_function;
+  delete mu_poisson;
+  delete k_poisson;
+  
+  if(num_sampled_signal==0){ return new RooDataHist("empty_generated_hist", "empty_generated_hist", x);}
+  return sideband_fit -> generateBinned(x, RooFit::NumEvents(num_sampled_signal), RooFit::Verbose(true), Extended());
+
+  */
+
+

@@ -14,6 +14,7 @@ void plot_signal_test(string infile, string outfile, string func, double signal_
 
   //Here signal is assumed to come in with normalization of 10x which gives the 0.1 scale factor. 
   TH1D *sig_hist = APFUtilities::get_sig_hist(infile);
+  sig_hist -> Scale(0.1);
   double nsig_injected = (sig_hist -> Integral())*0.1*signal_boost;
   
   RooDataHist hist_signal_rdh("hist_signal_rdh", "m_lly_sdh", m_lly, Import(*(sig_hist)));
@@ -24,58 +25,15 @@ void plot_signal_test(string infile, string outfile, string func, double signal_
   RooFitResult *result = new RooFitResult("fit_result","fit_result");
   //SIGNAL FIT HERE
 
-  RooCrystalBall* sig_dscb_fit = nullptr;
-  RooGaussian* sig_gauss_fit = nullptr;
-  RooAddPdf* signal_fit = nullptr;
-  if(func=="dscb"){
-   sig_dscb_fit = fit_sig_model(m_lly, hist_signal_rdh, func.c_str()); 
-   signal_fit = new RooAddPdf("signal_fit", "signal_fit", RooArgList(*sig_dscb_fit),   RooArgList(*nsig));
-  } else {
-   sig_gauss_fit = fit_sig_gauss(m_lly, hist_signal_rdh, func.c_str());
-   signal_fit = new RooAddPdf("signal_fit", "signal_fit", RooArgList(*sig_gauss_fit),   RooArgList(*nsig));
-  }
+
+  RooAbsPdf* signal_fit_model = signal_fit(m_lly, hist_signal_rdh, func);
+  RooAddPdf* signal_fit_add   = new RooAddPdf("signal_fit", "signal_fit", RooArgList(*signal_fit_model),   RooArgList(*nsig));
 
 
-  //hist_total_rdh.add(hist_signal_rdh); //Have to do this twice. Once in function and once outside. Maybe rethink how this is being done?
-
-  //Make plot for every flat integer
-  //if(signal_boost < 10 || static_cast<int>(signal_boost)%10==0){
-  //if( (static_cast<int>(signal_boost)*10)%10==0 ){
-    //make_plot_with_residual(m_lly, hist_total_rdh, splusb_fit, func.c_str(),outfile,m_lly_low,m_lly_high,nbins,&hist_signal_rdh,result);
-    make_signal_plot_with_residual(m_lly, hist_signal_rdh, signal_fit, func.c_str(), outfile, m_lly_low, m_lly_high, nbins);
-  //}
+  make_signal_plot_with_residual(m_lly, hist_signal_rdh, signal_fit_add, ("signal_fit_" +func).c_str(), outfile, m_lly_low, m_lly_high, nbins);
   
-  RooRealVar* nsig_ext = static_cast<RooRealVar*>((signal_fit -> coefList()).find("nsig") ); 
-
-  //Outputs # of signal events, fit values for nsig
-  //Need to get uncertainties!
-  /*out_file << signal_boost                 << "," << flush; //signal boost factor
-  out_file << hist_total_rdh.sumEntries()  << "," << flush; //N_{S+B}
-  out_file << nsig_injected                << "," << flush; //N_{S,true}
-  out_file << nsig_ext -> getValV()        << "," << flush; //N_{S,fit}
-  out_file << nsig_ext -> getError()       << "," << flush; //sigma_{N_{s,fit}}
-  out_file << nsig_ext -> getErrorHi()     << "," << flush; //sigma_{N_{s,fit}} High
-  out_file << nsig_ext -> getErrorLo()     << "," << flush; //sigma_{N_{s,fit}} Low
-  out_file << result -> minNll()           << flush; //-log(L)
-  out_file << endl;                                         //End of saved information
-
-  cout << "signal injection factor: " << signal_boost << endl; //signal boost factor
-  cout << "S + B: "                   << hist_total_rdh.sumEntries()  << endl; //N_{S+B}
-  cout << "N_S,true: "                << nsig_injected << endl; //N_{S,true}
-  cout << "N_S,true: "                << nsigtrue << endl; //N_{S,true}
-  cout << "N_S,fit: "                 << nsig_ext -> getValV()        << endl; //N_{S,fit}
-  cout << "sigma N_S fit: "           << nsig_ext -> getError()       << endl; //sigma_{N_{s,fit}}
-  cout << "sigma N_S fit: "           << nsig_ext -> getErrorHi()       << endl; //sigma_{N_{s,fit}}
-  cout << "sigma N_S fit: "           << nsig_ext -> getErrorLo()       << endl; //sigma_{N_{s,fit}}
-
-  cout << "-log(L): "                 << result -> minNll()           << endl; //-log(L)
-  cout << "------------------------------------" << endl;                                         //End of saved information
-  */
-
-  delete nsig_ext;
-  delete signal_fit;
-  delete sig_dscb_fit;
-  delete sig_gauss_fit;
+  delete signal_fit_model;
+  delete signal_fit_add;
   delete result;
 
   return;
@@ -103,12 +61,12 @@ int signal_fit_test(){
   //std::string test_file = "cat_ttH_lep_ll_ph_all_lly_m__mlly__wgt_1invfb__lumi_nonorm_lin.root";
 
   std::vector<std::string> topology      = {"ggF", "VBF", "WH_3l", "ZH_MET", "ttH_had", "ttH_lep"};
-  std::vector<std::string> func_list     = {"dscb", "gauss"};
+  std::vector<std::string> func_list     = {"dscb"};//, "gauss"};
   std::vector<std::string> list_of_plots = plot_list(name_seg_one, name_seg_two, true, true);//,false);
   std::vector<std::string> list_of_refit_plots = plot_list(name_seg_one, name_seg_three, true, true);//,false);
 
   cout << file_path + test_file;
-  string func_test = "gauss";
+  string func_test = "dscb";
   ofstream out_file; out_file.open("./sig_fit_test_ttH_" + func_test + ".txt");
   plot_signal_test(file_path + test_file , "./output/TEST_ttH_1_sig_fit", func_test, 1.0);
   out_file.close();
