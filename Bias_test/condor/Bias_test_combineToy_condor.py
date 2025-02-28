@@ -59,12 +59,6 @@ njet = ROOT.RooRealVar("njet", "njet", 0, 10)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 
-# Read samples
-ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
-bkg_hist = ZBreader.hist
-N = bkg_hist.sumEntries()
-
-#print("stats = ",N)
 x.setBins(260)
 x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
@@ -129,10 +123,10 @@ def profileFit(profile_, sig_model, hist, fix = False, strength = 0.):
     for i, ele in enumerate(profile_):
         #ele.reset()
         if (fix): 
-            c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), N)
+            c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), strength)
         else:
-            c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), N, 0, 3.*N)
+            c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), hist.sumEntries(), 0, 3.*hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), 0., -100.*N_sig, 100.*N_sig)
         tot_model = ROOT.RooAddPdf("tot_model_"+ele.pdf.GetName(), "tot_model_"+ele.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False, "", extend = True)
@@ -168,7 +162,7 @@ def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_
     #     c2.setVal(abs(r_sig) * (k - N_scan/2) * scan_size)
     #     scan_list_.append(pll.getVal() + offset - min_nll)
     for k in range(N_scan_):
-        c1 = ROOT.RooRealVar("c1_"+ bkgclass.pdf.GetName(), "c1_"+ bkgclass.pdf.GetName(), N, 0, 3.*N)
+        c1 = ROOT.RooRealVar("c1_"+ bkgclass.pdf.GetName(), "c1_"+ bkgclass.pdf.GetName(), hist.sumEntries(), 0, 3.*hist.sumEntries())
         c2 = ROOT.RooRealVar("c2_"+ bkgclass.pdf.GetName(), "c2_"+ bkgclass.pdf.GetName(), abs(r_sig_) * (k - N_scan_/2) * scan_size_)
         tot_model = ROOT.RooAddPdf("tot_model_"+ bkgclass.pdf.GetName(), "tot_model_"+ bkgclass.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, bkgclass.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False)
@@ -187,14 +181,14 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
     step = 0
     offset_nll = 0.
     scan = True
-    if DEBUG: print ('Start scanning, N = ', N)
+    if DEBUG: print ('Start scanning, N = ', hist.sumEntries())
     while scan:
         choose = []
         if DEBUG: print ('Left step ', step)
         scan_sig =  abs(r_scale_) * step * scan_size_
         for pdf_ in profile_:
             #pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N+scan_sig, 0., 5.*N)
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), hist.sumEntries()+scan_sig, 0., 5.*hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), -scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
@@ -230,7 +224,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
         for pdf_ in profile_:
             if step == 1: pdf_.reset()
             #pdf_.reset()
-            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), N-scan_sig, 0, 5.*N)
+            c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), hist.sumEntries()-scan_sig, 0, 5.*hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
