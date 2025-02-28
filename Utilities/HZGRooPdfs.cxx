@@ -872,9 +872,9 @@ ClassImp(ModGaus);
    s0("s0","s0",this,_s0),
    sl("sl","sl",this,_sl),
    sh("sh","sh",this,_sh),
-   xlow(xlow_),
-   xhigh(xhigh_)
- { 
+   lowx(xlow_),
+   highx(xhigh_)
+ {
  } 
 
 
@@ -887,18 +887,18 @@ ClassImp(ModGaus);
    s0("s0",this,other.s0),
    sl("sl",this,other.sl),
    sh("sh",this,other.sh),
-    xlow(other.xlow),
-    xhigh(other.xhigh)
+    lowx(other.lowx),
+    highx(other.highx)
  { 
  } 
 
  // Original
- 
+/* 
  Double_t mfunc(Double_t* x, Double_t* pr){
     Double_t width, power;
     // vh - vl >> vh
     power = pr[1] + pr[2]*(x[0] - pr[6])/(pr[7]-pr[6]);
-    if(x[0] <= pr[0]) width = pr[4] + (pr[3] - pr[4])*(x[0] - 105)/(pr[0]-pr[6]);
+    if(x[0] <= pr[0]) width = pr[4] + (pr[3] - pr[4])*(x[0] - pr[6])/(pr[0]-pr[6]);
     else width = pr[3] + (pr[5] - pr[3])*(x[0] - pr[0])/(pr[7] - pr[0]);
     return exp(-1*pow(fabs((x[0]-pr[0])/width), power));
 
@@ -940,6 +940,50 @@ void ModGaus::updateNorm(std::vector<Double_t> fitpars) const{
 
   return exp(-1*pow(fabs((m-m0)/width), power))/norm;
  }
+*/
+
+// Type 0
+Double_t mfunc(Double_t* x, Double_t* pr){
+  Double_t width, power;
+  // vh - vl >> vh
+  power = pr[1] + pr[2]*(x[0] - pr[5])/(pr[6] - pr[5]);
+  width = pr[3] + pr[4]*(x[0] - pr[5])/(pr[6] - pr[5]);
+  return exp(-1*pow(fabs((x[0]-pr[0])/width), power));
+
+}
+void ModGaus::updateNorm(std::vector<Double_t> fitpars) const{
+    if (fitpars != current) {
+        int nbins = 10000;
+        Double_t low = lowx;
+        Double_t high = highx;
+        Double_t _norm = 0;
+        TF1 intfunc("func", mfunc, 0., 200., 7);
+        for(int i(0); i<nbins; i++) {
+            intfunc.SetParameters(m0, vl, vr, sl, sh, low, high);
+            _norm+= ((high - low)/nbins) * intfunc.Eval(low + (i + 0.5)*(high - low)/nbins);
+
+        }
+    norm = _norm;
+    //cout << "norm = " << norm << endl;
+    }
+}
+Double_t ModGaus::evaluate() const
+{
+  // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE
+  Double_t width, power;
+  // vh - vl >> vh
+  power = vl + vr*(m - lowx)/(highx-lowx);
+  width = sl + sh*(m - lowx)/(highx-lowx);
+  std::vector<Double_t> vect;
+  vect.push_back(m0); vect.push_back(vl); vect.push_back(vr); vect.push_back(sl); vect.push_back(sh);
+  updateNorm(vect);
+  vect.clear();
+  current.clear();
+  current.insert(current.end(), {m0, vl, vr, sl, sh});
+  return exp(-1*pow(fabs((m-m0)/width), power))/norm;
+}
+
+
 
 dummy::dummy(float k){
     std::cout << "test = "<<k << std::endl;

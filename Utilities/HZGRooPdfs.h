@@ -106,8 +106,8 @@ protected:
   RooRealProxy s0 ;
   RooRealProxy sl ;
   RooRealProxy sh ;
-  double xlow;
-  double xhigh;
+  double lowx;
+  double highx;
   Double_t evaluate() const ;
 
 private:
