@@ -1,7 +1,7 @@
 # HtoZg_fitting
 
 # Environment
-The code is tested under `CMSSW_12_6_0` with `ROOT 6.24`, `Python 3.9.14` and `combine v9.1.0`. 
+The code is tested under `CMSSW_14_0_4/` and `CMSSW_14_1_0_pre4`, and `combine v10.1.0`. 
 Should work without `CMSSW` or `combine` but plain `pyroot`, but require an extra step.
 
 Make sure `RooGaussStepBernstein` is properly installed!
@@ -34,6 +34,8 @@ bkg_model = #PDF#Class(x, gauss_mu, cat, sigma_init, step_init, ...#PDF# specifi
 ```
 where `x` is the fitting axis, `gauss_mu` is the mean of the convolution Gaussian, `cat` is the category name, `sigma_init` is the initial value of Gaussian sigma, and `step_init` is the step position initial value. Some default values are assigned already, but feel free to play around with them.
 
+Note that every bkg function has a sideband version blinding (120, 130) as a member, `self.SBpdf`.
+
 ## Signal Functions
 The functions are defined in `Utilities/sig_functions_class.py`. A typical definition of a model is like this:
 ```
@@ -46,6 +48,9 @@ Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHi
 ```
 Minimizer_#STAT#(STAT, printLevel, eps, offset, strategy)
 ```
+
+## Configuration File
+
 
 ## F Test
 In the `F_test.py`, please change the sample directory. F test of multiple categories can happen in one run, and the print out will become messy. So please modify the file so that you do one category at a time. 
