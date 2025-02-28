@@ -2,6 +2,7 @@
 
 using namespace APFUtilities;
 
+/*
 AsymGenGaussian* fit_agg_model_sideband(RooRealVar &x, RooDataHist &hist_to_fit, const char *name, double low_d=100, double high_d=180, bool perform_fit = true, RooFitResult **result=nullptr){
   //x.setRange("Range1",100,122);
   //x.setRange("Range2",128,180);
@@ -14,12 +15,12 @@ AsymGenGaussian* fit_agg_model_sideband(RooRealVar &x, RooDataHist &hist_to_fit,
   AsymGenGaussian*  agg_model = new AsymGenGaussian(name,"Asymm. Gen. Gaussian", x, *kappa, *alpha, *xsi, low_d, high_d);
   if(!perform_fit){return agg_model;}
   
-/*  if(*result==nullptr){
+  if(*result==nullptr){
     agg_model -> fitTo(hist_to_fit,SumW2Error(kTRUE), Save(kTRUE), Range("Range1,Range2"));
   } else {
     *result = agg_model -> fitTo(hist_to_fit,SumW2Error(kTRUE), Save(kTRUE), Range("Range1,Range2"));
   }
-*/
+
   return agg_model;
 }
 
@@ -48,7 +49,7 @@ RooAbsPdf* bkg_fit_sideband(RooRealVar &x, RooDataHist bkg_rdh, std::string func
 
   return bkg_fit_model;
 }
-
+*/
 
 //This function will plot just one function on the histogram with a residual plot
 void plot_sideband_fit(string infile, string outfile, string func){
@@ -69,38 +70,52 @@ void plot_sideband_fit(string infile, string outfile, string func){
 
   RooDataHist hist_sideband_rdh("hist_signal_rdh", "m_lly_dh", m_lly, Import(*(data_hist)));
   double nsideband_d = data_hist -> Integral();
-  RooRealVar *nsideband = new RooRealVar("nsig", "nsig", nsideband_d, 0.0, 1000000.0);
+  RooRealVar* nsideband = new RooRealVar("nbkg", "nbkg", nsideband_d, 0.0, 1000000.0);
 
-  RooAbsPdf* sideband_bkg = bkg_fit_sideband(m_lly, hist_sideband_rdh, func, m_lly_low, m_lly_high);
+  RooAbsPdf* sideband_bkg = bkg_fit(m_lly, hist_sideband_rdh, func, m_lly_low, m_lly_high, true);
+  RooAddPdf* sideband_fit = new RooAddPdf("signal_fit", "signal_fit", RooArgList(*sideband_bkg),  RooArgList(*nsideband));
+
+  //bkg_sideband_fit(m_lly, hist_sideband_rdh, func, m_lly_low, m_lly_high);
+  //nsideband_d = nev_bkg_extraction(m_lly, sideband_bkg, nsideband_d, 100, 180, 122, 128);   
+  /*RooAbsPdf* sideband_bkg = bkg_fit(m_lly, hist_sideband_rdh, func, m_lly_low, m_lly_high, true);
   RooAddPdf* sideband_fit = new RooAddPdf("signal_fit", "signal_fit", RooArgList(*sideband_bkg),   RooArgList(*nsideband));
+  */
+
+  //This is the basic implementation of the bkg_fit_sideband function in APFUtilities. I am too lazy to use that f
   m_lly.setRange("Range1",100,122);
   m_lly.setRange("Range2",128,180);
   sideband_fit -> fitTo(hist_sideband_rdh,SumW2Error(kTRUE), Save(kTRUE), Range("Range1,Range2"));
   m_lly.removeRange("Range1");
   m_lly.removeRange("Range2");
+ 
+  TFile f_work_out = TFile(out_file + "_workspace.root", "RECREATE");
+  RooWorkspace w_sb_fit = new RooWorkspace("bkg_sideband_shape","bkg_sideband_shape");
+  
+  w_sb_fit -> import(sideband_fit);
+  w_sb_fit -> import(n_sideband);
+  w_sb_fit -> import(data_hist);
+  w_sb_fit -> Print();
+  w_sb_fit -> Write();
+  f_work_out.Close();
 
   //Make plot for every flat integer
   make_sideband_plot_with_residual(m_lly, hist_sideband_rdh, sideband_fit, func.c_str(), outfile, m_lly_low, m_lly_high, nbins);
-
-  /*
+  
   delete sideband_fit;
   delete sideband_bkg;
   delete nsideband;
   delete result;
   delete data_hist;
-  */
+  
   return;
 }
 
 int sideband_data_fit(){
   //Right now all histograms are located in a common area. Will try to move them to be more central
-  //std::string file_path = "/net/cms27/cms27r0/abarzdukas/drawPico/gitChangesDirectory/AfterMichaelAugustPush/draw_pico/plots/run3_cat_mlly/";
   std::string file_path = "/net/cms27/cms27r0/abarzdukas/drawPico/gitChangesDirectory/AddCategoriesAndKinFit/draw_pico/plots/mlly_dist_for_fitting/";
   std::string name_seg_one = "cat_";
   std::string name_seg_two = "_ph_all_lly_m_data__mlly__wgt__lumi_nonorm_lin";
   std::string name_seg_three = "_ph_all_refit_lly_m_data__llphoton_refit_m__wgt__lumi_nonorm_lin";
-
-
 
   //Various test files
   //std::string test_file = "cat_VBF_ll_ph_all_lly_m__mlly__wgt_1invfb__lumi_nonorm_lin.root";
@@ -120,11 +135,11 @@ int sideband_data_fit(){
   
   gErrorIgnoreLevel = kWarning;
   RooMsgService::instance().setStreamStatus(2,false);
-  list_of_plots.erase(list_of_plots.begin());
-  list_of_plots_refit.erase(list_of_plots.begin());
-  topology.erase(topology.begin());
+  //list_of_plots.erase(list_of_plots.begin());
+  //list_of_plots_refit.erase(list_of_plots_refit.begin());
+  //topology.erase(topology.begin());
  
-  
+   
   for(unsigned int idx_func = 0; idx_func < func_list.size(); idx_func++){
     for(unsigned int idx_top = 0; idx_top < list_of_plots.size(); idx_top++){
       string top = topology[idx_top];
@@ -149,6 +164,7 @@ int sideband_data_fit(){
     }
   }
   
+
   return 0;
 }
 
