@@ -49,6 +49,9 @@ Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHi
 Minimizer_#STAT#(STAT, printLevel, eps, offset, strategy)
 ```
 
+## Configuration File
+
+
 ## F Test
 In the `F_test.py`, please change the sample directory. F test of multiple categories can happen in one run, and the print out will become messy. So please modify the file so that you do one category at a time. 
 
