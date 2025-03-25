@@ -7,7 +7,7 @@ Should work without `CMSSW` or `combine` but plain `pyroot`, but require an extr
 Make sure `RooGaussStepBernstein` is properly installed!
 
 ### Option 1: 
-  It is installed in the `combine v9.1.0`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
+  It is installed in the `combine v10.1.0`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
 
 ### Option 2: 
   No dependence on `combine` or `CMSSW`. Generate a c++ dictionary `.so` file, `Utilities/HZGRooPdfs_cxx.so` using the following line ([reference](https://root.cern/manual/io_custom_classes/#generating-dictionaries))
@@ -15,6 +15,12 @@ Make sure `RooGaussStepBernstein` is properly installed!
   root[] .L HZGRooPdfs.cxx+
   ```
 Please run it with your version of `ROOT` to overwirte the `.so` file. The `.so` and `.d` files in this repo are generated under `ROOT 6.30`, thus not working under other ROOT versions.
+
+Depdending on the option, you may or may not need to include the library at the beginning of each python script. Please comment them out if you are using option 1.
+```
+ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+```
 
 Note: On the LXPLUS machine, the ROOT doesn't have the FFT package properly installed and when running the fit, you may see some errors accordingly. I suggest you use the ROOT in any CMSSW environment. 
 
@@ -36,12 +42,24 @@ where `x` is the fitting axis, `gauss_mu` is the mean of the convolution Gaussia
 
 Note that every bkg function has a sideband version blinding (120, 130) as a member, `self.SBpdf`.
 
+To further automate the process, you can also choose to use the `profileClass` where 14 background functions are defined as members and their essential initial values are assigned through a configuration file.
+```
+profile = profileClass(x, mu_gauss, cat='', config='')
+```
+
 ## Signal Functions
 The functions are defined in `Utilities/sig_functions_class.py`. A typical definition of a model is like this:
 ```
 sig_model = #PDF#Class(x, MH, cat, ...#PDF# specific arguments...)
 ```
 where `x` is the fitting axis, `MH` is the higgs mass variable, and `cat` is the category name.
+
+So far, only Double Sided Crystal Ball (DSCB) function is used. And there is a feature to set the parameter values to the post-fit values, `assignVal()`, using a configuration file.
+
+Each year(era), category, lepton flavor and production mode has its own signal model. And the final model is the combination of them. So far, we only include two production modes, ggF and VBF. In total, we define 32 individual DSCB models. To use the combined signal model,
+```
+sig_model = combineSignal(x, MH, cat='', config='')
+```
 
 ## Minimizer
 Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. A typical minimization of certain test statistics is like this:
@@ -50,7 +68,23 @@ Minimizer_#STAT#(STAT, printLevel, eps, offset, strategy)
 ```
 
 ## Configuration File
-
+Configurations `.json` files of background functions and signal functions can be found at `Config/`. They contain the post-fit parameter values of the models. The struction is explained as the following.
+### Background config file
+Each category has its own multi-layer dictionary, for example, for ggf1:
+```
+"ggf1":{
+  "Range":97,
+  "Chi2":[],
+  "SST":[],
+  "FT":[],
+  "CMSBias":[],
+  "bern2":{ ... },
+  "bern3":{ ... },
+  ...
+}
+```
+The value of `Range` is the starting mllg value of the fitting range of this category. Lists after the key `Chi2`, `SST`, `FT` and `CMSBias` contain the names of the background functions that pass the corresponding test. And the contents of the function keys, such as `bern2`, `bern3`, are the post-fit values of the models. They are used as initial values for the next fit.
+### Signal config file
 
 ## F Test
 In the `F_test.py`, please change the sample directory. F test of multiple categories can happen in one run, and the print out will become messy. So please modify the file so that you do one category at a time. 
