@@ -1,3 +1,4 @@
+import json
 import ROOT
 
 # Cornell sample in dat format
@@ -192,57 +193,70 @@ class readWspMC: #Zebing core func signal samples
 
 class readPico: #draw_pico datacard format
     def __init__(self, x, directory=""):
-        """Initializes self.data_hist_bin1 through self.data_hist_bin4 for
-        use with HtoZg_fitting utilities
+        """Initializes the following RooDataHist attributes for use with 
+        HtoZg_fitting utilities: 
+          data_hist_<CATNAME> 
+        where <CAT> is ggf1, ggf2, ggf3, ggf4, vbf1, vbf2, vbf3, vh3l, vhmet,
+        tthhad, or tthlep
 
         Args:
           x: three body invariant mass RooAbsReal
           directory: name of rawdata root file output by draw_pico
         """
+        
+        config = None
+        with open("../Config/config.json", "r") as jfile:
+          config = json.load(jfile)
 
-        mllg_cut = '{0}>105.0&&{0}<170.0'.format(x.GetName())
+        #TODO add signal and background as well
+        #TODO CAT_NAMES should be moved to some global location
+        CAT_NAMES = ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vh3l",
+                     "vhmet","tthhad","tthlep"]
+        #TODO sync category names between datacard and HtoZg_utilities
+        CAT_NAMES_ALT = {"ggf1" : "ggh1",
+                         "ggf2" : "ggh2",
+                         "ggf3" : "ggh3",
+                         "ggf4" : "ggh4",
+                         "vbf1" : "vbf1",
+                         "vbf2" : "vbf2",
+                         "vbf3" : "vbf3",
+                         "vh3l" : "vh3l",
+                         "vhmet" : "vhmet",
+                         "tthhad" : "tthhad",
+                         "tthlep" : "tthlep"}
 
+        datasets_raw = []
+        datasets_renamed = []
         root_file = ROOT.TFile(directory)
-        dataset_bin1 = (root_file.WS_data_obs_cat_ggh1
-                        .data("data_obs_cat_ggh1").reduce(mllg_cut))
-        dataset_bin2 = (root_file.WS_data_obs_cat_ggh2
-                        .data("data_obs_cat_ggh2").reduce(mllg_cut))
-        dataset_bin3 = (root_file.WS_data_obs_cat_ggh3
-                        .data("data_obs_cat_ggh3").reduce(mllg_cut))
-        dataset_bin4 = (root_file.WS_data_obs_cat_ggh4
-                        .data("data_obs_cat_ggh4").reduce(mllg_cut))
-        #in changing variable name, we wsomehow lose weights
-        #hack to change variable
-        dataset_bin1.changeObservableName('mllg_cat_ggh1',x.GetName())
-        dataset_bin2.changeObservableName('mllg_cat_ggh2',x.GetName())
-        dataset_bin3.changeObservableName('mllg_cat_ggh3',x.GetName())
-        dataset_bin4.changeObservableName('mllg_cat_ggh4',x.GetName())
         weight = ROOT.RooRealVar("weight","",-50.0,50.0)
+        for cat_name in CAT_NAMES:
+            #extract RooDataSet from pico ROOT file and apply appropriate cut
+            lowx = 105
+            if cat_name in ["ggf1","ggf2","ggf3","ggf4"]:
+                lowx = config[cat_name]["Range"]
+            highx = lowx+65
+            mllg_cut = "mllg_cat_{0}>{1}&&mllg_cat_{0}<{2}".format(
+                CAT_NAMES_ALT[cat_name], lowx, highx)
+            datasets_raw.append(getattr(root_file,
+                "WS_data_obs_cat_{}".format(CAT_NAMES_ALT[cat_name]))
+                .data("data_obs_cat_{}".format(CAT_NAMES_ALT[cat_name]))
+                .reduce(mllg_cut))
 
-        dataset_bin1_x = ROOT.RooDataSet("data_set_bin1","data_set_bin1",
-            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
-        dataset_bin2_x = ROOT.RooDataSet("data_set_bin2","data_set_bin2",
-            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
-        dataset_bin3_x = ROOT.RooDataSet("data_set_bin3","data_set_bin3",
-            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
-        dataset_bin4_x = ROOT.RooDataSet("data_set_bin4","data_set_bin4",
-            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
-        dataset_bin1_x.append(dataset_bin1)
-        dataset_bin2_x.append(dataset_bin2)
-        dataset_bin3_x.append(dataset_bin3)
-        dataset_bin4_x.append(dataset_bin4)
+            #hack to change the variable of the dataset to x
+            datasets_raw[-1].changeObservableName(
+                "mllg_cat_{}".format(CAT_NAMES_ALT[cat_name]), x.GetName())
+            datasets_renamed.append(ROOT.RooDataSet(
+                "data_set_{}".format(cat_name), "data_set_{}".format(cat_name),
+                ROOT.RooArgSet(x,weight), ROOT.RooFit.WeightVar(weight)))
+            datasets_renamed[-1].append(datasets_raw[-1])
 
-        self.data_hist_bin1 = ROOT.RooDataHist("data_hist_bin1",
-            "data_hist_bin1", x, dataset_bin1_x)
-        self.data_hist_bin2 = ROOT.RooDataHist("data_hist_bin2",
-            "data_hist_bin2", x, dataset_bin2_x)
-        self.data_hist_bin3 = ROOT.RooDataHist("data_hist_bin3",
-            "data_hist_bin3", x, dataset_bin3_x)
-        self.data_hist_bin4 = ROOT.RooDataHist("data_hist_bin4",
-            "data_hist_bin4", x, dataset_bin4_x)
+            #create RooDataHist and save as an attribute of this class
+            setattr(self, "data_hist_{}".format(cat_name),
+                ROOT.RooDataHist("data_hist_{}".format(cat_name), 
+                "data_hist_{}".format(cat_name), x, datasets_renamed[-1]))
 
     def numCheck(self):
-        print("# bin1 bkg = ", self.data_hist_bin1.sumEntries())
-        print("# bin2 bkg = ", self.data_hist_bin2.sumEntries())
-        print("# bin3 bkg = ", self.data_hist_bin3.sumEntries())
-        print("# bin4 bkg = ", self.data_hist_bin4.sumEntries())
+        print("# bin1 bkg = ", self.data_hist_ggf1.sumEntries())
+        print("# bin2 bkg = ", self.data_hist_ggf2.sumEntries())
+        print("# bin3 bkg = ", self.data_hist_ggf3.sumEntries())
+        print("# bin4 bkg = ", self.data_hist_ggf4.sumEntries())
