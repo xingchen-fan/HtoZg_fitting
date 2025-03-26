@@ -189,3 +189,60 @@ class readWspMC: #Zebing core func signal samples
     def numCheck(self):
         print ('n events = ', self.hist.sumEntries())
 
+
+class readPico: #draw_pico datacard format
+    def __init__(self, x, directory=""):
+        """Initializes self.data_hist_bin1 through self.data_hist_bin4 for
+        use with HtoZg_fitting utilities
+
+        Args:
+          x: three body invariant mass RooAbsReal
+          directory: name of rawdata root file output by draw_pico
+        """
+
+        mllg_cut = '{0}>105.0&&{0}<170.0'.format(x.GetName())
+
+        root_file = ROOT.TFile(directory)
+        dataset_bin1 = (root_file.WS_data_obs_cat_ggh1
+                        .data("data_obs_cat_ggh1").reduce(mllg_cut))
+        dataset_bin2 = (root_file.WS_data_obs_cat_ggh2
+                        .data("data_obs_cat_ggh2").reduce(mllg_cut))
+        dataset_bin3 = (root_file.WS_data_obs_cat_ggh3
+                        .data("data_obs_cat_ggh3").reduce(mllg_cut))
+        dataset_bin4 = (root_file.WS_data_obs_cat_ggh4
+                        .data("data_obs_cat_ggh4").reduce(mllg_cut))
+        #in changing variable name, we wsomehow lose weights
+        #hack to change variable
+        dataset_bin1.changeObservableName('mllg_cat_ggh1',x.GetName())
+        dataset_bin2.changeObservableName('mllg_cat_ggh2',x.GetName())
+        dataset_bin3.changeObservableName('mllg_cat_ggh3',x.GetName())
+        dataset_bin4.changeObservableName('mllg_cat_ggh4',x.GetName())
+        weight = ROOT.RooRealVar("weight","",-50.0,50.0)
+
+        dataset_bin1_x = ROOT.RooDataSet("data_set_bin1","data_set_bin1",
+            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
+        dataset_bin2_x = ROOT.RooDataSet("data_set_bin2","data_set_bin2",
+            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
+        dataset_bin3_x = ROOT.RooDataSet("data_set_bin3","data_set_bin3",
+            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
+        dataset_bin4_x = ROOT.RooDataSet("data_set_bin4","data_set_bin4",
+            ROOT.RooArgSet(x,weight),ROOT.RooFit.WeightVar(weight))
+        dataset_bin1_x.append(dataset_bin1)
+        dataset_bin2_x.append(dataset_bin2)
+        dataset_bin3_x.append(dataset_bin3)
+        dataset_bin4_x.append(dataset_bin4)
+
+        self.data_hist_bin1 = ROOT.RooDataHist("data_hist_bin1",
+            "data_hist_bin1", x, dataset_bin1_x)
+        self.data_hist_bin2 = ROOT.RooDataHist("data_hist_bin2",
+            "data_hist_bin2", x, dataset_bin2_x)
+        self.data_hist_bin3 = ROOT.RooDataHist("data_hist_bin3",
+            "data_hist_bin3", x, dataset_bin3_x)
+        self.data_hist_bin4 = ROOT.RooDataHist("data_hist_bin4",
+            "data_hist_bin4", x, dataset_bin4_x)
+
+    def numCheck(self):
+        print("# bin1 bkg = ", self.data_hist_bin1.sumEntries())
+        print("# bin2 bkg = ", self.data_hist_bin2.sumEntries())
+        print("# bin3 bkg = ", self.data_hist_bin3.sumEntries())
+        print("# bin4 bkg = ", self.data_hist_bin4.sumEntries())
