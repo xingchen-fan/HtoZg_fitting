@@ -127,23 +127,29 @@ Notise that each key has the production mode name in the end, `ggf` or `vbf`. Wh
 ## Chi^2 Test (Data Sideband Fit Test)
 Laurent series is a family that we need to take extra care of, as we are not sure about what powers to use for specific category. So please run `lau2_power_finder.py`, `lau3_power_finder.py` and `lau4_power_finder.py` before running the full test.
 ```
-./lau2_power_finder.py -c ggf1 -lo -10 -hi -5
+bash$ ./lau2_power_finder.py -c ggf1 -lo -10 -hi -5
 ```
 This `/lau2_power_finder.py` command looks for the best combination of two powers between -10 and -5 for category ggf1.
 ```
-./lau3_power_finder.py -c ggf1 -lo -9 -hi -6
+bash$ ./lau3_power_finder.py -c ggf1 -lo -9 -hi -6
 ```
 This `/lau3_power_finder.py` command looks for the best combination of three powers, given -9 and -6 are the best two powers, for category ggf1.
 ```
-./lau4_power_finder.py -c ggf1 -lo -9 -mi -8 -hi -6
+bash$ ./lau4_power_finder.py -c ggf1 -lo -9 -mi -8 -hi -6
 ```
 This `/lau4_power_finder.py` command looks for the best combination of four powers, given -9, -8 and -6 are the best three powers, for category ggf1.
 Be aware that this process takes a LONG time. Values provided in the config file are found through this process, unless the data sample is changed, there is no need to run these again.
 
 To run the sideband Chi^2 fit for category ggf1 with the config file `chi2_config_xgboost_nodrop.json`, run
 ```
-./Chi2_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json >ggf1.log 
+bash$ ./Chi2_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json >ggf1.log 2>&1
 ```
+Fitting results are save into `ggf1.log`. Then, parser it into the config file if you want to update the values,
+```
+bash$ ./config_parser.py -c ggf1 -con chi2_config_xgboost_nodrop.json -log ggf1.log
+```
+Add the models that pass the test to the `"Chi2"` value of ggf1 in the config file.
+
 ## F Test
 In the `F_test.py`,  
 
