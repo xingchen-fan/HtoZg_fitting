@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath("../CMS_plotter/"))
 from bkg_functions_class import *
 import CMS_lumi
 
-def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', note = "", CMS = "Preliminary"):
+def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', note = "", CMS = "Preliminary", fullRatio = False, leftSpace=False, bins = 1):
     ROOT.gStyle.SetOptStat(0)
     CMS_lumi.lumi_sqrtS = "13 TeV"
     CMS_lumi.writeExtraText = 1
@@ -15,22 +15,30 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     if sideBand:
         datahist = datahist.reduce(ROOT.RooFit.CutRange(fitRange))
     tot = datahist.sumEntries()
-    h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
-    model_hist = SBpdf.generateBinned(x, tot, True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
+    h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
+    model_hist = SBpdf.generateBinned(x, tot, True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
     norm_hist = pdf.generateBinned(x, 100000, True)
     if sideBand: sum_SB = norm_hist.sumEntries('x', fitRange)
     else: sum_SB = norm_hist.sumEntries()
     
-    for i in range(65):
+    for i in range(int(bins * (x.getMax() - x.getMin()))):
         model_hist.SetBinError(i+1, 0)
-    ratio = ROOT.TH1D("ratio", "ratio", 65, x.getMin(), x.getMax())
+    ratio = ROOT.TH1D("ratio", "ratio", int(bins * (x.getMax() - x.getMin())), x.getMin(), x.getMax())
     ratio.Divide(h_hist, model_hist)
     ratio.SetMarkerColor(ROOT.kBlack)
     ratio.SetMarkerStyle(8)
     ratio.SetMarkerSize(1)
     ratio.SetLineColor(ROOT.kBlack)
     ratio.SetTitle("")
-    ratio.GetYaxis().SetRangeUser(0.9, 1.1)
+    if fullRatio:
+        minimum = 99999
+        for i in range(int(bins * (x.getMax() - x.getMin()))):
+            bincont = ratio.GetBinContent(i+1)
+            if bincont != 0 and bincont < minimum:
+                minimum = bincont
+        ratio.GetYaxis().SetRangeUser(minimum, ratio.GetBinContent(ratio.GetMaximumBin()))
+    else:
+        ratio.GetYaxis().SetRangeUser(0.9, 1.1)
     ratio.GetXaxis().SetTitleOffset(0.9)
     ratio.GetXaxis().SetTitleSize(0.17)
     ratio.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma}(GeV)")
@@ -40,7 +48,6 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     ratio.GetYaxis().SetTitleSize(0.17)
     ratio.GetYaxis().SetTitle("Ratio")
     ratio.GetYaxis().SetNdivisions(4)
-    
     line = ROOT.TLine( x.getMin(), 1, x.getMax(), 1)
     line.SetLineColor(ROOT.kBlack)
     line.SetLineStyle(7)
@@ -53,14 +60,13 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
 
     
     latex = ROOT.TLatex()
-    latex.SetTextSize(0.04)
+    latex.SetTextSize(0.03)
     latex.SetTextAlign(13)
-    
-    x.setBins(65)
+    x.setBins(int(bins * (x.getMax() - x.getMin())))
     show_hist = ROOT.RooDataHist("show_hist", "show_hist", x, datahist)
     #show_normhist = ROOT.RooDataHist("show_normhist", "show_normhist", x, normhist)
     ROOT.gStyle.SetOptStat(0)
-    can = ROOT.TCanvas("","", 700, 500)
+    can = ROOT.TCanvas("c1","c1", 700, 500)
     #pad1 = ROOT.TPad("pad1","",0,0.15,1,1)
     #pad2 = ROOT.TPad("pad2","",0,0,1,0.2)
     #pad1.Draw()
@@ -81,7 +87,10 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     plot.GetYaxis().SetTitleOffset(0.8)
     plot.GetYaxis().SetLabelSize(0.05)
     plot.Draw()
-    leg = ROOT.TLegend(.5,.7,.9,.8)
+    if leftSpace:
+        leg = ROOT.TLegend(.15,.7,.55,.8)
+    else:
+        leg = ROOT.TLegend(.5,.7,.9,.8)
     leg.SetBorderSize(0)
     leg.SetFillColor(0)
     leg.SetFillStyle(0)
@@ -91,7 +100,10 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     leg.AddEntry('model',pdf.GetName(),"L")
     leg.Draw("SAME")
     CMS_lumi.CMS_lumi(can, 0, 0)
-    latex.DrawLatexNDC(.6, .7, note)
+    if leftSpace:
+        latex.DrawLatexNDC(.15, .7, note)
+    else:
+        latex.DrawLatexNDC(.6, .7, note)
     can.cd(2)
     ROOT.gPad.SetPad(0.0, 0.1, 1.0, 0.3)
     ROOT.gPad.SetTopMargin(0)
@@ -99,13 +111,15 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     ratio.Draw()
     line.Draw("same")
     can.SaveAs(output_dir + title+".pdf")
-    x.setBins(260)
+    x.setBins(int(4*(x.getMax() - x.getMin())))
 
-def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', best_index = 0, CMS = "Preliminary"):
+def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', best_index = 0, CMS = "Preliminary", fullRatio = True):
     ROOT.gStyle.SetOptStat(0)
     CMS_lumi.lumi_sqrtS = "13 TeV"
     CMS_lumi.writeExtraText = 1
     CMS_lumi.extraText = "      " + CMS
+    CMS_lumi.cmsTextSize = 0.5
+    CMS_lumi.lumiTextSize = 0.5
     can2 = ROOT.TCanvas("c2","c2", 700, 500)
     can2.Divide(1,2)
     can2.cd(1)
@@ -157,6 +171,7 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
         leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName(),"L")
     leg.Draw("same")
     h_hist = show_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
+    print('xmin = ', x.getMin())
     ratio = ROOT.TH1D("ratio", "ratio", 65, x.getMin(), x.getMax())
     ratio.Divide(model_hist, h_hist)
     ratio.SetMarkerColor(best_color)
@@ -164,7 +179,15 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     ratio.SetMarkerSize(1)
     ratio.SetLineColor(best_color)
     ratio.SetTitle("")
-    ratio.GetYaxis().SetRangeUser(0.9, 1.1)
+    if fullRatio:
+        minimum = 99999
+        for i in range(int(x.getMax() - x.getMin())):
+            bincont = ratio.GetBinContent(i+1)
+            if bincont != 0 and bincont < minimum:
+                minimum = bincont
+        ratio.GetYaxis().SetRangeUser(minimum, ratio.GetBinContent(ratio.GetMaximumBin()))
+    else:
+        ratio.GetYaxis().SetRangeUser(0.9, 1.1)
     ratio.GetXaxis().SetTitleOffset(0.9)
     ratio.GetXaxis().SetTitleSize(0.17)
     ratio.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma}/(GeV)")

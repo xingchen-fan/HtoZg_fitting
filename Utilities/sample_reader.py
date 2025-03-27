@@ -189,3 +189,225 @@ class readWspMC: #Zebing core func signal samples
     def numCheck(self):
         print ('n events = ', self.hist.sumEntries())
 
+
+def readRuiROOTdata(x, direct='', bdt_low=0, bdt_high=0, cat=''):
+    chain = ROOT.TChain('TreeB')
+    chain.Add(direct + 'data_2016APV_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2016_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2017_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2018_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2022EE_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2022_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2023_pinnacles_fullrange.root')
+    chain.Add(direct + 'data_2023BPix_pinnacles_fullrange.root')
+    hist_TH1 = ROOT.TH1F(cat+'_th1f', cat+'_th1f', 340, 95, 180)
+    for entry in chain:
+        if entry.bdt_score_test > bdt_low and entry.bdt_score_test < bdt_high:
+            if cat == 'ggf1' or cat == 'ggf2' or cat == 'ggf3' or cat == 'ggf4' or cat == 'ggF1' or cat == 'ggF2' or cat == 'ggF3' or cat == 'ggF4':
+                if entry.met < 90:
+                    hist_TH1.Fill(entry.llphoton_refit_m)
+            else:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+    hist_data = ROOT.RooDataHist('hist_data', 'hist_data', x, hist_TH1)
+    return hist_data
+class readRuiROOTggFdata:
+    def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
+        chain = ROOT.TChain('TreeB')
+        chain.Add(direct + 'data_2016APV_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2016_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2017_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2018_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2022EE_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2022_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2023_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'data_2023BPix_pinnacles_ggf_fixed.root')
+        hist1_TH1 = ROOT.TH1F('ggf1_th1f', 'ggf1_th1f', 340, 95, 180)
+        hist2_TH1 = ROOT.TH1F('ggf2_th1f', 'ggf2_th1f', 340, 95, 180)
+        hist3_TH1 = ROOT.TH1F('ggf3_th1f', 'ggf3_th1f', 340, 95, 180)
+        hist4_TH1 = ROOT.TH1F('ggf4_th1f', 'ggf4_th1f', 340, 95, 180)
+        for entry in chain:
+            if entry.bdt_score_test > bdt1 and entry.met < 90:
+                hist1_TH1.Fill(entry.llphoton_refit_m)
+            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.met < 90:
+                hist2_TH1.Fill(entry.llphoton_refit_m)
+            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.met < 90:
+                hist3_TH1.Fill(entry.llphoton_refit_m)
+            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.met < 90:
+                hist4_TH1.Fill(entry.llphoton_refit_m)
+        self.ggf1 = ROOT.RooDataHist('hist_ggf1_data', 'hist_ggf1_data', x, hist1_TH1)
+        self.ggf2 = ROOT.RooDataHist('hist_ggf2_data', 'hist_ggf2_data', x, hist2_TH1)
+        self.ggf3 = ROOT.RooDataHist('hist_ggf3_data', 'hist_ggf3_data', x, hist3_TH1)
+        self.ggf4 = ROOT.RooDataHist('hist_ggf4_data', 'hist_ggf4_data', x, hist4_TH1)
+
+class readRuiROOTVBFdata:
+    def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
+        chain = ROOT.TChain('outtree')
+        chain.Add(direct + 'data_2016APV_output.root')
+        chain.Add(direct + 'data_2016_output.root')
+        chain.Add(direct + 'data_2017_output.root')
+        chain.Add(direct + 'data_2018_output.root')
+        chain.Add(direct + 'data_2022EE_output.root')
+        chain.Add(direct + 'data_2022_output.root')
+        chain.Add(direct + 'data_2023_output.root')
+        chain.Add(direct + 'data_2023BPix_output.root')
+        hist1_TH1 = ROOT.TH1F('vbf1_th1f', 'vbf1_th1f', 340, 95, 180)
+        hist2_TH1 = ROOT.TH1F('vbf2_th1f', 'vbf2_th1f', 340, 95, 180)
+        hist3_TH1 = ROOT.TH1F('vbf3_th1f', 'vbf3_th1f', 340, 95, 180)
+        hist4_TH1 = ROOT.TH1F('vbf4_th1f', 'vbf4_th1f', 340, 95, 180)
+        for entry in chain:
+            if entry.BDT_score_2j > bdt1:
+                hist1_TH1.Fill(entry.llphoton_refit_m)
+            elif entry.BDT_score_2j > bdt2 and entry.BDT_score_2j < bdt1 :
+                hist2_TH1.Fill(entry.llphoton_refit_m)
+            elif entry.BDT_score_2j > bdt3 and entry.BDT_score_2j < bdt2 :
+                hist3_TH1.Fill(entry.llphoton_refit_m)
+            elif entry.BDT_score_2j > -1 and entry.BDT_score_2j < bdt3 :
+                hist4_TH1.Fill(entry.llphoton_refit_m)
+        self.vbf1 = ROOT.RooDataHist('hist_vbf1_data', 'hist_vbf1_data', x, hist1_TH1)
+        self.vbf2 = ROOT.RooDataHist('hist_vbf2_data', 'hist_vbf2_data', x, hist2_TH1)
+        self.vbf3 = ROOT.RooDataHist('hist_vbf3_data', 'hist_vbf3_data', x, hist3_TH1)
+        self.vbf4 = ROOT.RooDataHist('hist_vbf4_data', 'hist_vbf4_data', x, hist4_TH1)
+        
+class readRuiROOTggFSignalggF:
+    def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):
+        chain = ROOT.TChain('TreeS')
+        chain.Add(direct + 'GGF_'+year+'_pinnacles_ggf_fixed.root')
+        #chain.Add(direct + 'VBF_'+year+'_pinnacles_ggf_fixed.root')
+        hist1_TH1_el = ROOT.TH1F('ggfSig1_th1f_ggfel', 'ggfSig1_th1f_ggfel', 340, 95, 180)
+        hist2_TH1_el = ROOT.TH1F('ggfSig2_th1f_ggfel', 'ggfSig2_th1f_ggfel', 340, 95, 180)
+        hist3_TH1_el = ROOT.TH1F('ggfSig3_th1f_ggfel', 'ggfSig3_th1f_ggfel', 340, 95, 180)
+        hist4_TH1_el = ROOT.TH1F('ggfSig4_th1f_ggfel', 'ggfSig4_th1f_ggfel', 340, 95, 180)
+        hist1_TH1_mu = ROOT.TH1F('ggfSig1_th1f_ggfmu', 'ggfSig1_th1f_ggfmu', 340, 95, 180)
+        hist2_TH1_mu = ROOT.TH1F('ggfSig2_th1f_ggfmu', 'ggfSig2_th1f_ggfmu', 340, 95, 180)
+        hist3_TH1_mu = ROOT.TH1F('ggfSig3_th1f_ggfmu', 'ggfSig3_th1f_ggfmu', 340, 95, 180)
+        hist4_TH1_mu = ROOT.TH1F('ggfSig4_th1f_ggfmu', 'ggfSig4_th1f_ggfmu', 340, 95, 180)
+        for entry in chain:
+            if entry.bdt_score_test > bdt1 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist1_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist1_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist2_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist2_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist3_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist3_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist4_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist4_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+        self.ggf1El = ROOT.RooDataHist('hist_ggf1_sig_ggf_el', 'hist_ggf1_sig_ggf_el', x, hist1_TH1_el)
+        self.ggf2El = ROOT.RooDataHist('hist_ggf2_sig_ggf_el', 'hist_ggf2_sig_ggf_el', x, hist2_TH1_el)
+        self.ggf3El = ROOT.RooDataHist('hist_ggf3_sig_ggf_el', 'hist_ggf3_sig_ggf_el', x, hist3_TH1_el)
+        self.ggf4El = ROOT.RooDataHist('hist_ggf4_sig_ggf_el', 'hist_ggf4_sig_ggf_el', x, hist4_TH1_el)
+        self.ggf1Mu = ROOT.RooDataHist('hist_ggf1_sig_ggf_mu', 'hist_ggf1_sig_ggf_mu', x, hist1_TH1_mu)
+        self.ggf2Mu = ROOT.RooDataHist('hist_ggf2_sig_ggf_mu', 'hist_ggf2_sig_ggf_mu', x, hist2_TH1_mu)
+        self.ggf3Mu = ROOT.RooDataHist('hist_ggf3_sig_ggf_mu', 'hist_ggf3_sig_ggf_mu', x, hist3_TH1_mu)
+        self.ggf4Mu = ROOT.RooDataHist('hist_ggf4_sig_ggf_mu', 'hist_ggf4_sig_ggf_mu', x, hist4_TH1_mu)
+
+class readRuiROOTggFSignalVBF:
+    def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):
+        chain = ROOT.TChain('TreeS')
+        #chain.Add(direct + 'GGF_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'VBF_'+year+'_pinnacles_ggf_fixed.root')
+        hist1_TH1_el = ROOT.TH1F('ggfSig1_th1f_vbf_el', 'ggfSig1_th1f_vbf_el', 340, 95, 180)
+        hist2_TH1_el = ROOT.TH1F('ggfSig2_th1f_vbf_el', 'ggfSig2_th1f_vbf_el', 340, 95, 180)
+        hist3_TH1_el = ROOT.TH1F('ggfSig3_th1f_vbf_el', 'ggfSig3_th1f_vbf_el', 340, 95, 180)
+        hist4_TH1_el = ROOT.TH1F('ggfSig4_th1f_vbf_el', 'ggfSig4_th1f_vbf_el', 340, 95, 180)
+        hist1_TH1_mu = ROOT.TH1F('ggfSig1_th1f_vbf_mu', 'ggfSig1_th1f_vbf_mu', 340, 95, 180)
+        hist2_TH1_mu = ROOT.TH1F('ggfSig2_th1f_vbf_mu', 'ggfSig2_th1f_vbf_mu', 340, 95, 180)
+        hist3_TH1_mu = ROOT.TH1F('ggfSig3_th1f_vbf_mu', 'ggfSig3_th1f_vbf_mu', 340, 95, 180)
+        hist4_TH1_mu = ROOT.TH1F('ggfSig4_th1f_vbf_mu', 'ggfSig4_th1f_vbf_mu', 340, 95, 180)
+        for entry in chain:
+            if entry.bdt_score_test > bdt1 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist1_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist1_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist2_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist2_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist3_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist3_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.met < 90 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist4_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist4_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+        self.ggf1El = ROOT.RooDataHist('hist_ggf1_sig_vbf_el', 'hist_ggf1_sig_vbf_el', x, hist1_TH1_el)
+        self.ggf2El = ROOT.RooDataHist('hist_ggf2_sig_vbf_el', 'hist_ggf2_sig_vbf_el', x, hist2_TH1_el)
+        self.ggf3El = ROOT.RooDataHist('hist_ggf3_sig_vbf_el', 'hist_ggf3_sig_vbf_el', x, hist3_TH1_el)
+        self.ggf4El = ROOT.RooDataHist('hist_ggf4_sig_vbf_el', 'hist_ggf4_sig_vbf_el', x, hist4_TH1_el)
+        self.ggf1Mu = ROOT.RooDataHist('hist_ggf1_sig_vbf_mu', 'hist_ggf1_sig_vbf_mu', x, hist1_TH1_mu)
+        self.ggf2Mu = ROOT.RooDataHist('hist_ggf2_sig_vbf_mu', 'hist_ggf2_sig_vbf_mu', x, hist2_TH1_mu)
+        self.ggf3Mu = ROOT.RooDataHist('hist_ggf3_sig_vbf_mu', 'hist_ggf3_sig_vbf_mu', x, hist3_TH1_mu)
+        self.ggf4Mu = ROOT.RooDataHist('hist_ggf4_sig_vbf_mu', 'hist_ggf4_sig_vbf_mu', x, hist4_TH1_mu)
+
+class readRuiROOTVBFSignalggF:
+    def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):
+        chain = ROOT.TChain('outtree')
+        chain.Add(direct + 'GGF_'+year+'_pinnacles_ggf_fixed.root')
+        #chain.Add(direct + 'VBF_'+year+'_pinnacles_ggf_fixed.root')
+        hist1_TH1_el = ROOT.TH1F('vbfSig1_th1f_ggf_el', 'vbfSig1_th1f_ggf_el', 340, 95, 180)
+        hist2_TH1_el = ROOT.TH1F('vbfSig2_th1f_ggf_el', 'vbfSig2_th1f_ggf_el', 340, 95, 180)
+        hist3_TH1_el = ROOT.TH1F('vbfSig3_th1f_ggf_el', 'vbfSig3_th1f_ggf_el', 340, 95, 180)
+        hist4_TH1_el = ROOT.TH1F('vbfSig4_th1f_ggf_el', 'vbfSig4_th1f_ggf_el', 340, 95, 180)
+        hist1_TH1_mu = ROOT.TH1F('vbfSig1_th1f_ggf_mu', 'vbfSig1_th1f_ggf_mu', 340, 95, 180)
+        hist2_TH1_mu = ROOT.TH1F('vbfSig2_th1f_ggf_mu', 'vbfSig2_th1f_ggf_mu', 340, 95, 180)
+        hist3_TH1_mu = ROOT.TH1F('vbfSig3_th1f_ggf_mu', 'vbfSig3_th1f_ggf_mu', 340, 95, 180)
+        hist4_TH1_mu = ROOT.TH1F('vbfSig4_th1f_ggf_mu', 'vbfSig4_th1f_ggf_mu', 340, 95, 180)
+        for entry in chain:
+            if entry.bdt_score_test > bdt1 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist1_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist1_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist2_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist2_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist3_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist3_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist4_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist4_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+        self.vbf1El = ROOT.RooDataHist('hist_vbf1_sig_ggf_el', 'hist_vbf1_sig_ggf_el', x, hist1_TH1_el)
+        self.vbf2El = ROOT.RooDataHist('hist_vbf2_sig_ggf_el', 'hist_vbf2_sig_ggf_el', x, hist2_TH1_el)
+        self.vbf3El = ROOT.RooDataHist('hist_vbf3_sig_ggf_el', 'hist_vbf3_sig_ggf_el', x, hist3_TH1_el)
+        self.vbf4El = ROOT.RooDataHist('hist_vbf4_sig_ggf_el', 'hist_vbf4_sig_ggf_el', x, hist4_TH1_el)
+        self.vbf1Mu = ROOT.RooDataHist('hist_vbf1_sig_ggf_mu', 'hist_vbf1_sig_ggf_mu', x, hist1_TH1_mu)
+        self.vbf2Mu = ROOT.RooDataHist('hist_vbf2_sig_ggf_mu', 'hist_vbf2_sig_ggf_mu', x, hist2_TH1_mu)
+        self.vbf3Mu = ROOT.RooDataHist('hist_vbf3_sig_ggf_mu', 'hist_vbf3_sig_ggf_mu', x, hist3_TH1_mu)
+        self.vbf4Mu = ROOT.RooDataHist('hist_vbf4_sig_ggf_mu', 'hist_vbf4_sig_ggf_mu', x, hist4_TH1_mu)
+
+class readRuiROOTVBFSignalVBF:
+    def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):
+        chain = ROOT.TChain('outtree')
+        #chain.Add(direct + 'GGF_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'VBF_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'ZH_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'WH_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'ttH_'+year+'_pinnacles_ggf_fixed.root')
+        hist1_TH1_el = ROOT.TH1F('vbfSig1_th1f_vbf_el', 'vbfSig1_th1f_vbf_el', 340, 95, 180)
+        hist2_TH1_el = ROOT.TH1F('vbfSig2_th1f_vbf_el', 'vbfSig2_th1f_vbf_el', 340, 95, 180)
+        hist3_TH1_el = ROOT.TH1F('vbfSig3_th1f_vbf_el', 'vbfSig3_th1f_vbf_el', 340, 95, 180)
+        hist4_TH1_el = ROOT.TH1F('vbfSig4_th1f_vbf_el', 'vbfSig4_th1f_vbf_el', 340, 95, 180)
+        hist1_TH1_mu = ROOT.TH1F('vbfSig1_th1f_vbf_mu', 'vbfSig1_th1f_vbf_mu', 340, 95, 180)
+        hist2_TH1_mu = ROOT.TH1F('vbfSig2_th1f_vbf_mu', 'vbfSig2_th1f_vbf_mu', 340, 95, 180)
+        hist3_TH1_mu = ROOT.TH1F('vbfSig3_th1f_vbf_mu', 'vbfSig3_th1f_vbf_mu', 340, 95, 180)
+        hist4_TH1_mu = ROOT.TH1F('vbfSig4_th1f_vbf_mu', 'vbfSig4_th1f_vbf_mu', 340, 95, 180)
+        for entry in chain:
+            if entry.bdt_score_test > bdt1 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist1_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist1_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist2_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist2_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist3_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist3_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.weight_corr < 0.5:
+                if entry.ll_lepid == 11: hist4_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
+                elif entry.ll_lepid == 13: hist4_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
+        self.vbf1El = ROOT.RooDataHist('hist_vbf1_sig_vbf_el', 'hist_vbf1_sig_vbf_el', x, hist1_TH1_el)
+        self.vbf2El = ROOT.RooDataHist('hist_vbf2_sig_vbf_el', 'hist_vbf2_sig_vbf_el', x, hist2_TH1_el)
+        self.vbf3El = ROOT.RooDataHist('hist_vbf3_sig_vbf_el', 'hist_vbf3_sig_vbf_el', x, hist3_TH1_el)
+        self.vbf4El = ROOT.RooDataHist('hist_vbf4_sig_vbf_el', 'hist_vbf4_sig_vbf_el', x, hist4_TH1_el)
+        self.vbf1Mu = ROOT.RooDataHist('hist_vbf1_sig_vbf_mu', 'hist_vbf1_sig_vbf_mu', x, hist1_TH1_mu)
+        self.vbf2Mu = ROOT.RooDataHist('hist_vbf2_sig_vbf_mu', 'hist_vbf2_sig_vbf_mu', x, hist2_TH1_mu)
+        self.vbf3Mu = ROOT.RooDataHist('hist_vbf3_sig_vbf_mu', 'hist_vbf3_sig_vbf_mu', x, hist3_TH1_mu)
+        self.vbf4Mu = ROOT.RooDataHist('hist_vbf4_sig_vbf_mu', 'hist_vbf4_sig_vbf_mu', x, hist4_TH1_mu)
+
