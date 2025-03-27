@@ -66,7 +66,7 @@ Each year(era), category, lepton flavor and production mode has its own signal m
 ```
 sig_model = combineSignal(x, MH, cat='', config='')
 ```
-To fit the signal MC samples, go to the `Signal_model_preparation` folder and `./run.sh` where the fitting results are save to a log in `/logs` and then parsed to a config file. Right now we only use DSCB model.
+To fit the signal MC samples, go to the `Signal_model_preparation/` folder and `./run.sh` where the fitting results are save to a log in `/logs` and then parsed to a config file. Right now we only use DSCB model.
 
 ## Minimizer
 Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. A typical minimization of certain test statistics is like this:
@@ -151,9 +151,14 @@ bash$ ./config_parser.py -c ggf1 -con chi2_config_xgboost_nodrop.json -log ggf1.
 ```
 Add the models that pass the test to the `"Chi2"` value of ggf1 in the config file.
 
-## F Test
-In the `F_test.py`,  
+## Spurious Signal Test
+To make it easier for people to run this test, the simulations with extended DY are saved as histograms at `Data/`. To run the test in ggf1, for example,
+```
+bash$ ./Spurious_signal_test_hist.py -c ggf1 -con chi2_config_xgboost_nodrop.json
+```
+The signal model used is the combination of the individual models described previously by defining a `combineSignal` object. Background models tested are selected based on the `"Chi2"` value in the config file.
 
+## F Test
 One single F test is defined as
 ```
 singleFTestSidebandNLL(x, pdf_list, histogram, cat, eps, offset, strategy, range, className, sideBand = True, FT = True)
@@ -164,12 +169,20 @@ When calling the F test, NLL fit is used by default. A command to run the F test
 ```
 bash$ ./F_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json
 ```
-Output has both the test statistics and the P-values, as well as a multi-function plot.
+Background models tested are selected based on the `"SST"` value in the config file.Output has both the test statistics and the P-values, as well as a multi-function plot.
+## Make Workspaces 
+To operate the next test, we need to make toys with `combine`, thus need datacards and worksapces. To generate a workspace for ggf1, for example,
+```
+bash$ ./make_workspace_bias_test.py -c ggf1 -a 0 -con chi2_config_xgboost_nodrop.json
+```
+where `-a` means whether you want to generate and store an Asimov histogram in the workspace. This helps us to cross check with `combine` expected significance calculation.
 
-## Spurious Signal Test
-In the `Spurious_signal_test.py`, please change the sample directory. Chi2 fit with SumW2 and Poisson options are used in this test. By default, the signal model is Double-sided Crystal Ball (DSCB), and the signal yield with the errors are reported. Both the signal fit and S+B fit plots are saved.
+To generate the signal workspace only, run
+```
+bash$ ./make_signal_workspace.py -c ggf1 -con chi2_config_xgboost_nodrop.json
+```
 
-## Bias Test
+## CMS Bias Test
 Two approaches are available for the envelope bias test: using the `combine`, or using `Bias_test/Bias_test.py`. 
 ### Using `Bias_test/Bias_test.py`
 ```
