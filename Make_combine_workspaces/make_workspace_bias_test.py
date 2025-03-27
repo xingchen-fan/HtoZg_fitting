@@ -36,8 +36,9 @@ CAT = args.cat
 setting = configs[CAT]
 lowx = setting["Range"]
 
-# Save all the fit results?
+# Save all the fit results? Make signal workspace?
 LOG = True
+SIGNAL = False
 
 # Define variables
 x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
@@ -105,19 +106,21 @@ else:
         elif CAT == 'vbf4':
             hist_data = read_data.vbf4
 
+
 # Signal model preparation ------------------------
-#hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
-#hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
-sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
-MH.setVal(125)
-MH.setConstant(True)
-N_sig = sig_model.ntot
-N = hist_data.sumEntries()
-#N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
+if SIGNAL:
+    #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
+    #hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
+    sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
+    MH.setVal(125)
+    MH.setConstant(True)
+    N_sig = sig_model.ntot
+    N = hist_data.sumEntries()
+    #N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
+    print("N sig = ", N_sig)
 # -------------------------------------------------
 
 
-print("N sig = ", N_sig)
 #print("N sig window= ", N_sig_window)
 
 # Assume we have ...... in the profile, the signal model is combined DSCB
@@ -142,22 +145,7 @@ MH.setConstant(True)
 
 #plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
 profile_ = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
-profile = []
-
-if "bern2" in setting["FT"]: profile.append(profile_.bern2_model)
-if "bern3" in setting["FT"]: profile.append(profile_.bern3_model)
-if "bern4" in setting["FT"]: profile.append(profile_.bern4_model)
-if "bern5" in setting["FT"]: profile.append(profile_.bern5_model)
-if "pow1" in setting["FT"]: profile.append(profile_.pow1_model)
-if "pow2" in setting["FT"]: profile.append(profile_.pow2_model)
-if "pow3" in setting["FT"]: profile.append(profile_.pow3_model)
-if "exp1" in setting["FT"]: profile.append(profile_.exp1_model)
-if "exp2" in setting["FT"]: profile.append(profile_.exp2_model)
-if "exp3" in setting["FT"]: profile.append(profile_.exp3_model)
-if "lau2" in setting["FT"]: profile.append(profile_.lau2_model)
-if "lau3" in setting["FT"]: profile.append(profile_.lau3_model)
-if "lau4" in setting["FT"]: profile.append(profile_.lau4_model)
-if "modg" in setting["FT"]: profile.append(profile_.modg_model)
+profile = profile_.testSelection("FT")
 
 stat_list = []
 cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
@@ -185,7 +173,7 @@ c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 3*N_sig)
 c2 = ROOT.RooRealVar('c2','c2', N - N_sig, 0, 3*N)
 tot_model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, profile[best_].pdf), ROOT.RooArgList(c1, c2))
 hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
-hist_asimov.SetNameTitle('hist_asimov', 'hist_asimov')
+hist_asimov.SetNameTitle('hist_' + CAT + '_asimov', 'hist_' + CAT + '_asimov')
 '''
 nll1 = ROOT.RooNLLVar('nll1', 'nll2',  profile[best_].pdf, hist_asimov)
 r1 = Minimizer_NLL(nll1, -1, eps, True, strategy)
@@ -196,12 +184,13 @@ nll2_val = nll2.getVal()
 '''
 
 # Create signal workspace
-f_out1 = ROOT.TFile("workspaces/workspace_sig_" + CAT + ".root", "RECREATE")
-w_sig = ROOT.RooWorkspace("workspace_sig","workspace_sig")
-getattr(w_sig, "import")(sig_model.pdf)
-w_sig.Print()
-w_sig.Write()
-f_out1.Close()
+if SIGNAL:
+    f_out1 = ROOT.TFile("workspaces/workspace_sig_" + CAT + ".root", "RECREATE")
+    w_sig = ROOT.RooWorkspace("workspace_sig","workspace_sig")
+    getattr(w_sig, "import")(sig_model.pdf)
+    w_sig.Print()
+    w_sig.Write()
+    f_out1.Close()
 
 # Create background workspace 
 cate = ROOT.RooCategory("pdfindex_"+CAT, "Index of Pdf which is active for "+CAT)
