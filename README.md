@@ -33,6 +33,12 @@ Cornell `.dat` files have specific columns for relevant variables, make sure ass
 
 The current Cornell samples are available at the [link](https://cernbox.cern.ch/s/EIUbbYia6JCpfC6). `sample_reader.readDat()` requires two directory inputs, first one for the MC and second for the data. If both MC and data samples are stored in the same directory, you still need to provide two same directories.
 
+Update 3/27/25: Run2+3 data samples are read from Rui's dir by `readRuiROOTggFdata` and `readRuiROOTVBFdata`, and signal MC samples are read by `readRuiROOTggFSignalggF`, `readRuiROOTggFSignalVBF`, `readRuiROOTVBFSignalggF` and `readRuiROOTVBFSignalVBF`. They all share the same pattern of usage:
+```
+readRuiROOTggFdata(x, direct='', year='', bdt1=0, bdt2=0, bdt3=0)
+```
+Samples are read by the year and each reader object has nCategory of `RooDataHist` for data and nCategory * 2 of `RooDataHist` for signal.
+
 ## Background Functions
 The functions are defined in `Utilities/bkg_functions_class.py`. A typical definition of a model is like this: 
 ```
@@ -85,9 +91,61 @@ Each category has its own multi-layer dictionary, for example, for ggf1:
 ```
 The value of `Range` is the starting mllg value of the fitting range of this category. Lists after the key `Chi2`, `SST`, `FT` and `CMSBias` contain the names of the background functions that pass the corresponding test. And the contents of the function keys, such as `bern2`, `bern3`, are the post-fit values of the models. They are used as initial values for the next fit.
 ### Signal config file
+We split the signal model into individual ones depending on the year(era), lepton flavor and production mode. A typical block in the DSCB config file looks like this:
+```
+{
+    "ggf1": {
+        "2016": {
+            "el": {
+                "disigma ggf": 1,
+                "MH ggf": 124.99,
+                "nexp ggf": 0.31,
+                "sigmaL ggf": 0.84726,
+                "sigmaR ggf": 0.39915,
+                "nL ggf": 5.327,
+                "nR ggf": 6.3908,
+                "alphaL ggf": 0.55437,
+                "alphaR ggf": 0.53537,
 
+                "disigma vbf": 1,
+                "MH vbf": 124.99,
+                "nexp vbf": 0.05,
+                "sigmaL vbf": 0.8124,
+                "sigmaR vbf": 0.43476,
+                "nL vbf": 5.5343,
+                "nR vbf": 6.6618,
+                "alphaL vbf": 0.5494,
+                "alphaR vbf": 0.55964
+            },
+...
+        }
+    }
+}
+
+```
+Notise that each key has the production mode name in the end, `ggf` or `vbf`. Whether two sigmas are used in the model is controled by `disigma` and `nexp` shows the expected signal events in this category, year, lepton channel and production mode. The rest of parameter values is obvious as they are the post-fit values.
+## Chi^2 Test (Data Sideband Fit Test)
+Laurent series is a family that we need to take extra care of, as we are not sure about what powers to use for specific category. So please run `lau2_power_finder.py`, `lau3_power_finder.py` and `lau4_power_finder.py` before running the full test.
+```
+./lau2_power_finder.py -c ggf1 -lo -10 -hi -5
+```
+This `/lau2_power_finder.py` command looks for the best combination of two powers between -10 and -5 for category ggf1.
+```
+./lau3_power_finder.py -c ggf1 -lo -9 -hi -6
+```
+This `/lau3_power_finder.py` command looks for the best combination of three powers, given -9 and -6 are the best two powers, for category ggf1.
+```
+./lau4_power_finder.py -c ggf1 -lo -9 -mi -8 -hi -6
+```
+This `/lau4_power_finder.py` command looks for the best combination of four powers, given -9, -8 and -6 are the best three powers, for category ggf1.
+Be aware that this process takes a LONG time. Values provided in the config file are found through this process, unless the data sample is changed, there is no need to run these again.
+
+To run the sideband Chi^2 fit for category ggf1 with the config file `chi2_config_xgboost_nodrop.json`, run
+```
+./Chi2_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json >ggf1.log 
+```
 ## F Test
-In the `F_test.py`, please change the sample directory. F test of multiple categories can happen in one run, and the print out will become messy. So please modify the file so that you do one category at a time. 
+In the `F_test.py`,  
 
 One single F test is defined as
 ```
