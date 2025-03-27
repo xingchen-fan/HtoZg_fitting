@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import ROOT
 import os
 import sys
+import json
 import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
@@ -10,46 +12,21 @@ from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
-#ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+from profile_class import *
+ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 parser = argparse.ArgumentParser(description = "F test bin and function class")
 #parser.add_argument("method")
-parser.add_argument("category")
-parser.add_argument("xlow")
-parser.add_argument("function")
+parser.add_argument('-c', '--cat', help="category")
+parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
-#if not(args.method == "Chi2" or args.method == "NLL") :
-#   print("Please use the correct method.")
-#sys.exit(1)
+jfile = open('../Config/'+args.config, 'r')
+configs = json.load(jfile)
+CAT = args.cat
+setting = configs[CAT]
+lowx = setting["Range"]
 
-
-# def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = "Poisson", offset = False):
-#     bern2_model = Bern2Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 10, 7., 105., \
-#                                   printLevel = -1, eps = 1, offSet = offset, strategy = 0)
-#     bern2_model[0].Print("v")
-#     bern3_model = Bern3Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 50, 7., 105.,\
-#                                   printLevel = -1, eps = 1, offSet = offset, strategy = 0)
-#     bern3_model[0].Print("v")
-#     bern4_model = Bern4Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 50, 7., 105.,\
-#                                   printLevel = -1, eps = 1, offSet = offset, strategy = 0)
-#     bern4_model[0].Print("v")
-#     bern5_model = Bern5Minization(x, gauss_mu, histogram, method, e_type, cat, 10, 0.3, 50, 7., 105.,\
-#                                   printLevel = -1, eps = 1, offSet = offset, strategy = 0)
-#     bern5_model[0].Print("v")
-
-    
-#     stat = [bern2_model[1], bern3_model[1], bern4_model[1], bern5_model[1]]
-#     fs = []
-#     if method == "Chi2":
-#         for i in range(len(stat) - 1):
-#             fs.append(ROOT.Math.fdistribution_cdf_c((stat[i] - stat[i+1])*(260-5-i)/stat[i+1], 1, 260-5-i))
-#     elif method == "NLL":
-#         for i in range(len(stat) - 1):
-#             fs.append(ROOT.Math.chisquared_cdf_c(2*(stat[i] - stat[i+1]), 1))
-
-#     print(method, " = ", stat)
-#     print("P-value = ", fs)
 
 def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, className = "Default"):
     if e_type == "Poisson": error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
@@ -69,65 +46,7 @@ def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, 
     print(className, " Chi2 = ", chi2_)
 
     
-'''
-def singleBernFTest(x, gauss_mu, histogram, cat = "", method = "Chi2", e_type = "Poisson", eps = 0.1, offset = False, strategy = 0, range_ = "", n_bins = 260):
-    bern2_model = Bern2Class(x, gauss_mu, cat, 10, 0.3, 10, 7., 105.)
-    bern3_model = Bern3Class(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern4_model = Bern4Class(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    bern5_model = Bern5Class(x, gauss_mu, cat, 10, 0.3, 50, 7., 105.)
-    if e_type == "Poisson": error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
-    elif e_type == "SumW2": error = ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)
-    #cuthistogram = histogram.reduce(ROOT.RooFit.CutRange("left"))
-    if method == "Chi2": 
-        stat1 = ROOT.RooChi2Var("stat_bern2_" + cat, "stat bern2 " + cat, bern2_model.pdf,  histogram, error)
-        stat2 = ROOT.RooChi2Var("stat_bern3_" + cat, "stat bern3 " + cat, bern3_model.pdf,  histogram, error)
-        stat3 = ROOT.RooChi2Var("stat_bern4_" + cat, "stat bern4 " + cat, bern4_model.pdf,  histogram, error)
-        stat4 = ROOT.RooChi2Var("stat_bern5_" + cat, "stat bern5 " + cat, bern5_model.pdf,  histogram, error)
-    elif method == "NLL":
-        stat1 = ROOT.RooNLLVar("stat_bern2_" + cat, "stat bern2 " + cat, bern2_model.pdf,  histogram, ROOT.RooFit.Range(range_))
-        stat2 = ROOT.RooNLLVar("stat_bern3_" + cat, "stat bern3 " + cat, bern3_model.pdf,  histogram, ROOT.RooFit.Range(range_))
-        stat3 = ROOT.RooNLLVar("stat_bern4_" + cat, "stat bern4 " + cat, bern4_model.pdf,  histogram, ROOT.RooFit.Range(range_))
-        stat4 = ROOT.RooNLLVar("stat_bern5_" + cat, "stat bern5 " + cat, bern5_model.pdf,  histogram, ROOT.RooFit.Range(range_))
 
-    stats = [stat1, stat2, stat3, stat4]
-    if method == "Chi2": 
-        for entry in stats:
-            print(entry.GetTitle())
-            Minimizer_Chi2(entry, -1, 100, False, strategy)
-            r = Minimizer_Chi2(entry, -1, eps, offset, strategy)
-            r.Print("V")
-            # print("Cov q = ", r.covQual(), " status = ", r.status(), end="\n\n")
-    elif method == "NLL": 
-        for entry in stats:
-            print(entry.GetTitle())
-            Minimizer_NLL(entry, -1, 100, False, strategy)
-            r = Minimizer_NLL(entry, -1, eps, offset, strategy)
-            r.Print("V")
-    output = [stat1.getVal(), stat2.getVal(), stat3.getVal(), stat4.getVal()]
-    #res = bern4_model.pdf.chi2FitTo(cuthistogram, ROOT.RooFit.Range("left"), error, ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.Save(True))
-    #res.Print("V")
-    fs = []
-    bern2_model.checkBond()
-    bern3_model.checkBond()
-    bern4_model.checkBond()
-    bern5_model.checkBond()
-    if method == "Chi2":
-        for i in range(len(output) - 1):
-            fs.append(ROOT.Math.fdistribution_cdf_c((output[i] - output[i+1])*(260-5-i)/output[i+1], 1, 260-5-i))
-    elif method == "NLL":
-        for i in range(len(output) - 1):
-            fs.append(ROOT.Math.chisquared_cdf_c(2*(output[i] - output[i+1]), 1))
-
-    print(method, " = ", output)
-    if method == "Chi2": print("goodness = ", [ROOT.Math.chisquared_cdf_c(output[i], n_bins - 4 -i)for i in range(len(output))])
-    print("P-value = ", fs)
-    plotClass(x, histogram, bern2_model.pdf, title="Bern2 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
-    plotClass(x, histogram, bern3_model.pdf, title="Bern3 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
-    plotClass(x, histogram, bern4_model.pdf, title="Bern4 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
-    plotClass(x, histogram, bern5_model.pdf, title="Bern5 " + cat, output_dir="plots/", sideBand = True, fitRange = range_)
-
-    multiPlotClass(x, histogram, [bern2_model, bern3_model, bern4_model, bern5_model], title="bern multi " + cat, output_dir="plots/", sideBand=True, fitRange= range_)
-'''
 def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = True, strategy = 0, range_= "", className = "Default", sideBand = True, FT = True):
     stats = []
     fitres = []
@@ -152,7 +71,6 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         entry.checkBond()
         plotClass(x, histogram, entry.pdf, entry.SBpdf, title=entry.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = sideBand, fitRange = range_)
 
-    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=sideBand, fitRange= range_)
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
     dif = []
@@ -166,6 +84,12 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     for i in range(len(stats)):
         corrNLL.append(stats[i].getVal()+ 0.5 * fitres[i].floatParsFinal().getSize())
     print("corr NLL = ", corrNLL)
+    highest = 0
+    for i, f in enumerate(fs):
+        if f<0.05:
+            highest = i+1
+        else: break
+    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=sideBand, fitRange= range_, best_index = highest)
 
 # def customNLL(x, histogram, modelClass):
 #     x_list = ROOT.RooArgList("x_list")
@@ -174,14 +98,14 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
-lowx =float(args.xlow)
 
 # Define variables
 x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", lowx, lowx + 65.)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
-year = ROOT.RooRealVar("year", "year", 2015, 2019)
+year = ROOT.RooRealVar("year", "year", 2015, 21000)
+w_year = ROOT.RooRealVar("w_year", "w_year", 0, 100)
 lep = ROOT.RooRealVar("lep", "lep", 0, 1) #0 = electron, 1 = muon
 ph_eta = ROOT.RooRealVar("ph_eta", "ph_eta", -3, 3)
 nlep = ROOT.RooRealVar("nlep", "nlep", 0, 10)
@@ -202,65 +126,97 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 #reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
-reader = readDat(list, dir = "../../sample/")
-reader.numCheck()
-reader.dataNumCheck()
-# Beijing data sample root reader and make RooDataHist
-#x.setBins(260)
-#reader = readRoot(x, "~/beijing_sample/data.root")
 
 #Zebing core func hist
-ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
+#ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
+DAT = False
+if DAT:
+    if CAT=='ggf1':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+    elif CAT=='ggf2':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF2_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+    elif CAT=='ggf3':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF3_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+    elif CAT=='ggf4':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
 
-CAT = args.category
-if CAT=='u1':
-    mc_hist = reader.data_hist_untagged1_bkg
-    data_hist = reader.data_u1
-elif CAT=='u2':
-    mc_hist = reader.data_hist_untagged2_bkg
-    data_hist = ZBreader.hist #reader.data_u2
-elif CAT=='u3':
-    mc_hist = reader.data_hist_untagged3_bkg
-    data_hist = reader.data_u3
-elif CAT=='u4':
-    mc_hist = reader.data_hist_untagged4_bkg
-    data_hist = reader.data_u4
+else:
+    if 'ggf' in CAT:
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        if CAT == 'ggf1':
+            data_hist = read_data.ggf1
+        elif CAT == 'ggf2':
+            data_hist = read_data.ggf2
+        elif CAT == 'ggf3':
+            data_hist = read_data.ggf3
+        elif CAT == 'ggf4':
+            data_hist = read_data.ggf4
+    elif 'vbf' in CAT:
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286 , 0.083)
+        if CAT == 'vbf1':
+            data_hist = read_data.vbf1
+        elif CAT == 'vbf2':
+            data_hist = read_data.vbf2
+        elif CAT == 'vbf3':
+            data_hist = read_data.vbf3
+        elif CAT == 'vbf4':
+            data_hist = read_data.vbf4
 
 # Define PDF classes
-bern2_model = Bern2Class(x, mu_gauss, CAT, 1, 0.3, 10, 5., 110.)
-bern3_model = Bern3Class(x, mu_gauss, CAT, 1, 0.3, 10, 5., 110.)
-bern4_model = Bern4Class(x, mu_gauss, CAT, 1, 0.3, 50, 7., 110.)
-bern5_model = Bern5Class(x, mu_gauss, CAT, 1., 0.3, 50, 7., 110.)
-bern_list = [bern2_model, bern3_model, bern4_model,bern5_model]
-
 core_bern2_model = CoreBern2Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern3_model = CoreBern3Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern4_model = CoreBern4Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern5_model = CoreBern5Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern_list = [core_bern2_model, core_bern3_model, core_bern4_model, core_bern5_model]
 
-pow1_model = Pow1Class(x, mu_gauss, CAT)
-pow2_model = Pow2Class(x, mu_gauss, CAT)
-pow3_model = Pow3Class(x, mu_gauss, CAT)
-pow_list = [pow1_model, pow2_model, pow3_model]
-
 core_pow1_model = CorePow1Class(x, CAT, -6, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_pow2_model = CorePow2Class(x, CAT, -6, -15, 0.5,  fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_pow_list = [core_pow1_model, core_pow2_model]
 
-exp1_model = Exp1Class(x, mu_gauss, CAT)
-exp2_model = Exp2Class(x, mu_gauss, CAT,  p1_init = -0.06, p2_init = -0.02)
-exp3_model = Exp3Class(x, mu_gauss, CAT,  p1_init = -0.02, p2_init = -0.06,  p3_init = -0.12)
-exp_list = [exp1_model, exp2_model, exp3_model]
+profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
+bern_list = []
+pow_list = []
+exp_list = []
+lau_list = []
+if "bern2" in setting["SST"]:
+     bern_list.append(profile.bern2_model)
+if "bern3" in setting["SST"]:
+     bern_list.append(profile.bern3_model)
+if "bern4" in setting["SST"]:
+     bern_list.append(profile.bern4_model)
+if "bern5" in setting["SST"]:
+     bern_list.append(profile.bern5_model)
+if "pow1" in setting["SST"]:
+     pow_list.append(profile.pow1_model)
+if "pow2" in setting["SST"]:
+     pow_list.append(profile.pow2_model)
+if "pow3" in setting["SST"]:
+     pow_list.append(profile.pow3_model)
+if "exp1" in setting["SST"]:
+     exp_list.append(profile.exp1_model)
+if "exp2" in setting["SST"]:
+     exp_list.append(profile.exp2_model)
+if "exp3" in setting["SST"]:
+     exp_list.append(profile.exp3_model)
+if "lau2" in setting["SST"]:
+     lau_list.append(profile.lau2_model)
+if "lau3" in setting["SST"]:
+     lau_list.append(profile.lau3_model)
+if "lau4" in setting["SST"]:
+     lau_list.append(profile.lau4_model)
 
-lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -8, p2 = -7)
-lau2_model = Lau2Class(x, mu_gauss, CAT, p1 = -8, p2 = -7, p3 = -6)
-lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -8, p2 = -7, p3 = -6, p4 = -5)
-lau_list = [lau1_model, lau2_model, lau3_model]
 
-modg_model = ModGausClass(x, CAT, lowx, lowx+65)
-best_list = [bern3_model, bern4_model, pow1_model, pow2_model, exp2_model, modg_model]
-# Goodness of fit test
+    
+best_list = []
+# Goodness of fit test (NOT USED)
 # goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 #goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
 #goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
@@ -271,24 +227,17 @@ best_list = [bern3_model, bern4_model, pow1_model, pow2_model, exp2_model, modg_
 # singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 #singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 #singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
-if args.function == 'bern':
-    #goodness(bern_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
-    singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = False)
-elif args.function == 'pow':
-#    goodness(pow_list, mc_hist,  e_type = "SumW2", eps = 1, n_bins = 260, className="Pow")
+
+if len(bern_list) > 1:
+    singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = True)
+if len(pow_list) > 1:
     singleFTestSidebandNLL(x, pow_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
-elif args.function == 'exp':
-    #goodness(exp_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
+if len(exp_list) > 1:
     singleFTestSidebandNLL(x, exp_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
-elif args.function == 'lau':
-    goodness(lau_list, mc_hist,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Lau")
+if len(lau_list) > 1:
     singleFTestSidebandNLL(x, lau_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
-elif args.function == 'best':
-    singleFTestSidebandNLL(x, best_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Best", FT = False)
-elif args.function == 'core_bern':
-    singleFTestSidebandNLL(x, core_bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "CoreBern")
-elif args.function == 'core_pow':
-    singleFTestSidebandNLL(x, core_pow_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "CorePow")
+
+
 # can2 = ROOT.TCanvas("c2","c2", 500, 500)
 # can2.cd()
 # plot2 = x.frame()

@@ -1,8 +1,8 @@
 universe = vanilla
 executable = condor_parser.sh
-arguments = $(ProcId) bern5 ggf4
-error   = out_err/bern5.ggf4.err.$(ProcId)
-output  = out_err/bern5.ggf4.out.$(ProcId)
+arguments = $(ProcId) lau2 ggf4
+error   = out_err/lau2.ggf4.err.$(ProcId)
+output  = out_err/lau2.ggf4.out.$(ProcId)
 log =   bias.log
 MY.WantOS = "el9"
 +JobFlavour = "workday"

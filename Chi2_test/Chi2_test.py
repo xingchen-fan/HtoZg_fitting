@@ -12,15 +12,19 @@ from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
+from profile_class import *
 ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cat', help = 'Category')
+parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
 CAT = args.cat
-jfile = open('../Config/config.json', 'r')
+jfile = open('../Config/'+args.config, 'r')
 configs = json.load(jfile)
 setting = configs[CAT]
 
@@ -53,45 +57,66 @@ elif CAT == 'ggf4':
 else:
     NAMECAT = 'WRONG'
 # Read samples
-read_data = ROOT.RooDataSet.read('../Data/data_'+NAMECAT+'_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
-
+DAT = False
+if DAT:
+    read_data = ROOT.RooDataSet.read('../Data/data_'+NAMECAT+'_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+    hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+else:
+    if 'ggf' in CAT:
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        if CAT == 'ggf1':
+            hist_data = read_data.ggf1
+        elif CAT == 'ggf2':
+            hist_data = read_data.ggf2
+        elif CAT == 'ggf3':
+            hist_data = read_data.ggf3
+        elif CAT == 'ggf4':
+            hist_data = read_data.ggf4
+    elif 'vbf' in CAT:
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286 , 0.083)
+        if CAT == 'vbf1':
+            hist_data = read_data.vbf1
+        elif CAT == 'vbf2':
+            hist_data = read_data.vbf2
+        elif CAT == 'vbf3':
+            hist_data = read_data.vbf3
+        elif CAT == 'vbf4':
+            hist_data = read_data.vbf4
+print('N data = ', hist_data.sumEntries())
 # Bkg funcs
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
-bern2_model = Bern2Class(x, mu_gauss, CAT, setting["bern2"]['p0'], setting["bern2"]['p_init'],setting["bern2"]['bond'],setting["bern2"]['sigma_init'],setting["bern2"]['step_init'])
-bern3_model = Bern3Class(x, mu_gauss, CAT, setting["bern3"]['p0'], setting["bern3"]['p_init'],setting["bern3"]['bond'],setting["bern3"]['sigma_init'],setting["bern3"]['step_init'])
-bern4_model = Bern4Class(x, mu_gauss, CAT, setting["bern4"]['p0'], setting["bern4"]['p_init'],setting["bern4"]['bond'],setting["bern4"]['sigma_init'],setting["bern4"]['step_init'])
-bern5_model = Bern5Class(x, mu_gauss, CAT, setting["bern5"]['p0'], setting["bern5"]['p_init'],setting["bern5"]['bond'],setting["bern5"]['sigma_init'],setting["bern5"]['step_init'])
+#AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
+profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
 
-pow1_model = Pow1Class(x, mu_gauss, CAT, setting["pow1"]['sigma_init'], setting["pow1"]['step_init'], setting["pow1"]['p_init'], setting["pow1"]['p_low'], setting["pow1"]['p_high'])
-pow2_model = Pow2Class(x, mu_gauss, CAT, setting["pow2"]['sigma_init'], setting["pow2"]['step_init'], setting["pow2"]['p1_init'], setting["pow2"]['p1_low'], setting["pow2"]['p1_high'], setting["pow2"]['p2_init'], setting["pow2"]['p2_low'], setting["pow2"]['p2_high'], setting["pow2"]['f1_init'], setting["pow2"]['f2_init'], setting["pow2"]['xmax'], setting["pow2"]['const_f1'])
-pow3_model = Pow3Class(x, mu_gauss, CAT,setting["pow3"]['sigma_init'], setting["pow3"]['step_init'], setting["pow3"]['p1_init'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2_init'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3_init'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1_init'], setting["pow3"]['f2_init'], setting["pow3"]['f3_init'], setting["pow3"]['xmax'], setting["pow3"]['const_f1'])
-
-exp1_model = Exp1Class(x, mu_gauss, CAT, setting["exp1"]['sigma_init'], setting["exp1"]['step_init'], setting["exp1"]['p_init'], setting["exp1"]['p_low'], setting["exp1"]['p_high'])
-exp2_model = Exp2Class(x, mu_gauss, CAT, setting["exp2"]['sigma_init'], setting["exp2"]['step_init'], setting["exp2"]['p1_init'], setting["exp2"]['p1_low'], setting["exp2"]['p1_high'], setting["exp2"]['p2_init'], setting["exp2"]['p2_low'], setting["exp2"]['p2_high'], setting["exp2"]['f1_init'], setting["exp2"]['f2_init'], setting["exp2"]['xmax'], setting["exp2"]['const_f1'])
-exp3_model = Exp3Class(x, mu_gauss, CAT, setting["exp3"]['sigma_init'], setting["exp3"]['step_init'], setting["exp3"]['p1_init'], setting["exp3"]['p1_low'], setting["exp3"]['p1_high'], setting["exp3"]['p2_init'], setting["exp3"]['p2_low'], setting["exp3"]['p2_high'], setting["exp3"]['p3_init'], setting["exp3"]['p3_low'], setting["exp3"]['p3_high'], setting["exp3"]['f1_init'], setting["exp3"]['f2_init'], setting["exp3"]['f3_init'], setting["exp3"]['xmax'], setting["exp3"]['const_f1'])
-
-lau2_model = Lau2Class(x, mu_gauss, CAT, setting["lau2"]['sigma_init'], setting["lau2"]['step_init'], setting["lau2"]['p1'], setting["lau2"]['p2'], setting["lau2"]['f_init'], setting["lau2"]['xmax'], setting["lau2"]['const_f1'])
-lau3_model = Lau3Class(x, mu_gauss, CAT, setting["lau3"]['sigma_init'], setting["lau3"]['step_init'], setting["lau3"]['p1'], setting["lau3"]['p2'], setting["lau3"]['p3'], setting["lau3"]['f_init'], setting["lau3"]['xmax'], setting["lau3"]['const_f1'])
-lau4_model = Lau4Class(x, mu_gauss, CAT, setting["lau4"]['sigma_init'], setting["lau4"]['step_init'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f_init'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'])
-
-modg_model = ModGausClass(x, CAT, lowx, lowx+65, setting["modg"]['m0'], setting["modg"]['sl'], setting["modg"]['sh'], setting["modg"]['vl'], setting["modg"]['vr'])
-
-bkg_list = [pow2_model, pow3_model, exp3_model]
-#[bern2_model, bern3_model, bern4_model, bern5_model, pow1_model, pow2_model, pow3_model, exp1_model, exp2_model, exp3_model, lau2_model, lau3_model, lau4_model, modg_model]
-
+bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]
+#profile.lau2_model, profile.lau3_model, profile.lau4_model,
+#vbf1 no lau3, vbf2 no lau4
 
 # Sideband Chi^2 fit
 cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
+th1_cuthist = cuthistogram.createHistogram("cuthist_ks", x, ROOT.RooFit.Binning(260))
 n_bins = 220
+LOWSTAT = CAT == 'vbf1' or  CAT == 'vbf2'
+pass_list = []
 for func in bkg_list:
-    chi2 = ROOT.RooChi2Var('chi2_'+func.SBpdf.GetName(), 'chi2_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
-    Minimizer_Chi2(chi2, -1, 100, False, 0)
-    res=Minimizer_NLL(chi2, -1, 0.1, True, 0) 
+    if LOWSTAT:
+        chi2 = ROOT.RooNLLVar('chi2_'+func.SBpdf.GetName(), 'chi2_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
+    else:
+        chi2 = ROOT.RooChi2Var('chi2_'+func.SBpdf.GetName(), 'chi2_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
+    Minimizer_Chi2(chi2, -1, 1, False, 0)
+    res=Minimizer_Chi2(chi2, -1, 0.1, True, 0) 
     func.checkBond()
     res.Print('v')
-    chi2_val = chi2.getVal()
-    chi2_pV = ROOT.Math.chisquared_cdf_c(chi2.getVal(), n_bins - res.floatParsFinal().getSize())
-    plotClass(x, hist_data, func.pdf, func.SBpdf, title=func.pdf.GetName() + "_" + CAT, output_dir="plots/", sideBand = True, fitRange = 'left,right', note='#splitline{#Chi^{2} = ' + '%.2f'%chi2_val + '}{P-value = ' + '%.2f'%chi2_pV + '}')
+    chi2_ = ROOT.RooChi2Var('chi2_val_'+func.SBpdf.GetName(), 'chi2_val_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
+    chi2_val = chi2_.getVal()
+    dof = n_bins - res.floatParsFinal().getSize()
+    chi2_PV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), dof)
+    ks_model_hist = func.SBpdf.generateBinned(x, cuthistogram.sumEntries(), True).createHistogram("hist_"+func.SBpdf.GetName(), x, ROOT.RooFit.Binning(260))
+    ks_PV = th1_cuthist.KolmogorovTest(ks_model_hist)
+    plotClass(x, hist_data, func.pdf, func.SBpdf, title=func.pdf.GetName(), output_dir="plots/", sideBand = True, fitRange = 'left,right', note='#splitline{#Chi^{2}/dof = ' + '%.2f'%chi2_val + '/%i'%dof +'}{#splitline{#Chi^{2} P-value = ' + '%.2f'%chi2_PV + '}{KS P-value = ' + '%.2f'%ks_PV + '}}', fullRatio = ("vbf" in CAT))
+    if chi2_PV>0.1 and ks_PV>0.1 and res.status() == 0:
+        pass_list.append(func)
+print('List has ', len(pass_list), ' models')
+multiPlotClass(x, hist_data, pass_list, title="Chi2_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = ("vbf" in CAT))

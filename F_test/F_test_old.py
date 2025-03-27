@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
 import ROOT
 import os
 import sys
-import json
 import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
@@ -12,19 +10,15 @@ from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
-ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 parser = argparse.ArgumentParser(description = "F test bin and function class")
 #parser.add_argument("method")
-parser.add_argument('-c', '--cat', help="category")
+parser.add_argument("category")
+parser.add_argument("xlow")
+parser.add_argument("function")
 args = parser.parse_args()
-jfile = open('../Config/config.json', 'r')
-configs = json.load(jfile)
-CAT = args.cat
-setting = configs[CAT]
-lowx = setting["Range"]
-
 #if not(args.method == "Chi2" or args.method == "NLL") :
 #   print("Please use the correct method.")
 #sys.exit(1)
@@ -158,6 +152,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         entry.checkBond()
         plotClass(x, histogram, entry.pdf, entry.SBpdf, title=entry.pdf.GetName() + "_" + cat, output_dir="plots/", sideBand = sideBand, fitRange = range_)
 
+    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=sideBand, fitRange= range_)
     print("NLL = ", [ele.getVal() for ele in stats])
     fs = []
     dif = []
@@ -171,12 +166,6 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
     for i in range(len(stats)):
         corrNLL.append(stats[i].getVal()+ 0.5 * fitres[i].floatParsFinal().getSize())
     print("corr NLL = ", corrNLL)
-    highest = 0
-    for i, f in enumerate(fs):
-        if f<0.05:
-            highest = i+1
-        else: break
-    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=sideBand, fitRange= range_, best_index = highest)
 
 # def customNLL(x, histogram, modelClass):
 #     x_list = ROOT.RooArgList("x_list")
@@ -185,14 +174,14 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
+lowx =float(args.xlow)
 
 # Define variables
 x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", lowx, lowx + 65.)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
-year = ROOT.RooRealVar("year", "year", 2015, 21000)
-w_year = ROOT.RooRealVar("w_year", "w_year", 0, 100)
+year = ROOT.RooRealVar("year", "year", 2015, 2019)
 lep = ROOT.RooRealVar("lep", "lep", 0, 1) #0 = electron, 1 = muon
 ph_eta = ROOT.RooRealVar("ph_eta", "ph_eta", -3, 3)
 nlep = ROOT.RooRealVar("nlep", "nlep", 0, 10)
@@ -213,33 +202,36 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 #reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
+reader = readDat(list, dir = "../../sample/")
+reader.numCheck()
+reader.dataNumCheck()
+# Beijing data sample root reader and make RooDataHist
+#x.setBins(260)
+#reader = readRoot(x, "~/beijing_sample/data.root")
 
 #Zebing core func hist
-#ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
+ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
 
-if CAT=='ggf1':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
-elif CAT=='ggf2':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF2_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
-elif CAT=='ggf3':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF3_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
-elif CAT=='ggf4':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+CAT = args.category
+if CAT=='u1':
+    mc_hist = reader.data_hist_untagged1_bkg
+    data_hist = reader.data_u1
+elif CAT=='u2':
+    mc_hist = reader.data_hist_untagged2_bkg
+    data_hist = ZBreader.hist #reader.data_u2
+elif CAT=='u3':
+    mc_hist = reader.data_hist_untagged3_bkg
+    data_hist = reader.data_u3
+elif CAT=='u4':
+    mc_hist = reader.data_hist_untagged4_bkg
+    data_hist = reader.data_u4
 
 # Define PDF classes
-bern2_model = Bern2Class(x, mu_gauss, CAT, setting["bern2"]['p0'], setting["bern2"]['p_init'],setting["bern2"]['bond'],setting["bern2"]['sigma_init'],setting["bern2"]['step_init'])
-bern3_model = Bern3Class(x, mu_gauss, CAT, setting["bern3"]['p0'], setting["bern3"]['p_init'],setting["bern3"]['bond'],setting["bern3"]['sigma_init'],setting["bern3"]['step_init'])
-bern4_model = Bern4Class(x, mu_gauss, CAT, setting["bern4"]['p0'], setting["bern4"]['p_init'],setting["bern4"]['bond'],setting["bern4"]['sigma_init'],setting["bern4"]['step_init'])
-bern5_model = Bern5Class(x, mu_gauss, CAT, setting["bern5"]['p0'], setting["bern5"]['p_init'],setting["bern5"]['bond'],setting["bern5"]['sigma_init'],setting["bern5"]['step_init'])
-bern_list = []
+bern2_model = Bern2Class(x, mu_gauss, CAT, 1, 0.3, 10, 5., 110.)
+bern3_model = Bern3Class(x, mu_gauss, CAT, 1, 0.3, 10, 5., 110.)
+bern4_model = Bern4Class(x, mu_gauss, CAT, 1, 0.3, 50, 7., 110.)
+bern5_model = Bern5Class(x, mu_gauss, CAT, 1., 0.3, 50, 7., 110.)
+bern_list = [bern2_model, bern3_model, bern4_model,bern5_model]
 
 core_bern2_model = CoreBern2Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern3_model = CoreBern3Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
@@ -247,56 +239,26 @@ core_bern4_model = CoreBern4Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01je
 core_bern5_model = CoreBern5Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern_list = [core_bern2_model, core_bern3_model, core_bern4_model, core_bern5_model]
 
-pow1_model = Pow1Class(x, mu_gauss, CAT, setting["pow1"]['sigma_init'], setting["pow1"]['step_init'], setting["pow1"]['p_init'], setting["pow1"]['p_low'], setting["pow1"]['p_high'], setting["pow1"]['di_gauss'])
-pow2_model = Pow2Class(x, mu_gauss, CAT, setting["pow2"]['sigma_init'], setting["pow2"]['step_init'], setting["pow2"]['p1_init'], setting["pow2"]['p1_low'], setting["pow2"]['p1_high'], setting["pow2"]['p2_init'], setting["pow2"]['p2_low'], setting["pow2"]['p2_high'], setting["pow2"]['f1_init'], setting["pow2"]['f2_init'], setting["pow2"]['xmax'], setting["pow2"]['const_f1'], setting["pow2"]['di_gauss'])
-pow3_model = Pow3Class(x, mu_gauss, CAT,setting["pow3"]['sigma_init'], setting["pow3"]['step_init'], setting["pow3"]['p1_init'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2_init'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3_init'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1_init'], setting["pow3"]['f2_init'], setting["pow3"]['f3_init'], setting["pow3"]['xmax'], setting["pow3"]['const_f1'], setting["pow3"]['di_gauss'])
-pow_list = []
+pow1_model = Pow1Class(x, mu_gauss, CAT)
+pow2_model = Pow2Class(x, mu_gauss, CAT)
+pow3_model = Pow3Class(x, mu_gauss, CAT)
+pow_list = [pow1_model, pow2_model, pow3_model]
 
 core_pow1_model = CorePow1Class(x, CAT, -6, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_pow2_model = CorePow2Class(x, CAT, -6, -15, 0.5,  fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_pow_list = [core_pow1_model, core_pow2_model]
 
-exp1_model = Exp1Class(x, mu_gauss, CAT, setting["exp1"]['sigma_init'], setting["exp1"]['step_init'], setting["exp1"]['p_init'], setting["exp1"]['p_low'], setting["exp1"]['p_high'], setting["exp1"]['di_gauss'])
-exp2_model = Exp2Class(x, mu_gauss, CAT, setting["exp2"]['sigma_init'], setting["exp2"]['step_init'], setting["exp2"]['p1_init'], setting["exp2"]['p1_low'], setting["exp2"]['p1_high'], setting["exp2"]['p2_init'], setting["exp2"]['p2_low'], setting["exp2"]['p2_high'], setting["exp2"]['f1_init'], setting["exp2"]['f2_init'], setting["exp2"]['xmax'], setting["exp2"]['const_f1'], setting["exp2"]['di_gauss'])
-exp3_model = Exp3Class(x, mu_gauss, CAT, setting["exp3"]['sigma_init'], setting["exp3"]['step_init'], setting["exp3"]['p1_init'], setting["exp3"]['p1_low'], setting["exp3"]['p1_high'], setting["exp3"]['p2_init'], setting["exp3"]['p2_low'], setting["exp3"]['p2_high'], setting["exp3"]['p3_init'], setting["exp3"]['p3_low'], setting["exp3"]['p3_high'], setting["exp3"]['f1_init'], setting["exp3"]['f2_init'], setting["exp3"]['f3_init'], setting["exp3"]['xmax'], setting["exp3"]['const_f1'], setting["exp3"]['di_gauss'])
-exp_list = []
+exp1_model = Exp1Class(x, mu_gauss, CAT)
+exp2_model = Exp2Class(x, mu_gauss, CAT,  p1_init = -0.06, p2_init = -0.02)
+exp3_model = Exp3Class(x, mu_gauss, CAT,  p1_init = -0.02, p2_init = -0.06,  p3_init = -0.12)
+exp_list = [exp1_model, exp2_model, exp3_model]
 
-lau2_model = Lau2Class(x, mu_gauss, CAT, setting["lau2"]['sigma_init'], setting["lau2"]['step_init'], setting["lau2"]['p1'], setting["lau2"]['p2'], setting["lau2"]['f_init'], setting["lau2"]['xmax'], setting["lau2"]['const_f1'], setting["lau2"]['di_gauss'])
-lau3_model = Lau3Class(x, mu_gauss, CAT, setting["lau3"]['sigma_init'], setting["lau3"]['step_init'], setting["lau3"]['p1'], setting["lau3"]['p2'], setting["lau3"]['p3'], setting["lau3"]['f_init'], setting["lau3"]['xmax'], setting["lau3"]['const_f1'], setting["lau3"]['di_gauss'])
-lau4_model = Lau4Class(x, mu_gauss, CAT, setting["lau4"]['sigma_init'], setting["lau4"]['step_init'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f_init'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'], setting["lau4"]['di_gauss'])
-lau_list = []
+lau1_model = Lau1Class(x, mu_gauss, CAT, p1 = -8, p2 = -7)
+lau2_model = Lau2Class(x, mu_gauss, CAT, p1 = -8, p2 = -7, p3 = -6)
+lau3_model = Lau3Class(x, mu_gauss, CAT, p1 = -8, p2 = -7, p3 = -6, p4 = -5)
+lau_list = [lau1_model, lau2_model, lau3_model]
 
-modg_model = ModGausClass(x, CAT, lowx, lowx+65, setting["modg"]['m0'], setting["modg"]['sl'], setting["modg"]['sh'], setting["modg"]['vl'], setting["modg"]['vr'])
-
-if "bern2" in setting["SST"]:
-     bern_list.append(bern2_model)
-if "bern3" in setting["SST"]:
-     bern_list.append(bern3_model)
-if "bern4" in setting["SST"]:
-     bern_list.append(bern4_model)
-if "bern5" in setting["SST"]:
-     bern_list.append(bern5_model)
-if "pow1" in setting["SST"]:
-     pow_list.append(pow1_model)
-if "pow2" in setting["SST"]:
-     pow_list.append(pow2_model)
-if "pow3" in setting["SST"]:
-     pow_list.append(pow3_model)
-if "exp1" in setting["SST"]:
-     exp_list.append(exp1_model)
-if "exp2" in setting["SST"]:
-     exp_list.append(exp2_model)
-if "exp3" in setting["SST"]:
-     exp_list.append(exp3_model)
-if "lau2" in setting["SST"]:
-     lau_list.append(lau2_model)
-if "lau3" in setting["SST"]:
-     lau_list.append(lau3_model)
-if "lau4" in setting["SST"]:
-     lau_list.append(lau4_model)
-
-
-    
+modg_model = ModGausClass(x, CAT, lowx, lowx+65)
 best_list = [bern3_model, bern4_model, pow1_model, pow2_model, exp2_model, modg_model]
 # Goodness of fit test
 # goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
@@ -309,16 +271,24 @@ best_list = [bern3_model, bern4_model, pow1_model, pow2_model, exp2_model, modg_
 # singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 #singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 #singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
-if len(bern_list) > 1:
-    singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = True)
-if len(pow_list) > 1:
+if args.function == 'bern':
+    #goodness(bern_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+    singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = False)
+elif args.function == 'pow':
+#    goodness(pow_list, mc_hist,  e_type = "SumW2", eps = 1, n_bins = 260, className="Pow")
     singleFTestSidebandNLL(x, pow_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
-if len(exp_list) > 1:
+elif args.function == 'exp':
+    #goodness(exp_list, mc_hist,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
     singleFTestSidebandNLL(x, exp_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
-if len(lau_list) > 1:
+elif args.function == 'lau':
+    goodness(lau_list, mc_hist,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Lau")
     singleFTestSidebandNLL(x, lau_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
-
-
+elif args.function == 'best':
+    singleFTestSidebandNLL(x, best_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Best", FT = False)
+elif args.function == 'core_bern':
+    singleFTestSidebandNLL(x, core_bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "CoreBern")
+elif args.function == 'core_pow':
+    singleFTestSidebandNLL(x, core_pow_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "CorePow")
 # can2 = ROOT.TCanvas("c2","c2", 500, 500)
 # can2.cd()
 # plot2 = x.frame()

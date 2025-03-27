@@ -19,30 +19,53 @@ void read_condor_output(TString func, TString cat){
     TString number = to_string(i);
     ifstream file("condor/"+func+"_" + cat + "/output"+number+".txt");
     string line;
+    std::cout << "number = " << i << std::endl;
     if (file.is_open()) {
       while (getline(file, line)) {
 	string pull = line.substr(0,4);
 	string cover = line.substr(0,7);
+	string a_pull;
 	if (cover == "covered"){
 	  ncovered += stoi(line.substr(11,1));
 	}
 	if (pull == "pull"){
 	  int brac = line.find("[");
 	  int comma = line.find(",");
-	  string a_pull = line.substr(brac+1, comma-brac-1);
-	  //cout << a_pull <<endl;
-	  h->Fill(stod(a_pull));
+	  if (comma == -1 && line.size() <= 10) {
+	    std::cout << "size = " << line.size() <<std::endl;
+	    continue;
+	  }
+	  else if (comma == -1 && line.size() > 10){
+	    //std::cout << "size = " << line.size() <<std::endl;
+	    int rbrac = line.find("]");
+	    a_pull = line.substr(brac+1,rbrac-brac-1);
+	    h->Fill(stod(a_pull));
+	    continue;
+	  }
+	  else{
+	    std::cout << "comma = "<<comma<<std::endl;
+	    a_pull = line.substr(brac+1, comma-brac-1);
+	    //cout << a_pull <<endl;
+	    std::cout << "pull1 = "<< a_pull <<std::endl;
+	    h->Fill(stod(a_pull));
+	  }
 	  bool theEnd = false;
 	  int left = 0;
 	  while(!theEnd){
 	    left = comma;
 	    comma = line.find(",", left+1);
+	    if (comma == -1) {
+	      comma = left;
+	      break;
+	    }
 	    a_pull = line.substr(left+2, comma-left-2);
+	    std::cout << "pull = "<< a_pull <<std::endl;
 	    //cout << a_pull <<endl;
 	    h->Fill(stod(a_pull));
 	    if (line.find(",", comma+1) == string::npos) theEnd = true;
 	  }
 	  a_pull = line.substr(comma+2, line.find("]") - comma - 2);
+	  std::cout << "pull last= "<< a_pull <<std::endl;
 	  //cout << a_pull <<endl;
 	  h->Fill(stod(a_pull));
 	}

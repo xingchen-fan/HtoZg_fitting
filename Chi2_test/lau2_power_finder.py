@@ -13,11 +13,13 @@ from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
-ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+#ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--cat', help = 'Cat')
+parser.add_argument('-r', '--ranges', help = 'Range')
 parser.add_argument('-hi', '--high', help = 'Higher power')
 parser.add_argument('-lo', '--low', help = 'Lower power')
 args = parser.parse_args()
@@ -25,7 +27,18 @@ if int(args.high) <= int(args.low):
     raise Exception('Higher power must be larger than lower power!')
 tic = time.perf_counter()
 # Define vars
-lowx = 105
+CAT = args.cat
+if args.cat == 'ggf1':
+    CATNAME = 'ggF1'
+elif args.cat == 'ggf2':
+    CATNAME = 'ggF2'
+elif args.cat == 'ggf3':
+    CATNAME = 'ggF3'
+elif args.cat == 'ggf4':
+    CATNAME = 'ggF4'
+#raise Exception('Wrong category name!')
+ 
+lowx = int(args.ranges)
 x = ROOT.RooRealVar("x", "mllg", lowx, lowx+65.)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
@@ -42,40 +55,69 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 
-# Read samples
-read_data = ROOT.RooDataSet.read('data_ggF3_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+DAT = False
+# Read samples (dat)
+if DAT:
+    read_data = ROOT.RooDataSet.read('data_' +CATNAME+'_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+    hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+
+else:
+    if 'ggf' in CAT:
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        if CAT == 'ggf1':
+            hist_data = read_data.ggf1
+        elif CAT == 'ggf2':
+            hist_data = read_data.ggf2
+        elif CAT == 'ggf3':
+            hist_data = read_data.ggf3
+        elif CAT == 'ggf4':
+            hist_data = read_data.ggf4
+    elif 'vbf' in CAT:
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286, 0.083)
+        if CAT == 'vbf1':
+            hist_data = read_data.vbf1
+        elif CAT == 'vbf2':
+            hist_data = read_data.vbf2
+        elif CAT == 'vbf3':
+            hist_data = read_data.vbf3
+        elif CAT == 'vbf4':
+            hist_data = read_data.vbf4
 
 # Bkg funcs
-CAT = 'ggf3'
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 list_ = []
 chi2_list = []
 pv_list = []
 
-ONESHOT = True
+ONESHOT = False
 if ONESHOT:
-    lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., step_init = 101, p1 = int(args.low), p2 = int(args.high), f_init = 0.8, xmax = lowx+65., const_f1 = True)
+    lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., step_init = 101, p1 = int(args.low), p2 = int(args.high), f_init = 0.2, xmax = lowx+65., const_f1 = True)
     cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
     n_bins = 220
-    chi2 = ROOT.RooChi2Var('chi2_'+lau2_model.SBpdf.GetName(), 'chi2_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)
+    if CAT == 'vbf1' or CAT == 'vbf2':
+        chi2 = ROOT.RooNLLVar('chi2_'+lau2_model.SBpdf.GetName(), 'chi2_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)
+    else:
+        chi2 = ROOT.RooChi2Var('chi2_'+lau2_model.SBpdf.GetName(), 'chi2_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)
+        
     Minimizer_Chi2(chi2, -1, 100, False, 0)
     res=Minimizer_Chi2(chi2, -1, 0.1, True, 0)
     lau2_model.checkBond()
     res.Print('v')
-    chi2_val = chi2.getVal()
-    chi2_pV= ROOT.Math.chisquared_cdf_c(chi2.getVal(), n_bins - res.floatParsFinal().getSize())
+    chi2_= ROOT.RooChi2Var('chi2_val_'+lau2_model.SBpdf.GetName(), 'chi2_val_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)
+    chi2_val = chi2_.getVal()
+    chi2_pV= ROOT.Math.chisquared_cdf_c(chi2_.getVal(), n_bins - res.floatParsFinal().getSize())
     print ('Chi2 = ', chi2_val)
     print ('P-value = ', chi2_pV)
+    plotClass(x, hist_data, lau2_model.pdf, lau2_model.SBpdf, "Lau2", "", True, 'left,right')
     sys.exit()
 for i in range(int(args.low), int(args.high) + 1):
     for j in range(i+1, int(args.high) + 1):
         pow_list = []
         pow_list.append(i)
         pow_list.append(j)
-        lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., step_init = 101, p1 = i, p2 = j, f_init = 0.8, xmax = lowx+65., const_f1 = True)
+        lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., step_init = 101, p1 = i, p2 = j, f_init = 0.2, xmax = lowx+65., const_f1 = True, di_gauss = False)
         cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
         n_bins = 220
         chi2 = ROOT.RooChi2Var('chi2_'+lau2_model.SBpdf.GetName(), 'chi2_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)

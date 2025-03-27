@@ -15,6 +15,8 @@ from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
 from bias_class import *
+from profile_class import *
+from sig_functions_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 import ctypes
 #ROOT.gSystem.Load('../../Utilities/HZGRooPdfs_cxx.so')
@@ -34,9 +36,10 @@ parser.add_argument('-n', '--Ntoys', help = "N_toy")
 parser.add_argument( '-i', '--it', help="It")
 parser.add_argument('-f', '--func', help = "Func")
 parser.add_argument('-c', '--cat', help = "Category")
+parser.add_argument('-con', '--config', help = "Configuration")
 
 args = parser.parse_args()
-jfile = open('../../Config/config.json', 'r')
+jfile = open('../../Config/'+ args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -47,7 +50,7 @@ DEBUG = False
 DEBUG_SCAN = False
 # Define variables
 
-x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", lowx, lowx + 65.)
+x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -66,60 +69,28 @@ x.setRange('full', lowx, lowx+65)
 
 # Signal model (pre-fit)
 MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
-dscb_model = DSCB_Class(x, MH, CAT, 1.78,50, 100, 50, 100,0.845, 2.36)
-dscb_model.setConst(True)
+dscb_model = combineSignal(x, MH, CAT, '../../Config/config_DSCB.json')
 MH.setConstant(True)
-N_sig = 10
+N_sig = dscb_model.ntot
 
 # Conodr output file
 #output = open('output_'+args.Tag+'.txt', 'w')
 
 # Functions to test
 
-bern2_model = Bern2Class(x, mu_gauss, CAT, setting["bern2"]['p0'], setting["bern2"]['p_init'],setting["bern2"]['bond'],setting["bern2"]['sigma_init'],setting["bern2"]['step_init'])
-bern3_model = Bern3Class(x, mu_gauss, CAT, setting["bern3"]['p0'], setting["bern3"]['p_init'],setting["bern3"]['bond'],setting["bern3"]['sigma_init'],setting["bern3"]['step_init'])
-bern4_model = Bern4Class(x, mu_gauss, CAT, setting["bern4"]['p0'], setting["bern4"]['p_init'],setting["bern4"]['bond'],setting["bern4"]['sigma_init'],setting["bern4"]['step_init'])
-bern5_model = Bern5Class(x, mu_gauss, CAT, setting["bern5"]['p0'], setting["bern5"]['p_init'],setting["bern5"]['bond'],setting["bern5"]['sigma_init'],setting["bern5"]['step_init'])
-
-pow1_model = Pow1Class(x, mu_gauss, CAT, setting["pow1"]['sigma_init'], setting["pow1"]['step_init'], setting["pow1"]['p_init'], setting["pow1"]['p_low'], setting["pow1"]['p_high'], setting["pow1"]['di_gauss'])
-pow2_model = Pow2Class(x, mu_gauss, CAT, setting["pow2"]['sigma_init'], setting["pow2"]['step_init'], setting["pow2"]['p1_init'], setting["pow2"]['p1_low'], setting["pow2"]['p1_high'], setting["pow2"]['p2_init'], setting["pow2"]['p2_low'], setting["pow2"]['p2_high'], setting["pow2"]['f1_init'], setting["pow2"]['f2_init'], setting["pow2"]['xmax'], setting["pow2"]['const_f1'], setting["pow2"]['di_gauss'])
-pow3_model = Pow3Class(x, mu_gauss, CAT,setting["pow3"]['sigma_init'], setting["pow3"]['step_init'], setting["pow3"]['p1_init'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2_init'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3_init'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1_init'], setting["pow3"]['f2_init'], setting["pow3"]['f3_init'], setting["pow3"]['xmax'], setting["pow3"]['const_f1'], setting["pow3"]['di_gauss'])
-
-exp1_model = Exp1Class(x, mu_gauss, CAT, setting["exp1"]['sigma_init'], setting["exp1"]['step_init'], setting["exp1"]['p_init'], setting["exp1"]['p_low'], setting["exp1"]['p_high'], setting["exp1"]['di_gauss'])
-exp2_model = Exp2Class(x, mu_gauss, CAT, setting["exp2"]['sigma_init'], setting["exp2"]['step_init'], setting["exp2"]['p1_init'], setting["exp2"]['p1_low'], setting["exp2"]['p1_high'], setting["exp2"]['p2_init'], setting["exp2"]['p2_low'], setting["exp2"]['p2_high'], setting["exp2"]['f1_init'], setting["exp2"]['f2_init'], setting["exp2"]['xmax'], setting["exp2"]['const_f1'], setting["exp2"]['di_gauss'])
-exp3_model = Exp3Class(x, mu_gauss, CAT, setting["exp3"]['sigma_init'], setting["exp3"]['step_init'], setting["exp3"]['p1_init'], setting["exp3"]['p1_low'], setting["exp3"]['p1_high'], setting["exp3"]['p2_init'], setting["exp3"]['p2_low'], setting["exp3"]['p2_high'], setting["exp3"]['p3_init'], setting["exp3"]['p3_low'], setting["exp3"]['p3_high'], setting["exp3"]['f1_init'], setting["exp3"]['f2_init'], setting["exp3"]['f3_init'], setting["exp3"]['xmax'], setting["exp3"]['const_f1'], setting["exp3"]['di_gauss'])
-
-lau2_model = Lau2Class(x, mu_gauss, CAT, setting["lau2"]['sigma_init'], setting["lau2"]['step_init'], setting["lau2"]['p1'], setting["lau2"]['p2'], setting["lau2"]['f_init'], setting["lau2"]['xmax'], setting["lau2"]['const_f1'], setting["lau2"]['di_gauss'])
-lau3_model = Lau3Class(x, mu_gauss, CAT, setting["lau3"]['sigma_init'], setting["lau3"]['step_init'], setting["lau3"]['p1'], setting["lau3"]['p2'], setting["lau3"]['p3'], setting["lau3"]['f_init'], setting["lau3"]['xmax'], setting["lau3"]['const_f1'], setting["lau3"]['di_gauss'])
-lau4_model = Lau4Class(x, mu_gauss, CAT, setting["lau4"]['sigma_init'], setting["lau4"]['step_init'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f_init'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'], setting["lau4"]['di_gauss'])
-
-modg_model = ModGausClass(x, CAT, lowx, lowx+65, setting["modg"]['m0'], setting["modg"]['sl'], setting["modg"]['sh'], setting["modg"]['vl'], setting["modg"]['vr'])
-
-profile = []
-if "bern2" in setting["FT"]: profile.append(bern2_model)
-if "bern3" in setting["FT"]: profile.append(bern3_model)
-if "bern4" in setting["FT"]: profile.append(bern4_model)
-if "bern5" in setting["FT"]: profile.append(bern5_model)
-if "pow1" in setting["FT"]: profile.append(pow1_model)
-if "pow2" in setting["FT"]: profile.append(pow2_model)
-if "pow3" in setting["FT"]: profile.append(pow3_model)
-if "exp1" in setting["FT"]: profile.append(exp1_model)
-if "exp2" in setting["FT"]: profile.append(exp2_model)
-if "exp3" in setting["FT"]: profile.append(exp3_model)
-if "lau2" in setting["FT"]: profile.append(lau2_model)
-if "lau3" in setting["FT"]: profile.append(lau3_model)
-if "lau4" in setting["FT"]: profile.append(lau4_model)
-if "modg" in setting["FT"]: profile.append(modg_model)
+profile_class = profileClass(x, mu_gauss, CAT, '../../Config/'+args.config)
+profile = profile_class.testSelection("FT")
 
 print("Done seed PDFs")
 
 # Define profile Fit
 def profileFit(profile_, sig_model, hist, fix = False, strength = 0.):
-    min_nll = 0
+    min_nll = 99999999
     ind = 999
-    r_sig_ = 0
-    r_error_ = 0
+    r_sig_ = -999
+    r_error_ = -999
     best_=''
+    unstable = []
     for i, ele in enumerate(profile_):
         #ele.reset()
         if (fix): 
@@ -133,18 +104,23 @@ def profileFit(profile_, sig_model, hist, fix = False, strength = 0.):
         bias.minimize(debug = False)
         #result = tot_model.fitTo(hist, ROOT.RooFit.PrintLevel(-1),  ROOT.RooFit.Save(True), ROOT.RooFit.Minimizer("Minuit2"), ROOT.RooFit.Strategy(0))
         #result.Print("v")
-        if i ==0: 
+        if i ==0 and bias.stable == 0:
             ind = 0
             min_nll= bias.corrNLL #result.minNll() + .5*result.floatParsFinal().getSize()
             r_sig_ = c2.getVal()
             r_error_ = c2.getError()
             best_= ele.pdf.GetName()
-        elif bias.corrNLL< min_nll: 
+        elif bias.corrNLL< min_nll and bias.stable == 0: 
             ind = i
             min_nll = bias.corrNLL #result.minNll() + .5*result.floatParsFinal().getSize()
             r_sig_ = c2.getVal()
             r_error_ = c2.getError()
             best_= ele.pdf.GetName()
+        elif bias.stable != 0:
+            unstable.append(i)
+    if len(unstable)!=0:
+        for bad in unstable:
+            del profile_[bad]
     return [ind, min_nll, r_sig_, r_error_, best_]
 
 # Method 1 (WRONG)
@@ -361,7 +337,7 @@ ncover = 0
 for inx in range(len(r_sig)):
     if r_error[inx] > 0 and 0 > r_sig[inx] - r_error[inx] and 0 < r_sig[inx] + r_error[inx]:
         ncover += 1
-print("r = ", sum(r_sig)/int(args.Ntoys))
+print("average r = ", sum(r_sig)/int(args.Ntoys))
 print("best error = ", sum(best_error)/int(args.Ntoys))
 print("r error = ", sum(r_error)/int(args.Ntoys))
 print("bad toys = ", bad)
@@ -371,4 +347,7 @@ print("covered = ", ncover)
 # print("r error = ", r_error)
 # print("bad toys = ", bad)
 print("best func = ", [best_list[i] for i in range(len(best_list)) if r_error[i] > 0])
+print("all r = ", r_sig)
+print("all r error from fit = ", best_error)
+print("all r error from scan = ", r_error)
 print("pull = ", pull_list)

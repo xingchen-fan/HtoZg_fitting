@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import math
 import ROOT
 import os
 import json
@@ -10,10 +11,11 @@ from sig_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
+from profile_class import *
+from sig_functions_class import *
+
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-# ROOT.gInterpreter.AddIncludePath('../Utilities/ModGaus.h')
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-# ROOT.gSystem.Load('../Utilities/ModGaus_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 ##############################################
@@ -25,8 +27,10 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 parser = argparse.ArgumentParser(description = "Make workspace")
 parser.add_argument('-c', '--cat', help="category")
+parser.add_argument('-a', '--asimov', help="Asimov", default=0)
+parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
-jfile = open('../Config/config.json', 'r')
+jfile = open('../Config/'+args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -36,7 +40,7 @@ lowx = setting["Range"]
 LOG = True
 
 # Define variables
-x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", lowx, lowx + 65.)
+x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -48,7 +52,7 @@ nlep = ROOT.RooRealVar("nlep", "nlep", 0, 10)
 njet = ROOT.RooRealVar("njet", "njet", 0, 10)
 
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
-MH = ROOT.RooRealVar("MH","MH"       ,124.7, 120., 130.)
+MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
 list = [x, y, w, w_year, bdt, year, lep, ph_eta, nlep, njet]
 
 # Cornell MC and data sample dat reader and make RooDataHist
@@ -59,32 +63,64 @@ x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 #ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
 
-file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
+#file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 
-if CAT=='ggf1':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
-elif CAT=='ggf2':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF2_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
-elif CAT=='ggf3':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF3_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
-elif CAT=='ggf4':
-    read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
-    data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-    data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+DAT = False
+if DAT:
+    if CAT=='ggf1':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+    elif CAT=='ggf2':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF2_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+    elif CAT=='ggf3':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF3_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+    elif CAT=='ggf4':
+        read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
+        data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+else:
+    if 'ggf' in CAT:
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        if CAT == 'ggf1':
+            hist_data = read_data.ggf1
+        elif CAT == 'ggf2':
+            hist_data = read_data.ggf2
+        elif CAT == 'ggf3':
+            hist_data = read_data.ggf3
+        elif CAT == 'ggf4':
+            hist_data = read_data.ggf4
+    elif 'vbf' in CAT:
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286 ,0.083)
+        if CAT == 'vbf1':
+            hist_data = read_data.vbf1
+        elif CAT == 'vbf2':
+            hist_data = read_data.vbf2
+        elif CAT == 'vbf3':
+            hist_data = read_data.vbf3
+        elif CAT == 'vbf4':
+            hist_data = read_data.vbf4
 
-hist_sig_TH1 = file_open_sig.Get('hist_sig_'+CAT)
-hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
-N_sig = hist_sig.sumEntries()
-N = data_hist.sumEntries()
+# Signal model preparation ------------------------
+#hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
+#hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
+sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
+MH.setVal(125)
+MH.setConstant(True)
+N_sig = sig_model.ntot
+N = hist_data.sumEntries()
+#N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
+# -------------------------------------------------
+
+
 print("N sig = ", N_sig)
+#print("N sig window= ", N_sig_window)
 
-# Assume we have ...... in the profile, the signal model is DSCB
+# Assume we have ...... in the profile, the signal model is combined DSCB
 '''
 core_bern2_model = CoreBern2Class(x, cat, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_bern3_model = CoreBern3Class(x, cat, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
@@ -94,65 +130,70 @@ core_bern5_model = CoreBern5Class(x, cat, 1, 0.3, 10, fileName="ZGCoreShape_01je
 core_pow1_model = CorePow1Class(x, cat, -1, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_pow2_model = CorePow2Class(x, cat, -1, -1, 1,  fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 '''
-bern2_model = Bern2Class(x, mu_gauss, CAT, setting["bern2"]['p0'], setting["bern2"]['p_init'],setting["bern2"]['bond'],setting["bern2"]['sigma_init'],setting["bern2"]['step_init'])
-bern3_model = Bern3Class(x, mu_gauss, CAT, setting["bern3"]['p0'], setting["bern3"]['p_init'],setting["bern3"]['bond'],setting["bern3"]['sigma_init'],setting["bern3"]['step_init'])
-bern4_model = Bern4Class(x, mu_gauss, CAT, setting["bern4"]['p0'], setting["bern4"]['p_init'],setting["bern4"]['bond'],setting["bern4"]['sigma_init'],setting["bern4"]['step_init'])
-bern5_model = Bern5Class(x, mu_gauss, CAT, setting["bern5"]['p0'], setting["bern5"]['p_init'],setting["bern5"]['bond'],setting["bern5"]['sigma_init'],setting["bern5"]['step_init'])
-
-pow1_model = Pow1Class(x, mu_gauss, CAT, setting["pow1"]['sigma_init'], setting["pow1"]['step_init'], setting["pow1"]['p_init'], setting["pow1"]['p_low'], setting["pow1"]['p_high'], setting["pow1"]['di_gauss'])
-pow2_model = Pow2Class(x, mu_gauss, CAT, setting["pow2"]['sigma_init'], setting["pow2"]['step_init'], setting["pow2"]['p1_init'], setting["pow2"]['p1_low'], setting["pow2"]['p1_high'], setting["pow2"]['p2_init'], setting["pow2"]['p2_low'], setting["pow2"]['p2_high'], setting["pow2"]['f1_init'], setting["pow2"]['f2_init'], setting["pow2"]['xmax'], setting["pow2"]['const_f1'], setting["pow2"]['di_gauss'])
-pow3_model = Pow3Class(x, mu_gauss, CAT,setting["pow3"]['sigma_init'], setting["pow3"]['step_init'], setting["pow3"]['p1_init'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2_init'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3_init'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1_init'], setting["pow3"]['f2_init'], setting["pow3"]['f3_init'], setting["pow3"]['xmax'], setting["pow3"]['const_f1'], setting["pow3"]['di_gauss'])
-
-exp1_model = Exp1Class(x, mu_gauss, CAT, setting["exp1"]['sigma_init'], setting["exp1"]['step_init'], setting["exp1"]['p_init'], setting["exp1"]['p_low'], setting["exp1"]['p_high'], setting["exp1"]['di_gauss'])
-exp2_model = Exp2Class(x, mu_gauss, CAT, setting["exp2"]['sigma_init'], setting["exp2"]['step_init'], setting["exp2"]['p1_init'], setting["exp2"]['p1_low'], setting["exp2"]['p1_high'], setting["exp2"]['p2_init'], setting["exp2"]['p2_low'], setting["exp2"]['p2_high'], setting["exp2"]['f1_init'], setting["exp2"]['f2_init'], setting["exp2"]['xmax'], setting["exp2"]['const_f1'], setting["exp2"]['di_gauss'])
-exp3_model = Exp3Class(x, mu_gauss, CAT, setting["exp3"]['sigma_init'], setting["exp3"]['step_init'], setting["exp3"]['p1_init'], setting["exp3"]['p1_low'], setting["exp3"]['p1_high'], setting["exp3"]['p2_init'], setting["exp3"]['p2_low'], setting["exp3"]['p2_high'], setting["exp3"]['p3_init'], setting["exp3"]['p3_low'], setting["exp3"]['p3_high'], setting["exp3"]['f1_init'], setting["exp3"]['f2_init'], setting["exp3"]['f3_init'], setting["exp3"]['xmax'], setting["exp3"]['const_f1'], setting["exp3"]['di_gauss'])
-
-lau2_model = Lau2Class(x, mu_gauss, CAT, setting["lau2"]['sigma_init'], setting["lau2"]['step_init'], setting["lau2"]['p1'], setting["lau2"]['p2'], setting["lau2"]['f_init'], setting["lau2"]['xmax'], setting["lau2"]['const_f1'], setting["lau2"]['di_gauss'])
-lau3_model = Lau3Class(x, mu_gauss, CAT, setting["lau3"]['sigma_init'], setting["lau3"]['step_init'], setting["lau3"]['p1'], setting["lau3"]['p2'], setting["lau3"]['p3'], setting["lau3"]['f_init'], setting["lau3"]['xmax'], setting["lau3"]['const_f1'], setting["lau3"]['di_gauss'])
-lau4_model = Lau4Class(x, mu_gauss, CAT, setting["lau4"]['sigma_init'], setting["lau4"]['step_init'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f_init'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'], setting["lau4"]['di_gauss'])
-
-modg_model = ModGausClass(x, CAT, lowx, lowx+65, setting["modg"]['m0'], setting["modg"]['sl'], setting["modg"]['sh'], setting["modg"]['vl'], setting["modg"]['vr'])
-
-sig_model = DSCB_Class(x, MH, CAT)
-
+'''
 x.setRange("signal",115, 132)
-sig_model.pdf.fitTo(hist_sig, ROOT.RooFit.SumW2Error(True),  ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0), ROOT.RooFit.Range("signal"))
+res = sig_model.pdf.fitTo(hist_sig, ROOT.RooFit.SumW2Error(True),  ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0), ROOT.RooFit.Range("signal"), ROOT.RooFit.Save(True))
+res.Print('v')
 sig_model.setConst(True)
+MH.setVal(125.)
 MH.setConstant(True)
+'''
 
+
+#plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
+profile_ = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
 profile = []
-if "bern2" in setting["FT"]: profile.append(bern2_model)
-if "bern3" in setting["FT"]: profile.append(bern3_model)
-if "bern4" in setting["FT"]: profile.append(bern4_model)
-if "bern5" in setting["FT"]: profile.append(bern5_model)
-if "pow1" in setting["FT"]: profile.append(pow1_model)
-if "pow2" in setting["FT"]: profile.append(pow2_model)
-if "pow3" in setting["FT"]: profile.append(pow3_model)
-if "exp1" in setting["FT"]: profile.append(exp1_model)
-if "exp2" in setting["FT"]: profile.append(exp2_model)
-if "exp3" in setting["FT"]: profile.append(exp3_model)
-if "lau2" in setting["FT"]: profile.append(lau2_model)
-if "lau3" in setting["FT"]: profile.append(lau3_model)
-if "lau4" in setting["FT"]: profile.append(lau4_model)
-if "modg" in setting["FT"]: profile.append(modg_model)
+
+if "bern2" in setting["FT"]: profile.append(profile_.bern2_model)
+if "bern3" in setting["FT"]: profile.append(profile_.bern3_model)
+if "bern4" in setting["FT"]: profile.append(profile_.bern4_model)
+if "bern5" in setting["FT"]: profile.append(profile_.bern5_model)
+if "pow1" in setting["FT"]: profile.append(profile_.pow1_model)
+if "pow2" in setting["FT"]: profile.append(profile_.pow2_model)
+if "pow3" in setting["FT"]: profile.append(profile_.pow3_model)
+if "exp1" in setting["FT"]: profile.append(profile_.exp1_model)
+if "exp2" in setting["FT"]: profile.append(profile_.exp2_model)
+if "exp3" in setting["FT"]: profile.append(profile_.exp3_model)
+if "lau2" in setting["FT"]: profile.append(profile_.lau2_model)
+if "lau3" in setting["FT"]: profile.append(profile_.lau3_model)
+if "lau4" in setting["FT"]: profile.append(profile_.lau4_model)
+if "modg" in setting["FT"]: profile.append(profile_.modg_model)
 
 stat_list = []
-cuthist = data_hist.reduce(ROOT.RooFit.CutRange('left,right'))
+cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
 error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
 for model in profile:
     stat_list.append(ROOT.RooNLLVar("stat_"+model.pdf.GetName(), "stat_"+model.pdf.GetName(), model.SBpdf,  cuthist))
 
 eps = 0.1
 strategy = 0
+stat_vals = []
 for stat in stat_list:
-    Minimizer_Chi2(stat, -1, 100, False, strategy)
+    Minimizer_NLL(stat, -1, 100, False, strategy)
     #Minimizer_Chi2(stat, -1, 1, False, strategy)
-    r = Minimizer_Chi2(stat, -1, eps, True, strategy)
+    r = Minimizer_NLL(stat, -1, eps, True, strategy)
     if LOG: r.Print("V")
     else: print(stat.GetName(), ": Cov q = ", r.covQual(), " status = ", r.status())
-
+    stat_vals.append(stat.getVal() + 0.5*r.floatParsFinal().getSize())
 for model in profile:
     model.checkBond()
+
+best_ = stat_vals.index(min(stat_vals))
+
+# Create Asimov (optional)
+c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 3*N_sig)
+c2 = ROOT.RooRealVar('c2','c2', N - N_sig, 0, 3*N)
+tot_model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, profile[best_].pdf), ROOT.RooArgList(c1, c2))
+hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
+hist_asimov.SetNameTitle('hist_asimov', 'hist_asimov')
+'''
+nll1 = ROOT.RooNLLVar('nll1', 'nll2',  profile[best_].pdf, hist_asimov)
+r1 = Minimizer_NLL(nll1, -1, eps, True, strategy)
+nll1_val = nll1.getVal()
+nll2 = ROOT.RooNLLVar('nll1', 'nll2',  tot_model, hist_asimov)
+r2 = Minimizer_NLL(nll2, -1, eps, True, strategy)
+nll2_val = nll2.getVal()
+'''
 
 # Create signal workspace
 f_out1 = ROOT.TFile("workspaces/workspace_sig_" + CAT + ".root", "RECREATE")
@@ -172,19 +213,39 @@ multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 # Penalty term
 #multipdf.setCorrectionFactor(0.)
 
-norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N, 0, 3*N)
-f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
+norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N - N_sig, 0, 3*N)
+if int(args.asimov) == 0:
+    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
+else:
+    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_asimov_" + CAT + ".root", "RECREATE")
 w_bkg = ROOT.RooWorkspace("workspace_bkg","workspace_bkg")
 getattr(w_bkg, "import")(cate)
 getattr(w_bkg, "import")(norm)
 getattr(w_bkg, "import")(multipdf)
-getattr(w_bkg, "import")(data_hist)
+if int(args.asimov) == 0:
+    getattr(w_bkg, "import")(hist_data)
+else:
+    getattr(w_bkg, "import")(hist_asimov)
 w_bkg.Print()
 w_bkg.Write()
 f_out2.Close()
 
+# Cut and count significance
+CDF = False
+if CDF:
+    cdf = profile[best_].pdf.createCdf(ROOT.RooArgSet(x))
+    x.setVal(120.)
+    cdf_low = cdf.getVal()
+    x.setVal(130.)
+    cdf_high = cdf.getVal()
+    print ('N bkg (sig window) = ', N*(cdf_high - cdf_low))
+    print ('Significance = ', N_sig_window/math.sqrt(N*(cdf_high - cdf_low)))
+
+
+#plotClass(x, hist_asimov, tot_model, tot_model, title="Asimov", output_dir="", sideBand = False)
+
 # Plot it
-multiPlotClass(x, data_hist, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right')
+multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_)
 
 # Create toy histogram (depreciated)
 bias = False
