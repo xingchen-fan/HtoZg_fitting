@@ -108,16 +108,15 @@ else:
 
 
 # Signal model preparation ------------------------
-if SIGNAL:
-    #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
-    #hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
-    sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
-    MH.setVal(125)
-    MH.setConstant(True)
-    N_sig = sig_model.ntot
-    N = hist_data.sumEntries()
-    #N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
-    print("N sig = ", N_sig)
+#hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
+#hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
+sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
+MH.setVal(125)
+MH.setConstant(True)
+N_sig = sig_model.ntot
+N = hist_data.sumEntries()
+#N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
+print("N sig = ", N_sig)
 # -------------------------------------------------
 
 
