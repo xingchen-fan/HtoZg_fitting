@@ -66,6 +66,7 @@ Each year(era), category, lepton flavor and production mode has its own signal m
 ```
 sig_model = combineSignal(x, MH, cat='', config='')
 ```
+To fit the signal MC samples, go to the `Signal_model_preparation` folder and `./run.sh` where the fitting results are save to a log in `/logs` and then parsed to a config file. Right now we only use DSCB model.
 
 ## Minimizer
 Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. A typical minimization of certain test statistics is like this:
@@ -155,18 +156,14 @@ In the `F_test.py`,
 
 One single F test is defined as
 ```
-singleFTestSidebandNLL(x, pdf_list, histogram, cat, eps, offset, strategy, range, className)
+singleFTestSidebandNLL(x, pdf_list, histogram, cat, eps, offset, strategy, range, className, sideBand = True, FT = True)
 ```
-where `x` is the fitting axis, `pdf_list` is the list of the functions that you wnat to do F test over, `histogram` is the `RooDataHist` to be fit, `cat` is the category name, `eps` is the EDM, `offset` controls whether using the offset, and `strategy` should be 0, `range` specicies the range to plot, and `className` is the string added to the title of the multi-function plot output file.
+where `x` is the fitting axis, `pdf_list` is the list of the functions that you wnat to do F test over, `histogram` is the `RooDataHist` to be fit, `cat` is the category name, `eps` is the EDM, `offset` controls whether using the offset, and `strategy` should be 0, `range` specicies the range to plot, and `className` is the string added to the title of the multi-function plot output file. `sideBand` and `FT` are always set to true.
 
-Note: Sideband fit of FFT evaluated function is not possible, thus the full range fit is conducted regardless of `range` 
-
-When calling the F test, NLL fit is used by default
+When calling the F test, NLL fit is used by default. A command to run the F test in ggf1 is
 ```
-bash$ python3 F_test.py CAT XLOW FUNC
+bash$ ./F_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json
 ```
-where `CAT` is the category name (u1, u2, u3 or u4 for now), `XLOW` is the lower boundary of mllg fitting range and `FUNC` is the family of the functions (bern, pow, exp or lau for now).
-
 Output has both the test statistics and the P-values, as well as a multi-function plot.
 
 ## Spurious Signal Test
