@@ -53,6 +53,18 @@ To further automate the process, you can also choose to use the `profileClass` w
 profile = profileClass(x, mu_gauss, cat='', config='')
 ```
 
+To add your own background model, follow the steps:
+
+1. Add the `.cxx` and `.h` files at `Utilities/`
+  
+2. Do `.L YourFunc.cxx+` in ROOT, and include the `.so` library in the python script that you want to use the function.
+
+3. Add the class in `Utilities/bkg_functions_class.py` just like the other functions.
+
+4. Add it as a attribute of `profileClass` in `Utilities/profile_class.py`
+
+5. If you want to set the initial values from the config file, you need to edit the config file so that it includes the keys of the parameters.
+   
 ## Signal Functions
 The functions are defined in `Utilities/sig_functions_class.py`. A typical definition of a model is like this:
 ```
