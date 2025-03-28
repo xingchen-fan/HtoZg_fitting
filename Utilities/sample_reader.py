@@ -1,4 +1,5 @@
 import ROOT
+import json
 
 # Cornell sample in dat format
 
@@ -411,3 +412,70 @@ class readRuiROOTVBFSignalVBF:
         self.vbf3Mu = ROOT.RooDataHist('hist_vbf3_sig_vbf_mu', 'hist_vbf3_sig_vbf_mu', x, hist3_TH1_mu)
         self.vbf4Mu = ROOT.RooDataHist('hist_vbf4_sig_vbf_mu', 'hist_vbf4_sig_vbf_mu', x, hist4_TH1_mu)
 
+
+class readPico: #draw_pico datacard format
+    def __init__(self, x, directory=""):
+        """Initializes the following RooDataHist attributes for use with 
+        HtoZg_fitting utilities: 
+          data_hist_<CATNAME> 
+        where <CAT> is ggf1, ggf2, ggf3, ggf4, vbf1, vbf2, vbf3, vh3l, vhmet,
+        tthhad, or tthlep
+
+        Args:
+          x: three body invariant mass RooAbsReal
+          directory: name of rawdata root file output by draw_pico
+        """
+        
+        config = None
+        with open("../Config/config.json", "r") as jfile:
+            config = json.load(jfile)
+
+        #TODO CAT_NAMES should be moved to some global location
+        CAT_NAMES = ["ggf1", "ggf2", "ggf3", "ggf4", "vbf1", "vbf2", "vbf3",
+                     "vbf4", "vh3l", "vhmet", "tthhad", "tthlep"]
+        PROCS = ["data_obs", "Htozg_el", "Htozg_mu", "Htomm"]
+
+        datasets_raw = []
+        datasets_renamed = []
+        root_file = ROOT.TFile(directory)
+        weight = ROOT.RooRealVar("weight", "", -50.0, 50.0)
+        for proc in PROCS:
+            for cat_name in CAT_NAMES:
+                #get RooDataSet from pico ROOT file and apply appropriate cut
+                lowx = 105
+                #hack to only do this for categories that need it
+                if cat_name in ["ggf1", "ggf2", "ggf3", "ggf4"]:
+                    lowx = config[cat_name]["Range"]
+                highx = lowx+65
+                if ("Htozg" in proc) or ("Htomm" in proc):
+                    lowx = 118
+                    highx = 130
+                mllg_cut = "mllg_cat_{0}>{1}&&mllg_cat_{0}<{2}".format(
+                    cat_name, lowx, highx)
+                dataname = "{}_cat_{}".format(proc, cat_name)
+                if proc != "data_obs":
+                    dataname = "mcdata_" + dataname + "_nominal"
+                datasets_raw.append(getattr(root_file,
+                    "WS_{}_cat_{}".format(proc, cat_name))
+                    .data(dataname).reduce(mllg_cut))
+
+                #hack to change the variable of the dataset to x
+                datasets_raw[-1].changeObservableName(
+                    "mllg_cat_{}".format(cat_name), x.GetName())
+                datasets_renamed.append(ROOT.RooDataSet(
+                    "{}_data_set_{}".format(proc, cat_name), 
+                    "{}_data_set_{}".format(proc, cat_name),
+                    ROOT.RooArgSet(x,weight), ROOT.RooFit.WeightVar(weight)))
+                datasets_renamed[-1].append(datasets_raw[-1])
+
+                #create RooDataHist and save as an attribute of this class
+                #hist_name = "data_hist_{}".format(cat_name)
+                hist_name = "hist_{}_cat_{}".format(proc,cat_name)
+                setattr(self, hist_name, ROOT.RooDataHist(hist_name, 
+                    hist_name, x, datasets_renamed[-1]))
+
+    def numCheck(self):
+        print("# bin1 bkg = ", self.hist_data_obs_cat_ggf1.sumEntries())
+        print("# bin2 bkg = ", self.hist_data_obs_cat_ggf2.sumEntries())
+        print("# bin3 bkg = ", self.hist_data_obs_cat_ggf3.sumEntries())
+        print("# bin4 bkg = ", self.hist_data_obs_cat_ggf4.sumEntries())
