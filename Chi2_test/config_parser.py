@@ -115,12 +115,17 @@ for line in log:
         elif len(r) >1:
             setting["pow1"]["sigma_init"] =  float(r[1])
             setting["pow1"]["fix_sigma"] = 0
+    elif "sigma2_pow1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["pow1"]["sigma2_init"] =  float(r[1])
+        setting["pow1"]["di_gauss"] = 1
     elif "pow1p" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow1"]["p_init"] = float(r[1])
-    elif "sigma2_pow1" in line:
-        setting["pow1"]["di_gauss"] = 1
-
+    elif "gc_pow1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["pow1"]["gc_init"] = float(r[1])
+    
     if "pow2t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow2"]["step_init"]= float(r[1])
@@ -132,20 +137,25 @@ for line in log:
         elif len(r) >1:
             setting["pow2"]["sigma_init"] =  float(r[1])
             setting["pow2"]["fix_sigma"] = 0
+    elif "sigma2_pow2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["pow2"]["sigma2_init"] =  float(r[1])
+        setting["pow2"]["di_gauss"] = 1
     elif "pow2p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow2"]["p1_init"] = float(r[1])
     elif "pow2p2" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow2"]["p2_init"] = float(r[1])
-    elif "sigma2_pow2" in line:
-        setting["pow2"]["di_gauss"] = 1
     elif "pow2f1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow2"]["f1_init"] = float(r[0])
     elif "pow2f2" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow2"]["f2_init"] = float(r[1])
+    elif "gc_pow2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["pow2"]["gc_init"] = float(r[1])
 
     if "pow3t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
@@ -158,6 +168,10 @@ for line in log:
         elif len(r) >1:
             setting["pow3"]["sigma_init"] =  float(r[1])
             setting["pow3"]["fix_sigma"] = 0
+    elif "sigma2_pow3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["pow3"]["sigma2_init"] =  float(r[1])
+        setting["pow3"]["di_gauss"] = 1
     elif "pow3p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow3"]["p1_init"] = float(r[1])
@@ -167,8 +181,6 @@ for line in log:
     elif "pow3p3" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow3"]["p3_init"] = float(r[1])
-    elif "sigma2_pow3" in line:
-        setting["pow3"]["di_gauss"] = 1
     elif "pow3f1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow3"]["f1_init"] = float(r[0])
@@ -178,9 +190,12 @@ for line in log:
     elif "pow3f3" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow3"]["f3_init"] = float(r[1])
+    elif "gc_pow3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["pow3"]["gc_init"] = float(r[1])
 
 
-    if "exp1_t" in line:
+    if "exp_t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp1"]["step_init"]= float(r[1])
     elif "sigma_exp1" in line:
@@ -191,12 +206,17 @@ for line in log:
         elif len(r) >1:
             setting["exp1"]["sigma_init"] =  float(r[1])
             setting["exp1"]["fix_sigma"] = 0
-    elif "exp1_p1" in line:
+    elif "sigma2_exp1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp1"]["sigma2_init"] =  float(r[1])
+        setting["exp1"]["di_gauss"] = 1
+    elif "exp_p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp1"]["p_init"] = float(r[1])
-    elif "sigma2_exp1" in line:
-        setting["exp1"]["di_gauss"] = 1
-
+    elif "gc_exp1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp1"]["gc_init"] = float(r[1])
+        
     if "exp2_t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp2"]["step_init"]= float(r[1])
@@ -208,21 +228,25 @@ for line in log:
         elif len(r) >1:
             setting["exp2"]["sigma_init"] =  float(r[1])
             setting["exp2"]["fix_sigma"] = 0
+    elif "sigma2_exp2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp2"]["sigma2_init"] =  float(r[1])
+        setting["exp2"]["di_gauss"] = 1
     elif "exp2_p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp2"]["p1_init"] = float(r[1])
     elif "exp2_p2" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp2"]["p2_init"] = float(r[1])
-    elif "sigma2_exp2" in line:
-        setting["exp2"]["di_gauss"] = 1
     elif "exp2_f1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp2"]["f1_init"] = float(r[0])
     elif "exp2_f2" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp2"]["f2_init"] = float(r[1])
-
+    elif "gc_exp2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp2"]["gc_init"] = float(r[1])
 
     if "exp3_t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
@@ -235,14 +259,19 @@ for line in log:
         elif len(r) >1:
             setting["exp3"]["sigma_init"] =  float(r[1])
             setting["exp3"]["fix_sigma"] = 0
+    elif "sigma2_exp3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp3"]["sigma2_init"] =  float(r[1])
+        setting["exp3"]["di_gauss"] = 1
     elif "exp3_p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp3"]["p1_init"] = float(r[1])
     elif "exp3_p2" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp3"]["p2_init"] = float(r[1])
-    elif "sigma2_exp3" in line:
-        setting["exp3"]["di_gauss"] = 1
+    elif "exp3_p3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp3"]["p3_init"] = float(r[1])
     elif "exp3_f1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp3"]["f1_init"] = float(r[0])
@@ -252,10 +281,19 @@ for line in log:
     elif "exp3_f3" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp3"]["f3_init"] = float(r[1])
-
+    elif "gc_exp3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["exp3"]["gc_init"] = float(r[1])
+        
     if "lau2_t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["lau2"]["step_init"]= float(r[1])
+    elif "lau2_f1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau2"]["f1_init"] = float(r[0])
+    elif "lau2_f2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau2"]["f2_init"] = float(r[1])
     elif "sigma_lau2" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         if len(r) == 1:
@@ -264,9 +302,26 @@ for line in log:
         elif len(r) >1:
             setting["lau2"]["sigma_init"] =  float(r[1])
             setting["lau2"]["fix_sigma"] = 0
+    elif "sigma2_lau2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau2"]["sigma2_init"] =  float(r[1])
+        setting["lau2"]["di_gauss"] = 1
+    elif "gc_lau2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau2"]["gc_init"] = float(r[1])
+        
     if "lau3_t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["lau3"]["step_init"]= float(r[1])
+    elif "lau3_f1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau3"]["f1_init"] = float(r[0])
+    elif "lau3_f2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau3"]["f2_init"] = float(r[1])
+    elif "lau3_f3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau3"]["f3_init"] = float(r[1])
     elif "sigma_lau3" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         if len(r) == 1:
@@ -275,9 +330,29 @@ for line in log:
         elif len(r) >1:
             setting["lau3"]["sigma_init"] =  float(r[1])
             setting["lau3"]["fix_sigma"] = 0
+    elif "sigma2_lau3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau3"]["sigma2_init"] =  float(r[1])
+        setting["lau3"]["di_gauss"] = 1
+    elif "gc_lau3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau3"]["gc_init"] = float(r[1])
+        
     if "lau4_t" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["lau4"]["step_init"]= float(r[1])
+    elif "lau4_f1" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau4"]["f1_init"] = float(r[0])
+    elif "lau4_f2" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau4"]["f2_init"] = float(r[1])
+    elif "lau4_f3" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau4"]["f3_init"] = float(r[1])
+    elif "lau4_f4" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau4"]["f4_init"] = float(r[1])
     elif "sigma_lau4" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         if len(r) == 1:
@@ -286,6 +361,13 @@ for line in log:
         elif len(r) >1:
             setting["lau4"]["sigma_init"] =  float(r[1])
             setting["lau4"]["fix_sigma"] = 0
+    elif "sigma2_lau4" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau4"]["sigma2_init"] =  float(r[1])
+        setting["lau4"]["di_gauss"] = 1
+    elif "gc_lau4" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["lau4"]["gc_init"] = float(r[1])
 
     if "m0" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
