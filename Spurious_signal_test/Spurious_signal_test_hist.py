@@ -34,7 +34,7 @@ mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 x.setBins(260)
 
 # SST histograms stored in root files
-file_open_bkg = ROOT.TFile.Open('../Data/sst_ggf_hist_nodrop.root', 'READ')
+file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 hist_bkg_TH1 = file_open_bkg.Get(CAT+'_dy_sm')
 #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+CAT)
@@ -46,7 +46,7 @@ hist_bkg = ROOT.RooDataHist('hist_bkg', 'hist_bkg', x, hist_bkg_TH1)
 MH = ROOT.RooRealVar("MH","MH"       ,124.7, 120., 130.)
 profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
 
-bkg_list = profile.testSelection("Chi2")
+bkg_list = [profile.bern2_model]#profile.testSelection("Chi2")
 
 
 # Signal model 
@@ -64,39 +64,55 @@ MH.setConstant(True)
 # Bkg fit
 for bkg_model in bkg_list:
     print ("Starting ", bkg_model.name)
-    chi2 = ROOT.RooChi2Var("chi2_bkg_" + CAT, "chi2 bkg " + CAT, bkg_model.pdf,  hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
-    Minimizer_Chi2(chi2, -1, 100, False, 0)
-    r = Minimizer_Chi2(chi2, -1, 0.1, False, 0)
+    if CAT == 'vbf1':
+        r = bkg_model.pdf.fitTo(hist_bkg, ROOT.RooFit.Save(True), \
+                               ROOT.RooFit.AsymptoticError(True),ROOT.RooFit.PrintLevel(-1))
+        th1_hist = hist_bkg.createHistogram("hist_ks", x, ROOT.RooFit.Binning(260))
+        ks_model_hist = bkg_model.pdf.generateBinned(x,hist_bkg.sumEntries(), True).createHistogram("model_hist_ks", x, ROOT.RooFit.Binning(260))
+        ks_PV = ks_model_hist.KolmogorovTest(th1_hist, 'X')
+        note_ = 'KS P-value = %.2f'%ks_PV
+    else:    
+        chi2 = ROOT.RooChi2Var("chi2_bkg_" + CAT, "chi2 bkg " + CAT, bkg_model.pdf,  hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+        Minimizer_Chi2(chi2, -1, 100, False, 0)
+        r = Minimizer_Chi2(chi2, -1, 0.1, False, 0)
+        note_ = '#Chi^{2}/dof = %.2f'%chi2.getVal()+'/%i'%(260-r.floatParsFinal().getSize())
     bkg_model.checkBond()
     r.Print("V")
-
+    plotClass(x, hist_bkg, bkg_model.pdf, bkg_model.SBpdf, "B_"+bkg_model.name,  note=note_, CMS = 'Simulation', fullRatio = True)
 # S+B fit
     c01 = ROOT.RooRealVar("c1", "c1", hist_bkg.sumEntries(), 0, 3.* hist_bkg.sumEntries())
     c02 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
-
     tot_model = ROOT.RooAddPdf(bkg_model.name + "_tot", bkg_model.name + "_tot", ROOT.RooArgList(combine_model.pdf, bkg_model.pdf), ROOT.RooArgList(c02, c01))
-    #combine_model.pdf.Print()
-    chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
-    Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
-    res1 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
+    if CAT == 'vbf1':
+        res1 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.SumW2Error(False), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
+        note_chi2 = ''
+    else:
+        chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
+        chi2_val = chi2_tot.getVal()
+        Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
+        res1 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
+        pV = ROOT.Math.chisquared_cdf_c(chi2_val, 260 - res1.floatParsFinal().getSize())
+        note_chi2 = '#Chi^{2} = %.2f'%chi2_val+',P-value = %.2f'%pV
     bkg_model.checkBond()
     print("Poisson error:")
     res1.Print("V")
     NS = c02.getVal()
     delta_NS = c02.getError()
+    #plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_Poisson_"+tot_model.GetName(), note='', CMS = 'Simulation', fullRatio = True)
 
-    chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Extended(True))
-    Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
-    res2 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
+    if CAT == 'vbf1':
+        res2 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
+    else:
+        chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Extended(True))
+        Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
+        res2 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
     bkg_model.checkBond()
     print("SumW2 error:")
     res2.Print("V")
     delta_MC = c02.getError()
-    pV = ROOT.Math.chisquared_cdf_c(chi2_tot.getVal(), 260 - res2.floatParsFinal().getSize())
-    print("p-value = ", pV)
     print("N signal = ", NS, ", Delta Ns = ", delta_NS, ", Delta MC = ", delta_MC)
 
-    plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_"+tot_model.GetName(), note='#splitline{N_{S} = ' + '%.2f' % NS + ' #zeta_{S} = ' + '%.2f' % max(0., abs(NS) - 2*delta_MC) + '}{#splitline{#Delta_{MC} = '+ '%.2f' % delta_MC + '}{#splitline{#Delta_{N_{S}} = '+ '%.2f' % delta_NS+'}{P-value = %.2f'%pV +'}}}', CMS = 'Simulation')
+    plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_"+tot_model.GetName(), note='#splitline{N_{S} = ' + '%.2f' % NS + ' #zeta_{S} = ' + '%.2f' % max(0., abs(NS) - 2*delta_MC) + '}{#splitline{#Delta_{MC} = '+ '%.2f' % delta_MC + '}{#splitline{#Delta_{N_{S}} = '+ '%.2f' % delta_NS+'}{' + note_chi2 +'}}}', CMS = 'Simulation', fullRatio = True)
 
 
 

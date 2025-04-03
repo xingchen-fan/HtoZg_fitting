@@ -89,7 +89,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
         if f<0.05:
             highest = i+1
         else: break
-    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=sideBand, fitRange= range_, best_index = highest)
+    multiPlotClass(x, histogram, pdfList, title=className+"_multi_" + cat, output_dir="plots/", sideBand=sideBand, fitRange= range_, best_index = highest, bestLabel = True)
 
 # def customNLL(x, histogram, modelClass):
 #     x_list = ROOT.RooArgList("x_list")
@@ -186,6 +186,7 @@ bern_list = []
 pow_list = []
 exp_list = []
 lau_list = []
+
 if "bern2" in setting["SST"]:
      bern_list.append(profile.bern2_model)
 if "bern3" in setting["SST"]:

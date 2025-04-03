@@ -13,8 +13,8 @@ from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
 from profile_class import *
-ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+#ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
 ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
 
@@ -87,12 +87,11 @@ print('N data = ', hist_data.sumEntries())
 # Bkg funcs
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
-#AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
+AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
 profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
 
-bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]
-#profile.lau2_model, profile.lau3_model, profile.lau4_model,
-#vbf1 no lau3, vbf2 no lau4
+bkg_list = [profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]
+#vbf1 no lau3,lau4 and  vbf2 no lau4
 
 # Sideband Chi^2 fit
 cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
@@ -115,7 +114,7 @@ for func in bkg_list:
     chi2_PV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), dof)
     ks_model_hist = func.SBpdf.generateBinned(x, cuthistogram.sumEntries(), True).createHistogram("hist_"+func.SBpdf.GetName(), x, ROOT.RooFit.Binning(260))
     ks_PV = th1_cuthist.KolmogorovTest(ks_model_hist)
-    plotClass(x, hist_data, func.pdf, func.SBpdf, title=func.pdf.GetName(), output_dir="plots/", sideBand = True, fitRange = 'left,right', note='#splitline{#Chi^{2}/dof = ' + '%.2f'%chi2_val + '/%i'%dof +'}{#splitline{#Chi^{2} P-value = ' + '%.2f'%chi2_PV + '}{KS P-value = ' + '%.2f'%ks_PV + '}}', fullRatio = ("vbf" in CAT))
+    plotClass(x, hist_data, func.pdf, func.SBpdf, title=func.pdf.GetName(), output_dir="plots/", sideBand = True, fitRange = 'left,right', note='#splitline{#Chi^{2}/dof = ' + '%.2f'%chi2_val + '/%i'%dof +'}{#splitline{#Chi^{2} P-value = ' + '%.2f'%chi2_PV + '}{KS P-value = ' + '%.2f'%ks_PV + '}}', fullRatio = True)
     if chi2_PV>0.1 and ks_PV>0.1 and res.status() == 0:
         pass_list.append(func)
 print('List has ', len(pass_list), ' models')

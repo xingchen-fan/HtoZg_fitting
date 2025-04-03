@@ -36,9 +36,11 @@ CAT = args.cat
 setting = configs[CAT]
 lowx = setting["Range"]
 
-# Save all the fit results? Make signal workspace?
+# Save all the fit results? Make signal workspace? Read dat files? Do fit?
 LOG = True
 SIGNAL = False
+DAT = False
+FIT = False # 'False' to read the post-fit values from config file
 
 # Define variables
 x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
@@ -66,7 +68,6 @@ x.setRange('full', lowx, lowx+65)
 
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 
-DAT = False
 if DAT:
     if CAT=='ggf1':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
@@ -155,21 +156,29 @@ for model in profile:
 eps = 0.1
 strategy = 0
 stat_vals = []
-for stat in stat_list:
-    Minimizer_NLL(stat, -1, 100, False, strategy)
-    #Minimizer_Chi2(stat, -1, 1, False, strategy)
-    r = Minimizer_NLL(stat, -1, eps, True, strategy)
-    if LOG: r.Print("V")
-    else: print(stat.GetName(), ": Cov q = ", r.covQual(), " status = ", r.status())
-    stat_vals.append(stat.getVal() + 0.5*r.floatParsFinal().getSize())
+nFloat = 0
+for ind, stat in enumerate(stat_list):
+    if FIT:
+        Minimizer_NLL(stat, -1, 100, False, strategy)
+        #Minimizer_Chi2(stat, -1, 1, False, strategy)
+        r = Minimizer_NLL(stat, -1, eps, True, strategy)
+        if LOG: r.Print("V")
+        else: print(stat.GetName(), ": Cov q = ", r.covQual(), " status = ", r.status())
+        nFloat = r.floatParsFinal().getSize()
+    else:
+        nFloat = profile[ind].pdf.getParameters(hist_data).selectByAttrib('Constant',False).getSize()
+    stat_vals.append(stat.getVal() + 0.5*nFloat)
+    print (profile[ind].name,' = ', nFloat)
+        
 for model in profile:
     model.checkBond()
 
 best_ = stat_vals.index(min(stat_vals))
+print ("best is ", profile[best_].name)
 
 # Create Asimov (optional)
-c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 3*N_sig)
-c2 = ROOT.RooRealVar('c2','c2', N - N_sig, 0, 3*N)
+c1= ROOT.RooRealVar('c1','c1', N_sig)#, 0, 3*N_sig)
+c2 = ROOT.RooRealVar('c2','c2', N)#, 0, 3*N)
 tot_model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, profile[best_].pdf), ROOT.RooArgList(c1, c2))
 hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
 hist_asimov.SetNameTitle('hist_' + CAT + '_asimov', 'hist_' + CAT + '_asimov')
@@ -233,7 +242,7 @@ if CDF:
 #plotClass(x, hist_asimov, tot_model, tot_model, title="Asimov", output_dir="", sideBand = False)
 
 # Plot it
-multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_)
+multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = True)
 
 # Create toy histogram (depreciated)
 bias = False

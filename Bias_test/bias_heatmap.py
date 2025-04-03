@@ -5,12 +5,13 @@ import json
 
 parser = argparse.ArgumentParser(description = "Bias test heat map")
 parser.add_argument('-c', '--cat', help="category")
+parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
-jfile = open('../Config/config.json', 'r')
+jfile = open('../Config/' + args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-func_list = setting["FT"]
+func_list = setting["CMSBias"]
 N_func = len(func_list)
 
 def fill_best(best_list_, func):
