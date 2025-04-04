@@ -7,7 +7,9 @@ class profileClass:
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
         setting = configs_[cat]
-        self.config = config
+        self.cat = cat
+        self.config_file = config
+        self.config_dict = configs_
         self.setting_ = setting
         self.bern2_model = Bern2Class(x, mu_gauss, cat, setting["bern2"]['p0'], setting["bern2"]['p1_init'], setting["bern2"]['p2_init'], setting["bern2"]['bond'],setting["bern2"]['sigma_init'],setting["bern2"]['step_init'], setting["bern2"]['fix_sigma'])
         self.bern3_model = Bern3Class(x, mu_gauss, cat, setting["bern3"]['p0'], setting["bern3"]['p1_init'], setting["bern3"]['p2_init'], setting["bern3"]['p3_init'], setting["bern3"]['bond'],setting["bern3"]['sigma_init'],setting["bern3"]['step_init'], setting["bern3"]['fix_sigma'])
@@ -49,6 +51,37 @@ class profileClass:
         if "agg"  in self.setting_[test]: profile_.append(self.agg_model)
         return profile_
 
+    #Code to update the JSON file
+    def write_config_file(self, histogram, test, config_out=None):
+      #Update setting dictionary with updated
 
+      test_models = self.testSelection(test)
+      
+      slimmed_setting = {}
+      
+      for model in test_models:
+        parameters = model.pdf.getParameters(histogram)
+        model_name = model.name.rstrip('_' + self.cat + '_model')
+        slimmed_setting[model_name] = {}
+
+        for param in parameters:
+          param_name = (param.GetName()).rstrip('_' + self.cat) #Check GetName command
+          param_val = param.getValV()
+          #self.config_dict[self.cat][model_name][param_name] = param.getValV()
+          #self.setting_[model_name][param_name] = param.getValV()
+          slimmed_setting[model_name][param_name] = param.getValV()
+
+      #Correctly identify which file to write to
+      config_to_update = self.config_file
+      if config_out:
+        config_to_update = config_out
+
+      config_to_dump = {}
+      #config_to_dump[self.cat] = self.setting_
+      config_to_dump[self.cat] = slimmed_setting
+
+      #Dump the file to a JSON to update CONFIG
+      with open(config_to_update, 'w') as output_file:
+        json.dump(config_to_dump, output_file, indent=4, separators=(',',': '))
 
 

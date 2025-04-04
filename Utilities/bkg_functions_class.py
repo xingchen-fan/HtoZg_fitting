@@ -8,14 +8,44 @@ def bondComp(par, tol):
     
 #### Asymmetric Generalized Gaussian
 class AGGClass:
-    def __init__(self, x, cat="", kappa_init = -0.5, alpha_init = 1, zeta_init = 0, x_low = 100., x_high = 180.):
-        self.kappa = ROOT.RooRealVar("AGG_kappa_" + cat, "AGG_kappa_" + cat, kappa_init, -30, 0)
-        self.alpha = ROOT.RooRealVar("AGG_alpha_" + cat, "AGG_alpha_" + cat, alpha_init, 0, 5)
-        self.zeta = ROOT.RooRealVar("AGG_zeta_" + cat, "AGG_zeta_" + cat, zeta_init, 90, x_high)
-        self.pdf = ROOT.AsymGenGaussian("AGG_"+cat, "AGG_"+cat, x, self.kappa, self.alpha, self.zeta, x_low, x_high)
-        self.SBpdf = ROOT.RooGenericPdf("SBAGG_"+cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
-        self.name = "AGG_"+cat
-        
+    def __init__(self, x, cat="", kappa_init = -0.5, alpha_init = 20.0, zeta_init = 110.0, x_low = 100., x_high = 180.):
+        self.init_list = [kappa_init, alpha_init, zeta_init]
+        self.kappa = ROOT.RooRealVar("agg_kappa_" + cat, "agg_kappa_" + cat, kappa_init, -100.0, 100.0)
+        self.alpha = ROOT.RooRealVar("agg_alpha_" + cat, "agg_alpha_" + cat, alpha_init, 0.0, 1000.0)
+        self.zeta = ROOT.RooRealVar("agg_zeta_" + cat, "agg_zeta_" + cat, zeta_init, x_low, x_high)
+        self.pdf = ROOT.AsymGenGaussian("agg_"+cat+"_model", "agg_"+cat, x, self.kappa, self.alpha, self.zeta, x_low, x_high)
+        self.SBpdf = ROOT.RooGenericPdf("SBagg_"+cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "agg_"+cat
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.kappa, self.alpha, self.zeta]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.kappa.setVal(self.init_list[0])
+        self.alpha.setVal(self.init_list[1])
+        self.zeta.setVal(self.init_list[2])
+    
+#### EXModGaus a.k.a analytic EXP1 function
+class EXMGClass:
+    def __init__(self, x, cat="", mu_init = 110.0, sig_init = 1.0, xsi_init = 0.5, x_low = 100., x_high = 180.):
+        self.init_list = [mu_init, sig_init, xsi_init]
+        self.mu = ROOT.RooRealVar("exmg_mu_" + cat, "exmg_mu_" + cat, mu_init, 100, 180)
+        self.sig = ROOT.RooRealVar("exmg_sig_" + cat, "exmg_sig_" + cat, sig_init, 0, 10.0)
+        self.xsi = ROOT.RooRealVar("exmg_xsi_" + cat, "exmg_xsi_" + cat, mu_init, -5.0, 10.0) #When written this is lambda, did not want to overwrite lambda functionality\
+        self.pdf = ROOT.EXModGaus("exmg_"+cat+"_model", "exmg_"+cat, x, self.mu, self.sig, self.xsi, x_low, x_high)
+        self.SBpdf = ROOT.RooGenericPdf("SBexmg_"+cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "exmg_"+cat
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.mu, self.sig, self.xsi]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+        self.mu.setVal(self.init_list[0])
+        self.sig.setVal(self.init_list[1])
+        self.xsi.setVal(self.init_list[2])
+
 #### Bernstein
 class Bern2Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p1_init=0.3, p2_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False):
@@ -483,14 +513,14 @@ class Exp3Class:
 class Lau2Class:
     def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 108., p1 = -7, p2 = -6, f_init = 0.1, xmax = 165., const_f1 = False, di_gauss = False, fix_sigma = False):
         self.init_list = [sigma_init, step_init, p1, p2, f_init]
-        self.sigma = ROOT.RooRealVar("sigma_lau2_" + cat,"sigma_lau2_" + cat       ,sigma_init,  1., 25.)
+        self.sigma = ROOT.RooRealVar("sigma_lau2_" + cat,"sigma_lau2_" + cat       ,sigma_init,  1., 40.)
         self.sigma.setConstant(fix_sigma)
-        self.sigma2 = ROOT.RooRealVar("sigma2_lau2_" + cat,"sigma2_lau2_"+cat, sigma_init * 2,  0.1, 25.)
+        self.sigma2 = ROOT.RooRealVar("sigma2_lau2_" + cat,"sigma2_lau2_"+cat, sigma_init * 2,  0.1, 40.)
         self.offset = ROOT.RooRealVar("os_" + cat, "os_" + cat, 1e-10)
         self.xmax = ROOT.RooRealVar("xmax_lau2_" + cat, "xmax_lau2_" + cat, xmax)
         self.t = ROOT.RooRealVar("lau2_t_" + cat, "t lau2 " + cat, step_init, 90., 118.)
-        self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f_init, 0, 10.)
-        self.f2 = ROOT.RooRealVar("lau2_f2_" + cat, "f2 lau2 " + cat, f_init, 0., 10.)
+        self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f_init, 0, 30.)
+        self.f2 = ROOT.RooRealVar("lau2_f2_" + cat, "f2 lau2 " + cat, f_init, 0., 30.)
         self.p1 = ROOT.RooRealVar("lau2_p1_" + cat, "p1 lau2 " + cat, p1)
         self.p2 = ROOT.RooRealVar("lau2_p2_" + cat, "p2 lau2 " + cat, p2)
         self.norm1 = ROOT.RooFormulaVar("norm1_lau2_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p1, self.xmax))

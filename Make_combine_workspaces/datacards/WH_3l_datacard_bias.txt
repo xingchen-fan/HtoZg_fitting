@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    WH_3l   workspaces/workspace_bkg_profile_bias_WH_3l.root   workspace_bkg:multipdf_WH_3l 
+shapes sig    WH_3l   workspaces/workspace_sig_WH_3l.root   workspace_sig:sig_model_DS_WH_3l
+shapes data_obs   WH_3l   workspaces/workspace_bkg_profile_bias_WH_3l.root     workspace_bkg:hist_data
+
+-------------------------------------------------
+bin		WH_3l
+observation	-1
+--------------------------------------------------
+bin 		WH_3l		WH_3l
+process	bkg		sig
+process	1		0
+rate		1.0  20.15
+--------------------------------------------------
+
+pdfindex_WH_3l         discrete

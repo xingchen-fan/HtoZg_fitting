@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    ttH_had   workspaces/workspace_bkg_profile_bias_ttH_had.root   workspace_bkg:multipdf_ttH_had 
+shapes sig    ttH_had   workspaces/workspace_sig_ttH_had.root   workspace_sig:sig_model_DS_ttH_had
+shapes data_obs   ttH_had   workspaces/workspace_bkg_profile_bias_ttH_had.root     workspace_bkg:hist_data
+
+-------------------------------------------------
+bin		ttH_had
+observation	-1
+--------------------------------------------------
+bin 		ttH_had		ttH_had
+process	bkg		sig
+process	1		0
+rate		1.0  20.15
+--------------------------------------------------
+
+pdfindex_ttH_had         discrete

@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    ZH_MET   workspaces/workspace_bkg_profile_bias_ZH_MET.root   workspace_bkg:multipdf_ZH_MET 
+shapes sig    ZH_MET   workspaces/workspace_sig_ZH_MET.root   workspace_sig:sig_model_DS_ZH_MET
+shapes data_obs   ZH_MET   workspaces/workspace_bkg_profile_bias_ZH_MET.root     workspace_bkg:hist_data
+
+-------------------------------------------------
+bin		ZH_MET
+observation	-1
+--------------------------------------------------
+bin 		ZH_MET		ZH_MET
+process	bkg		sig
+process	1		0
+rate		1.0  20.15
+--------------------------------------------------
+
+pdfindex_ZH_MET         discrete

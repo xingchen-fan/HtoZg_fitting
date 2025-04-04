@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    untagged   workspaces/workspace_bkg_profile_bias_untagged.root   workspace_bkg:multipdf_untagged 
+shapes sig    untagged   workspaces/workspace_sig_untagged.root   workspace_sig:sig_model_DS_untagged
+shapes data_obs   untagged   workspaces/workspace_bkg_profile_bias_untagged.root     workspace_bkg:hist_data
+
+-------------------------------------------------
+bin		untagged
+observation	-1
+--------------------------------------------------
+bin 		untagged		untagged
+process	bkg		sig
+process	1		0
+rate		1.0  20.15
+--------------------------------------------------
+
+pdfindex_untagged         discrete
