@@ -15,7 +15,7 @@ observation	-1
 bin 		ZH_MET		ZH_MET
 process	bkg		sig
 process	1		0
-rate		1.0  20.15
+rate		1.0  0.731508
 --------------------------------------------------
 
 pdfindex_ZH_MET         discrete

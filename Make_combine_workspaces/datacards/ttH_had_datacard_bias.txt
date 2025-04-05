@@ -15,7 +15,7 @@ observation	-1
 bin 		ttH_had		ttH_had
 process	bkg		sig
 process	1		0
-rate		1.0  20.15
+rate		1.0  0.816
 --------------------------------------------------
 
 pdfindex_ttH_had         discrete

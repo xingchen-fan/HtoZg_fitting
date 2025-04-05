@@ -15,7 +15,7 @@ observation	-1
 bin 		WH_3l		WH_3l
 process	bkg		sig
 process	1		0
-rate		1.0  20.15
+rate		1.0  1.11364
 --------------------------------------------------
 
 pdfindex_WH_3l         discrete

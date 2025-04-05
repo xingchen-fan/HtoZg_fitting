@@ -15,7 +15,7 @@ observation	-1
 bin 		ttH_lep		ttH_lep
 process	bkg		sig
 process	1		0
-rate		1.0  20.15
+rate		1.0  0.534
 --------------------------------------------------
 
 pdfindex_ttH_lep         discrete

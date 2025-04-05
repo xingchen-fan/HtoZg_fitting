@@ -15,7 +15,7 @@ observation	-1
 bin 		untagged		untagged
 process	bkg		sig
 process	1		0
-rate		1.0  20.15
+rate		1.0  7.98184
 --------------------------------------------------
 
 pdfindex_untagged         discrete
