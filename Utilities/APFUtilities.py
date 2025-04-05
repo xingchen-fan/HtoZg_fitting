@@ -81,6 +81,6 @@ def get_file_name(category, on_lxplus):
   if not on_lxplus:
       file_path = VHttH_file_path
 
-  file_name = file_path + file_name_part1 + CAT + file_name_part2
+  file_name = file_path + file_name_part1 + category + file_name_part2
   return file_name
 

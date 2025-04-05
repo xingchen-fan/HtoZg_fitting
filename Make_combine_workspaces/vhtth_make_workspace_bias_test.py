@@ -11,7 +11,7 @@ from sig_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
-from profile_class import *
+from wip_profile_class import *
 from sig_functions_class import *
 from APFUtilities import *
 
