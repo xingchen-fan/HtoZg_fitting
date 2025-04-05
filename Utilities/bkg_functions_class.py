@@ -78,7 +78,7 @@ class Bern3Class:
         self.p1 = ROOT.RooRealVar("bern3_p1_" + cat, "bern3_p1_" + cat, p1_init,-bond, bond)
         self.p2 = ROOT.RooRealVar("bern3_p2_" + cat, "bern3_p2_" + cat, p2_init,-bond, bond)
         self.p3 = ROOT.RooRealVar("bern3_p3_" + cat, "bern3_p3_" + cat, p3_init,-bond, bond)
-        self.sigma = ROOT.RooRealVar("bern3_sigma_bern3_" + cat,"bern3_sigma_" + cat, sigma_init,  0, 15.)
+        self.sigma = ROOT.RooRealVar("bern3_sigma_" + cat,"bern3_sigma_" + cat, sigma_init,  0, 15.)
         self.sigma.setConstant(fix_sigma)
         self.stepval = ROOT.RooRealVar("bern3_step_" + cat, "bern3_step_" + cat, step_init, 90., 120.)
         self.pdf = ROOT.RooGaussStepBernstein("bern3_" +cat + "_model", "Bernstein3 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, ROOT.RooArgList(self.p0,self.p1,self.p2,self.p3))

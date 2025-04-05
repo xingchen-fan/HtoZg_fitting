@@ -61,8 +61,8 @@ class profileClass:
       
       for model in test_models:
         parameters = model.pdf.getParameters(histogram)
-        model_name = model.name.rstrip('_' + self.cat + '_model')
-        slimmed_setting[model_name] = {}
+        model_name = model.name.replace('_' + self.cat,'')
+        #slimmed_setting[model_name] = {}
 
         for param in parameters:
           #Format name
