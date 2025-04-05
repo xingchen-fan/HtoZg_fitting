@@ -49,11 +49,13 @@ x = define_mlly()
 mu_gauss = ROOT.RooRealVar("mu_gauss", "always 0", 0.)
 MH = ROOT.RooRealVar("MH", "MH", 125, 120., 130.)
 
+#Define file name
+file_name = get_file_name(CAT, True)
 
+#Get data histogram as a RooDataHist
+data_hist = get_data_rdh(file_name, "rdh_" + CAT, x)
 
-
-
-#plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
+#Get profile from config file and use select set of functions
 profile_ = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
 profile = profile_.testSelection("postFT")
 

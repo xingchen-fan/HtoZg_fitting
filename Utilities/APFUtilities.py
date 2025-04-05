@@ -7,6 +7,7 @@ ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 
 
 VHttH_file_path = "/net/cms27/cms27r0/abarzdukas/drawPico/gitChangesDirectory/PushControlRegions/draw_pico/plots/an_int_fitting/"
+VHttH_file_path_lxplus = "~/public/vhtth_mlly_histograms/"
 
 def get_hist(infile, hist_name):
   file = ROOT.TFile(infile)
@@ -70,4 +71,16 @@ def define_mlly():
   
   return x
 
+#Right now the two options are on lxplus or UCSB cluster. Can make more robust if needed.
+def get_file_name(category, on_lxplus):
+  file_name_part1 = "an_int_fit_dist_Data_cat_"
+  file_name_part2 = "_AllYears__llphoton_refit_m__wgt__lumi_nonorm_lin.root"
+  file_path = VHttH_file_path_lxplus
+
+  #If on UCSB server use the correct file_path variable
+  if not on_lxplus:
+      file_path = VHttH_file_path
+
+  file_name = file_path + file_name_part1 + CAT + file_name_part2
+  return file_name
 
