@@ -16,6 +16,11 @@ from sample_reader import *
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
 def get_args():
+    """Parses arguments
+
+    Returns:
+        Namespace with arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--sampletype', help = 'Sample Type', default='')
     parser.add_argument('-i', '--input_file', help = 'Input File', default='')
@@ -31,6 +36,9 @@ def get_hist(CAT, prod, lep_flavor):
         CAT: category name
         prod: production mode
         lep_flavor: lepton flavor
+
+    Returns:
+       RooDataHist for appropriate category, production mode, and lepton flavor
     """
     if not CAT in ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vbf4"]:
         raise ValueError("Unknown category")
@@ -49,13 +57,14 @@ def get_hist(CAT, prod, lep_flavor):
         sig_sample = readRuiROOTVBFSignalVBF(x, '')
     return getattr(sig_sample, f"{CAT}{lep_flavor}")
 
-def save_params_to_json(dscb_model, MH, filename, preset_name):
+def save_params_to_json(dscb_model, MH, nexp, filename, preset_name):
     """Saves DSCB parameter values to json, overwriting any existing values
     for the given preset_name
 
     Args:
         dscb_model: DSCB_Class after fit is performed
         MH: RooRealVar of DSCB mu 
+        nexp: number of signal events for this process/category
         filename: json file to save model to
         preset_name: key in file to access stored parameters
     """
@@ -63,9 +72,9 @@ def save_params_to_json(dscb_model, MH, filename, preset_name):
     fit_params = {}
     #N.B. sigmaL is two-sided sigma when disigma=False
     fit_params["disigma"] = dscb_model.disigma
-    for key in ["sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
+    fit_params["nexp"] = nexp
+    for key in ["dMH", "sigmaL", "sigmaR", "nL", "nR", "alphaL", "alphaR"]:
         fit_params[key] = getattr(dscb_model,key).getVal()
-    fit_params["MH"] = MH.getVal()
 
     #save to file
     dscb_config = {}
@@ -97,6 +106,8 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = True,
     #Minimizer_NLL(nll, -1, 100, False, 0)
     sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True), 
         ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
+    sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True), 
+        ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
     #sig_model.pdf.chi2FitTo(hist, 
     #    ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), 
     #    ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
@@ -109,7 +120,8 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = True,
     #    ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0), 
     #    ROOT.RooFit.Save(True))
     res.Print('v')
-    print(name+'_nexp = %.2f'%hist.sumEntries())
+    nexp = hist.sumEntries()
+    print(name+'_nexp = %.2f'%nexp)
     
     if DISIGMA:
         note = '#splitline{#splitline{#sigmaL = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+', #sigmaR = ' + '%.2f'%sig_model.sigmaR.getVal() + '#pm%.2f'%sig_model.sigmaR.getError() + '}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
@@ -119,7 +131,7 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = True,
     plotClass(x, hist, sig_model.pdf, sig_model.pdf, name, note=note, 
         CMS = "Simulation", fullRatio = True, leftSpace=True, bins = 2)
     if save_json != "":
-      save_params_to_json(sig_model, MH, save_json, name)
+      save_params_to_json(sig_model, MH, nexp, save_json, name)
 
 def do_category_fit(args):
     """Performs fit to signal in appropriate category and draws output plot.
@@ -132,6 +144,7 @@ def do_category_fit(args):
     if args.sampletype=="pico":
         x = ROOT.RooRealVar("x", "mllg", 118, 130)
         MH =  ROOT.RooRealVar("MH", "MH", 125, 120, 130)
+        MH.setConstant()
         x.setBins(int(4* (x.getMax() - x.getMin())))
         pico_reader = readPico(x, args.input_file)
         name = f"{args.prod}_cat_{args.cat}"
@@ -143,6 +156,7 @@ def do_category_fit(args):
         for lepton_flavor in ["El","Mu"]:
             x = ROOT.RooRealVar("x", "mllg", 118, 130)
             MH =  ROOT.RooRealVar("MH", "MH", 125, 120, 130)
+            MH.setConstant()
             x.setBins(int(4* (x.getMax() - x.getMin())))
             hist = get_hist(CAT, args.prod, lepton_flavor)
             name = CAT+"_"+args.year+"_"+lepton_flavor.lower()+"_"+args.prod

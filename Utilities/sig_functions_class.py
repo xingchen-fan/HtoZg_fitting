@@ -3,18 +3,23 @@ import json
 import sys
 
 class DSCB_Class:
-    def __init__(self, x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False):
+    def __init__(self, x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False, simple_name = False):
         self.disigma = di_sigma
+        self.dMH = ROOT.RooRealVar("dMH_"+cat, "dMH_"+cat, 0.0, -2.0, 2.0)
         self.sigmaL = ROOT.RooRealVar("sigmaL_"+cat,"sigmaL_"+cat       , sigmaL_init, 0.01, 5.)
         self.sigmaR = ROOT.RooRealVar("sigmaR_"+cat,"sigmaR_"+cat       , sigmaR_init, 0.01, 5.)
         self.nL =  ROOT.RooRealVar("nL_"+cat, "nL_"+cat, nL_init, 0.01, nL_bond)
         self.nR =  ROOT.RooRealVar("nR_"+cat, "nR_"+cat, nR_init, 0.01, nR_bond)
         self.alphaL = ROOT.RooRealVar("alphaL_"+cat, "alphaL_"+cat, alphaL_init, 0.01, 5.)
         self.alphaR = ROOT.RooRealVar("alphaR_"+cat, "alphaR_"+cat, alphaR_init, 0.01, 5.)
+        self.mean = ROOT.RooFormulaVar("MH_"+cat, "MH_"+cat, "(@0+@1)", ROOT.RooArgList(MH, self.dMH))
+        pdf_name = "model_DS_"+cat
+        if simple_name:
+          pdf_name = cat
         if self.disigma:
-            self.pdf = ROOT.RooCrystalBall.RooCrystalBall("model_DS_"+cat, "model_DS_"+cat, x, MH, self.sigmaL, self.sigmaR, self.alphaL, self.nL, self.alphaR, self.nR)
+            self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, self.mean, self.sigmaL, self.sigmaR, self.alphaL, self.nL, self.alphaR, self.nR)
         else:
-            self.pdf = ROOT.RooCrystalBall.RooCrystalBall("model_DS_"+cat, "model_DS_"+cat, x, MH, self.sigmaL, self.alphaL, self.nL, self.alphaR, self.nR)
+            self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, self.mean, self.sigmaL, self.alphaL, self.nL, self.alphaR, self.nR)
 
     def setStable(self):
         if self.nL.getVal() > 30 or self.nL.getError() > 50:
@@ -35,6 +40,7 @@ class DSCB_Class:
             self.nR.setConstant(True)
     
     def setConst(self, constant = True):
+        self.dMH.setConstant(constant)
         self.sigmaL.setConstant(constant)
         self.sigmaR.setConstant(constant)
         self.nL.setConstant(constant)
@@ -61,6 +67,18 @@ class DSCB_Class:
             print("aL = ",  self.alphaL.getVal())
             print("aR = ",  self.alphaR.getVal())
         self.setConst(True)
+
+    def assignValModular(self, config):
+        """Assigns values based on dictionary
+
+        Args:
+          config: dictionary with parameters (disigma, sigmaL, nL, etc.)
+        """
+        self.disigma = config["disigma"]
+        #TODO add dynamic MH
+        for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
+            getattr(self, param).setVal(config[param])
+        self.setConst(True) #change this eventually for syst.s
         
                 
 
@@ -188,3 +206,5 @@ class combineSignal:
         #self.pdf = ROOT.RooAddPdf('combine_sig_'+cat, 'combine_sig_'+cat, pdf_list, ROOT.RooArgList(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, self.c8, self.c9, self.c10, self.c11, self.c12, self.c13, self.c14, self.c15, self.c16), False)
         self.pdf = ROOT.RooAddPdf("combine_sig_"+cat, "combine_sig_"+cat, ROOT.RooArgList(self.model_2016_el_ggf.pdf, self.model_2016_mu_ggf.pdf, self.model_2016APV_el_ggf.pdf, self.model_2016APV_mu_ggf.pdf, self.model_2017_el_ggf.pdf, self.model_2017_mu_ggf.pdf, self.model_2018_el_ggf.pdf, self.model_2018_mu_ggf.pdf, self.model_2022_el_ggf.pdf, self.model_2022_mu_ggf.pdf, self.model_2022EE_el_ggf.pdf, self.model_2022EE_mu_ggf.pdf, self.model_2023_el_ggf.pdf, self.model_2023_mu_ggf.pdf, self.model_2023BPix_el_ggf.pdf, self.model_2023BPix_mu_ggf.pdf, self.model_2016_el_vbf.pdf, self.model_2016_mu_vbf.pdf, self.model_2016APV_el_vbf.pdf, self.model_2016APV_mu_vbf.pdf, self.model_2017_el_vbf.pdf, self.model_2017_mu_vbf.pdf, self.model_2018_el_vbf.pdf, self.model_2018_mu_vbf.pdf, self.model_2022_el_vbf.pdf, self.model_2022_mu_vbf.pdf, self.model_2022EE_el_vbf.pdf, self.model_2022EE_mu_vbf.pdf, self.model_2023_el_vbf.pdf, self.model_2023_mu_vbf.pdf, self.model_2023BPix_el_vbf.pdf, self.model_2023BPix_mu_vbf.pdf), ROOT.RooArgList(self.c1_ggf, self.c2_ggf, self.c3_ggf, self.c4_ggf, self.c5_ggf, self.c6_ggf, self.c7_ggf, self.c8_ggf, self.c9_ggf, self.c10_ggf, self.c11_ggf, self.c12_ggf, self.c13_ggf, self.c14_ggf, self.c15_ggf, self.c16_ggf, self.c1_vbf, self.c2_vbf, self.c3_vbf, self.c4_vbf, self.c5_vbf, self.c6_vbf, self.c7_vbf, self.c8_vbf, self.c9_vbf, self.c10_vbf, self.c11_vbf, self.c12_vbf, self.c13_vbf, self.c14_vbf, self.c15_vbf))
         
+
+        self.pdf = ROOT.RooAddPdf("combine_sig_"+cat, "combine_sig_"+cat, ROOT.RooArgList(self.model_2016_el_ggf.pdf, self.model_2016_mu_ggf.pdf, self.model_2016APV_el_ggf.pdf, self.model_2016APV_mu_ggf.pdf, self.model_2017_el_ggf.pdf, self.model_2017_mu_ggf.pdf, self.model_2018_el_ggf.pdf, self.model_2018_mu_ggf.pdf, self.model_2022_el_ggf.pdf, self.model_2022_mu_ggf.pdf, self.model_2022EE_el_ggf.pdf, self.model_2022EE_mu_ggf.pdf, self.model_2023_el_ggf.pdf, self.model_2023_mu_ggf.pdf, self.model_2023BPix_el_ggf.pdf, self.model_2023BPix_mu_ggf.pdf, self.model_2016_el_vbf.pdf, self.model_2016_mu_vbf.pdf, self.model_2016APV_el_vbf.pdf, self.model_2016APV_mu_vbf.pdf, self.model_2017_el_vbf.pdf, self.model_2017_mu_vbf.pdf, self.model_2018_el_vbf.pdf, self.model_2018_mu_vbf.pdf, self.model_2022_el_vbf.pdf, self.model_2022_mu_vbf.pdf, self.model_2022EE_el_vbf.pdf, self.model_2022EE_mu_vbf.pdf, self.model_2023_el_vbf.pdf, self.model_2023_mu_vbf.pdf, self.model_2023BPix_el_vbf.pdf, self.model_2023BPix_mu_vbf.pdf), ROOT.RooArgList(self.c1_ggf, self.c2_ggf, self.c3_ggf, self.c4_ggf, self.c5_ggf, self.c6_ggf, self.c7_ggf, self.c8_ggf, self.c9_ggf, self.c10_ggf, self.c11_ggf, self.c12_ggf, self.c13_ggf, self.c14_ggf, self.c15_ggf, self.c16_ggf, self.c1_vbf, self.c2_vbf, self.c3_vbf, self.c4_vbf, self.c5_vbf, self.c6_vbf, self.c7_vbf, self.c8_vbf, self.c9_vbf, self.c10_vbf, self.c11_vbf, self.c12_vbf, self.c13_vbf, self.c14_vbf, self.c15_vbf))

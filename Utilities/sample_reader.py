@@ -425,16 +425,13 @@ class readPico: #draw_pico datacard format
           x: three body invariant mass RooAbsReal
           directory: name of rawdata root file output by draw_pico
         """
-        
-        config = None
-        with open("../Config/config.json", "r") as jfile:
-            config = json.load(jfile)
 
         #TODO CAT_NAMES should be moved to some global location
         CAT_NAMES = ["ggf1", "ggf2", "ggf3", "ggf4", "vbf1", "vbf2", "vbf3",
                      "vbf4", "vh3l", "vhmet", "tthhad", "tthlep"]
         PROCS = ["data_obs", "Htozg_el", "Htozg_mu", "Htomm"]
 
+        self.default_var = x
         datasets_raw = []
         datasets_renamed = []
         root_file = ROOT.TFile(directory)
@@ -442,14 +439,9 @@ class readPico: #draw_pico datacard format
         for proc in PROCS:
             for cat_name in CAT_NAMES:
                 #get RooDataSet from pico ROOT file and apply appropriate cut
-                lowx = 105
-                #hack to only do this for categories that need it
-                if cat_name in ["ggf1", "ggf2", "ggf3", "ggf4"]:
-                    lowx = config[cat_name]["Range"]
-                highx = lowx+65
-                if ("Htozg" in proc) or ("Htomm" in proc):
-                    lowx = 118
-                    highx = 130
+                #hack to apply range cut
+                lowx = x.getMin()
+                highx = x.getMax()
                 mllg_cut = "mllg_cat_{0}>{1}&&mllg_cat_{0}<{2}".format(
                     cat_name, lowx, highx)
                 dataname = "{}_cat_{}".format(proc, cat_name)
