@@ -28,7 +28,7 @@ class profileClass:
         self.lau3_model = Lau3Class(x, mu_gauss, cat, setting["lau3"]['sigma'], setting["lau3"]['step'], setting["lau3"]['p1'], setting["lau3"]['p2'], setting["lau3"]['p3'], setting["lau3"]['f'], setting["lau3"]['xmax'], setting["lau3"]['const_f1'], setting["lau3"]['di_gauss'], setting["lau3"]['fix_sigma'])
         self.lau4_model = Lau4Class(x, mu_gauss, cat, setting["lau4"]['sigma'], setting["lau4"]['step'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'], setting["lau4"]['di_gauss'], setting["lau4"]['fix_sigma'])
         self.modg_model = ModGausClass(x, cat, x.getMin(), x.getMax(), setting["modg"]['m0'], setting["modg"]['sl'], setting["modg"]['sh'], setting["modg"]['vl'], setting["modg"]['vr'])
-        self.exmg_model = EXMGClass(x, cat, setting["exmg"]['mu'], setting["exmg"]['sigma'], setting["exmg"]['xsi'])
+        self.exmg_model = EXMGClass(x, cat, setting["exmg"]['mu'], setting["exmg"]['sig'], setting["exmg"]['xsi'])
         self.agg_model = AGGClass(x, cat, setting["agg"]['kappa'], setting["agg"]['alpha'], setting["agg"]['zeta'])
 
     def testSelection(self, test=""):

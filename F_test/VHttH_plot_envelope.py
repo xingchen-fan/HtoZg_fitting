@@ -17,7 +17,7 @@ from APFUtilities import *
 ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 
-ROOT.gROOT.SetBatch(True)
+#ROOT.gROOT.SetBatch(True)
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
@@ -54,6 +54,9 @@ envelope_funcs = setting[input_key]
 pdfList = []
 if CAT=="ttH_lep":
   pdfList = [profile.exmg_model, profile.agg_model, profile.bern2_model, profile.pow1_model,  profile.lau2_model]
+  #pdfList = [profile.exmg_model, profile.agg_model]
+  #pdfList = [profile.agg_model, profile.bern2_model, profile.pow1_model,  profile.lau2_model]
+
 if CAT=="ttH_had":
   pdfList = [profile.exmg_model, profile.agg_model, profile.bern2_model, profile.pow1_model,  profile.lau2_model]
 if CAT=="WH_3l":
@@ -88,7 +91,7 @@ for func in pdfList:
     res.Print('v')
 
 #Make Plot
-multiPlotClass(x, data_hist, pdfList, title="PostFTest_multi_" + CAT, output_dir="plots/", sideBand=True, fitRange="left,right", best_index = 0,  sideband_bins=80, ratio_range=[0.5,1.5], fullRatio=False)
+multiPlotClass(x, data_hist, pdfList, title="PostFTest_multi_" + CAT, output_dir="./plots/", sideBand=True, fitRange="left,right", best_index = 1,  sideband_bins=80, ratio_range=[0.5,1.5], fullRatio=False)
 
 profile.write_config_file(data_hist, "PostFT", config_out=CAT + '_postFT_config.json')
 

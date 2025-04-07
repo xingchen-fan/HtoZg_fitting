@@ -13,11 +13,11 @@ def get_hist(infile, hist_name):
   file = ROOT.TFile(infile)
   canvas_hist = file.Get("canvas")
   hist_return = None
-  
+
   #Finds histogram in file  
-  for idx_h in range(0,50000):
-    if(hist_return is None):
-      hist_return = canvas.FindObject(hist_name+str(idx_h))
+  for idx_h in range(0,200000):
+    if(not isinstance(hist_return,ROOT.TH1D)):
+      hist_return = canvas_hist.FindObject(hist_name+str(idx_h))
     else:
       break
   return hist_return  
@@ -41,7 +41,8 @@ def get_hist_from_canvas(canvas, hist_name):
   
   #Finds histogram in file  
   for idx_h in range(0,50000):
-    if(hist_return is None):
+
+    if(hist_return is None):# or type(hist_return) != 'cppyy.gbl.TH1D'):
       hist_return = canvas.FindObject(hist_name+str(idx_h))
     else:
       break

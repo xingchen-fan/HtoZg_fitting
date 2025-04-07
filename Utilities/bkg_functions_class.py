@@ -32,7 +32,7 @@ class EXMGClass:
         self.init_list = [mu_init, sig_init, xsi_init]
         self.mu = ROOT.RooRealVar("exmg_mu_" + cat, "exmg_mu_" + cat, mu_init, 100, 180)
         self.sig = ROOT.RooRealVar("exmg_sig_" + cat, "exmg_sig_" + cat, sig_init, 0, 10.0)
-        self.xsi = ROOT.RooRealVar("exmg_xsi_" + cat, "exmg_xsi_" + cat, mu_init, -5.0, 10.0) #When written this is lambda, did not want to overwrite lambda functionality\
+        self.xsi = ROOT.RooRealVar("exmg_xsi_" + cat, "exmg_xsi_" + cat, xsi_init, -5.0, 1000.0) #When written this is lambda, did not want to overwrite lambda functionality\
         self.pdf = ROOT.EXModGaus("exmg_"+cat+"_model", "exmg_"+cat, x, self.mu, self.sig, self.xsi, x_low, x_high)
         self.SBpdf = ROOT.RooGenericPdf("exmg_SB_"+cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
         self.name = "exmg_"+cat
