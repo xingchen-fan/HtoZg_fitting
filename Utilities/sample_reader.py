@@ -430,41 +430,60 @@ class readPico: #draw_pico datacard format
         CAT_NAMES = ["ggf1", "ggf2", "ggf3", "ggf4", "vbf1", "vbf2", "vbf3",
                      "vbf4", "vh3l", "vhmet", "tthhad", "tthlep"]
         PROCS = ["data_obs", "Htozg_el", "Htozg_mu", "Htomm"]
+        SYST_NAMES = ["nominal", "CMS_scale_eUp", "CMS_scale_eDown", 
+                      "CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", 
+                      "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown", 
+                      "CMS_scale_mUp", "CMS_scale_mDown"]
 
         self.default_var = x
+        mllg_vars = []
         datasets_raw = []
-        datasets_renamed = []
         root_file = ROOT.TFile(directory)
         weight = ROOT.RooRealVar("weight", "", -50.0, 50.0)
         for proc in PROCS:
             for cat_name in CAT_NAMES:
-                #get RooDataSet from pico ROOT file and apply appropriate cut
-                #hack to apply range cut
-                lowx = x.getMin()
-                highx = x.getMax()
-                mllg_cut = "mllg_cat_{0}>{1}&&mllg_cat_{0}<{2}".format(
-                    cat_name, lowx, highx)
-                dataname = "{}_cat_{}".format(proc, cat_name)
-                if proc != "data_obs":
-                    dataname = "mcdata_" + dataname + "_nominal"
-                datasets_raw.append(getattr(root_file,
-                    "WS_{}_cat_{}".format(proc, cat_name))
-                    .data(dataname).reduce(mllg_cut))
+                for syst in SYST_NAMES:
+                    is_data = (proc == "data_obs")
+                    dataname = "{}_cat_{}".format(proc, cat_name)
+                    if is_data:
+                        if syst != "nominal":
+                            continue
+                    else:
+                        dataname = f"mcdata_{dataname}_{syst}"
+                    #get RooDataSet from pico ROOT file and apply cut
+                    #hack to apply range cut
+                    lowx = x.getMin()
+                    highx = x.getMax()
+                    mllg_cut = "mllg_cat_{0}>{1}&&mllg_cat_{0}<{2}".format(
+                        cat_name, lowx, highx)
+                    ws_name = f"WS_{proc}_cat_{cat_name}"
+                    mllg_vars.append(getattr(root_file, ws_name)
+                        .var(f"mllg_cat_{cat_name}"))
+                    datasets_raw.append(getattr(root_file, ws_name)
+                        .data(dataname).reduce(mllg_cut))
 
-                #hack to change the variable of the dataset to x
-                datasets_raw[-1].changeObservableName(
-                    "mllg_cat_{}".format(cat_name), x.GetName())
-                datasets_renamed.append(ROOT.RooDataSet(
-                    "{}_data_set_{}".format(proc, cat_name), 
-                    "{}_data_set_{}".format(proc, cat_name),
-                    ROOT.RooArgSet(x,weight), ROOT.RooFit.WeightVar(weight)))
-                datasets_renamed[-1].append(datasets_raw[-1])
+                    #create RooDataHist and save as an attribute of this class
+                    setattr(self, dataname, self.convert_datahist_variable(
+                        dataname, datasets_raw[-1], mllg_vars[-1], x))
 
-                #create RooDataHist and save as an attribute of this class
-                #hist_name = "data_hist_{}".format(cat_name)
-                hist_name = "hist_{}_cat_{}".format(proc,cat_name)
-                setattr(self, hist_name, ROOT.RooDataHist(hist_name, 
-                    hist_name, x, datasets_renamed[-1]))
+    def convert_datahist_variable(self, name, dataset, x_original, x):
+        """Converts a RooDataSet into a RooDataHist with variable x
+
+        Args:
+          name: name of final histogram
+          dataset: RooDataSet with arbitrary variable
+          x_original: variable for original RooDataSet
+          x: variable to use for final RooDataHist
+
+        Returns: 
+          RooDataHist representation of dataset with x as variable
+        """
+        lowx = x.getMin()
+        highx = x.getMax()
+        nbins = x.getBinning().numBins()
+        dummy_hist = ROOT.TH1D("","",nbins,lowx,highx)
+        dataset.fillHistogram(dummy_hist, ROOT.RooArgList(x_original))
+        return ROOT.RooDataHist(name, name, x, dummy_hist)
 
     def numCheck(self):
         print("# bin1 bkg = ", self.hist_data_obs_cat_ggf1.sumEntries())

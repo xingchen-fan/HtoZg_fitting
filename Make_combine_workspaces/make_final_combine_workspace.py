@@ -13,6 +13,7 @@ from plot_utility import *
 from sample_reader import *
 from profile_class import *
 from sig_functions_class import *
+from multiprocessing import Process
 
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
@@ -25,14 +26,18 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 # Signal model is fitted and fixed.
 ##############################################
 
-#CATEGORIES = ["ggf4", "ggf3", "ggf2", "ggf1", "vbf4", "vbf3", "vbf2", "vbf1",
-#              "vh3l", "vhmet", "tthhad", "tthlep"]
-
-#other categories missing rn
-CATEGORIES = ["ggf4", "ggf3", "ggf2", "ggf1"]
+CATEGORIES = ["ggf4", "ggf3", "ggf2", "ggf1", "vbf4", "vbf3", "vbf2", "vbf1",
+              "vh3l", "vhmet", "tthhad", "tthlep"]
 
 #can split according to year, prod mode, whatever, currently just el vs mu
-SIGNAL_PROCS = ["Htozg_el", "Htozg_mu"] 
+SIGNAL_PROCS = ["Htozg_el", "Htozg_mu", "Htomm"] 
+
+#stored as (name, is_scale)
+SYSTEMATICS = [("CMS_scale_e", True),
+               ("CMS_res_e", False),
+               ("CMS_scale_g", True),
+               ("CMS_res_g", False),
+               ("CMS_scale_m", True)]
 
 rng = ROOT.TRandom3()
 
@@ -46,6 +51,7 @@ def parse_args():
     parser.add_argument('-s', '--sig_config', help = 'Signal Configuration')
     parser.add_argument('-b', '--bak_config', help = 'Background Configuration')
     parser.add_argument('-d', '--datacard', help = 'Datacard filename')
+    parser.add_argument('-t', '--threads', type=int, default=1)
     args = parser.parse_args()
     return args
 
@@ -90,32 +96,33 @@ def write_all_workspaces(datacard_filename, signal_config, background_config):
         signal_config: name of json with signal configurations
         background_config: name of json with background configuration
     """
-    workspace_filename = datacard_filename[:-4] + ".root"
-    rawdata_filename = datacard_filename[:-4] + "_rawdata.root"
-    output_file = ROOT.TFile(workspace_filename, "RECREATE")
-    x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", 95.0, 180.0)
-    x.setBins(85)
-    reader = readPico(x, rawdata_filename)
+    #process each category
+    category_processes = []
     for category in CATEGORIES:
-        write_workspace(category, reader, signal_config, background_config,
-                        output_file, fake_data=True)
-    output_file.Close()
+        category_processes.append(Process(target=write_workspace, args=
+            (category, datacard_filename, signal_config, background_config)))
+        category_processes[-1].start()
+    for icat in range(len(CATEGORIES)):
+        category_processes[icat].join()
+    #merge outputs
+    #just deal with this in datacard for now?
+    #workspace_filename = datacard_filename[:-4] + ".root"
+    #output_file = ROOT.TFile(workspace_filename, "RECREATE")
+    #category_filename = datacard_filename[:-4] + f"_{category}.root"
     #append_nuisances_to_datacard(datacard_filename)
+    print("Finished processing all categories")
 
-def write_workspace(category, reader, signal_config, background_config, 
-                    output_file, fake_data=False):
+def write_workspace(category, datacard_filename, signal_config, 
+                    background_config, fake_data=False):
     """Writes workspace for given category
 
     Args:
         category: name of category
-        reader: pico reader
+        datacard_filename: filename of datacard
         signal_config: config file for signal
         background_config: config file for background
-        output_file: root file to save workspaces to
         fake_data: using MC as data
     """
-
-    output_file.cd()
     configs_bkg_ = {}
     with open(background_config, "r") as jfile_:
         configs_bkg_ = json.load(jfile_)
@@ -135,21 +142,27 @@ def write_workspace(category, reader, signal_config, background_config,
     MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
     MH.setVal(125)
     MH.setConstant(True)
+    shape_systematics = []
+    for syst_name, is_scale in SYSTEMATICS:
+        shape_systematics.append(ROOT.RooRealVar(syst_name, "", 0.0, -5.0, 
+                                                 5.0))
 
     #save workspace with data
-    #have to now undo the hack we did to get all the histograms to have the
-    #same variable 
+    rawdata_filename = datacard_filename[:-4] + "_rawdata.root"
+    reader = readPico(x, rawdata_filename)
+    #NOTE you MUST open output after initializing readPico
+    workspace_filename = datacard_filename[:-4] + f"_{category}.root"
+    output_file = ROOT.TFile(workspace_filename, "RECREATE")
+    output_file.cd()
     hist_name = f"data_obs_cat_{category}"
-    data_hist_og = getattr(reader, f"hist_data_obs_cat_{category}")
-    normalized_hist = ROOT.TH1D("","",65,lowx,highx)
-    data_hist_og.fillHistogram(normalized_hist, 
-        ROOT.RooArgList(reader.default_var))
+    hist_data = getattr(reader, hist_name)
     if fake_data:
-        hist_to_toy(normalized_hist)
-    hist_data = ROOT.RooDataHist(hist_name, hist_name, x, normalized_hist)
+      normalized_hist = ROOT.TH1D("","",65,lowx,highx)
+      hist_data.fillHistogram(normalized_hist, x)
+      hist_to_toy(normalized_hist)
+      hist_data = ROOT.RooDataHist(hist_name, hist_name, x, normalized_hist)
     ws_name = f"WS_data_obs_cat_{category}"
     ws_data = ROOT.RooWorkspace(ws_name, ws_name)
-    #getattr(ws_data,"import")(x)
     getattr(ws_data,"import")(hist_data)
     ws_data.Write()
     nevents_data = hist_data.sumEntries()
@@ -161,8 +174,47 @@ def write_workspace(category, reader, signal_config, background_config,
   
     for proc in SIGNAL_PROCS:
         proc_name = f"{proc}_cat_{category}"
-        proc_settings = configs_[proc_name]
-        signal_model = DSCB_Class(x, MH, proc_name, simple_name=True)
+        #TODO implement shape systematics by taking differences between
+        #nominal parameters and systematic variations
+        proc_settings = configs_[proc_name+"_nominal"]
+        dMH = ROOT.RooRealVar(f"dMH_{proc_name}", "", 0.0, -2.0, 2.0)
+        mu_final = [ROOT.RooFormulaVar(f"mu_comb0_{proc_name}","","@0+@1",
+            ROOT.RooArgList(MH, dMH))]
+        sigma = ROOT.RooRealVar(f"sigma_{proc_name}", "", 0.0, 0.01, 5.0)
+        sigma_final = [ROOT.RooFormulaVar(f"sigma_comb0_{proc_name}","","@0",
+            ROOT.RooArgList(sigma))]
+        for isyst in range(len(SYSTEMATICS)):
+            syst_name = SYSTEMATICS[isyst][0]
+            is_scale = SYSTEMATICS[isyst][1]
+            syst_var = shape_systematics[isyst]
+            alt_settings_up = configs_[proc_name+f"_{syst_name}Up"]
+            alt_settings_down = configs_[proc_name+f"_{syst_name}Down"]
+            if is_scale:
+                variation = ((abs(proc_settings["dMH"]
+                    -alt_settings_up["dMH"])+abs(proc_settings["dMH"]
+                    -alt_settings_down["dMH"]))/2.0)/abs(proc_settings["dMH"])
+                if (variation > 0.01):
+                    formula_idx = len(mu_final)+1
+                    mu_final.append(ROOT.RooFormulaVar(
+                        f"mu_comb{formula_idx}_{proc_name}",
+                        "",f"@0*(1.0+{variation}*@1)",
+                        ROOT.RooArgList(mu_final[-1], 
+                        shape_systematics[isyst])))
+
+            else:
+                variation = (((abs(proc_settings["sigmaL"]
+                    -alt_settings_up["sigmaL"])+abs(proc_settings["sigmaL"]
+                    -alt_settings_down["sigmaL"]))/2.0)
+                    /abs(proc_settings["sigmaL"]))
+                if (variation > 0.01):
+                    formula_idx = len(sigma_final)+1
+                    sigma_final.append(ROOT.RooFormulaVar(
+                        f"sigma_comb{formula_idx}_{proc_name}",
+                        "",f"@0*(1.0+{variation}*@1)",
+                        ROOT.RooArgList(sigma_final[-1], 
+                        shape_systematics[isyst])))
+        signal_model = DSCB_Class(x, mu_final[-1], sigma_final[-1], dMH, sigma,
+                                  proc_name)
         signal_model.assignValModular(proc_settings)
         ws_signal = ROOT.RooWorkspace("WS_"+proc_name, "WS_"+proc_name)
         getattr(ws_signal,"import")(signal_model.pdf)
@@ -170,7 +222,7 @@ def write_workspace(category, reader, signal_config, background_config,
 
     #save workspace with background
     profile_ = profileClass(x, mu_gauss, category, background_config)
-    profile = profile_.testSelection("FT")
+    profile = profile_.testSelection("FinalTemp")
     stat_list = []
     cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
     error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
@@ -215,6 +267,8 @@ def write_workspace(category, reader, signal_config, background_config,
     multiPlotClass(x, hist_data, profile, title="Profile_" +category, 
                    output_dir="", sideBand=True, fitRange= 'left,right', 
                    best_index = best_)
+
+    output_file.Close()
 
 def append_nuisances_to_datacard(datacard_filename):
     """Appends nuisance parameters to datacard

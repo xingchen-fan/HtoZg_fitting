@@ -3,23 +3,37 @@ import json
 import sys
 
 class DSCB_Class:
-    def __init__(self, x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False, simple_name = False):
+    #temporary new constructor, works only for single sided
+    def __init__(self, x, mu_init, sigma_init, dMH, sigmaL, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False, simple_name = False):
         self.disigma = di_sigma
-        self.dMH = ROOT.RooRealVar("dMH_"+cat, "dMH_"+cat, 0.0, -2.0, 2.0)
-        self.sigmaL = ROOT.RooRealVar("sigmaL_"+cat,"sigmaL_"+cat       , sigmaL_init, 0.01, 5.)
+        self.dMH = dMH
+        self.sigmaL = sigmaL
         self.sigmaR = ROOT.RooRealVar("sigmaR_"+cat,"sigmaR_"+cat       , sigmaR_init, 0.01, 5.)
         self.nL =  ROOT.RooRealVar("nL_"+cat, "nL_"+cat, nL_init, 0.01, nL_bond)
         self.nR =  ROOT.RooRealVar("nR_"+cat, "nR_"+cat, nR_init, 0.01, nR_bond)
         self.alphaL = ROOT.RooRealVar("alphaL_"+cat, "alphaL_"+cat, alphaL_init, 0.01, 5.)
         self.alphaR = ROOT.RooRealVar("alphaR_"+cat, "alphaR_"+cat, alphaR_init, 0.01, 5.)
-        self.mean = ROOT.RooFormulaVar("MH_"+cat, "MH_"+cat, "(@0+@1)", ROOT.RooArgList(MH, self.dMH))
         pdf_name = "model_DS_"+cat
-        if simple_name:
-          pdf_name = cat
-        if self.disigma:
-            self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, self.mean, self.sigmaL, self.sigmaR, self.alphaL, self.nL, self.alphaR, self.nR)
-        else:
-            self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, self.mean, self.sigmaL, self.alphaL, self.nL, self.alphaR, self.nR)
+        pdf_name = cat
+        self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, mu_init, sigma_init, self.alphaL, self.nL, self.alphaR, self.nR)
+
+    #def __init__(self, x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False, simple_name = False):
+    #    self.disigma = di_sigma
+    #    self.dMH = ROOT.RooRealVar("dMH_"+cat, "dMH_"+cat, 0.0, -2.0, 2.0)
+    #    self.sigmaL = ROOT.RooRealVar("sigmaL_"+cat,"sigmaL_"+cat       , sigmaL_init, 0.01, 5.)
+    #    self.sigmaR = ROOT.RooRealVar("sigmaR_"+cat,"sigmaR_"+cat       , sigmaR_init, 0.01, 5.)
+    #    self.nL =  ROOT.RooRealVar("nL_"+cat, "nL_"+cat, nL_init, 0.01, nL_bond)
+    #    self.nR =  ROOT.RooRealVar("nR_"+cat, "nR_"+cat, nR_init, 0.01, nR_bond)
+    #    self.alphaL = ROOT.RooRealVar("alphaL_"+cat, "alphaL_"+cat, alphaL_init, 0.01, 5.)
+    #    self.alphaR = ROOT.RooRealVar("alphaR_"+cat, "alphaR_"+cat, alphaR_init, 0.01, 5.)
+    #    self.mean = ROOT.RooFormulaVar("MH_"+cat, "MH_"+cat, "(@0+@1)", ROOT.RooArgList(MH, self.dMH))
+    #    pdf_name = "model_DS_"+cat
+    #    if simple_name:
+    #      pdf_name = cat
+    #    if self.disigma:
+    #        self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, self.mean, self.sigmaL, self.sigmaR, self.alphaL, self.nL, self.alphaR, self.nR)
+    #    else:
+    #        self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, self.mean, self.sigmaL, self.alphaL, self.nL, self.alphaR, self.nR)
 
     def setStable(self):
         if self.nL.getVal() > 30 or self.nL.getError() > 50:
@@ -75,7 +89,6 @@ class DSCB_Class:
           config: dictionary with parameters (disigma, sigmaL, nL, etc.)
         """
         self.disigma = config["disigma"]
-        #TODO add dynamic MH
         for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
             getattr(self, param).setVal(config[param])
         self.setConst(True) #change this eventually for syst.s
