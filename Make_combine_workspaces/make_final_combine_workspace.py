@@ -133,8 +133,9 @@ def write_workspace(category, datacard_filename, signal_config,
     # For now use full range, needs to match draw_pico
     mllg_name = f"mllg_cat_{category}"
     x = ROOT.RooRealVar(mllg_name, mllg_name, lowx, highx)
-    x.setBinning(ROOT.RooUniformBinning(lowx, highx, 65),'full')
-    x.setBins(65,'')
+    nbins = 130
+    x.setBinning(ROOT.RooUniformBinning(lowx, highx, nbins),'full')
+    x.setBins(nbins,'')
     x.setBins(1000,'cache')
     x.setRange('left', lowx, 120)
     x.setRange('right', 130, highx)
