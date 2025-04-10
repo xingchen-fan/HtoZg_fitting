@@ -269,8 +269,8 @@
             "bern5",
             "pow2",
             "exp2",
-            "lau4",
-	    "modg"
+            "lau4"
+	    
         ],
 	"CMSBias": ["bern5",  "pow2", "exp2", "lau4"],
         "bern2": {
@@ -501,8 +501,7 @@
             "bern4",
             "pow2",
             "exp2",
-            "lau3",
-	    "modg"
+            "lau3"
         ],
 	"CMSBias": [
 	    "bern4",
@@ -740,9 +739,8 @@
         "FT": [
             "pow1",
             "exp2",
-            "lau2",
-	    "modg"
-        ],
+            "lau2"
+	],
 	"CMSBias":[
 	    "pow1",
             "exp2",

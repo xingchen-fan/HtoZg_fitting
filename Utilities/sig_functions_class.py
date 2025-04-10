@@ -17,7 +17,7 @@ class DSCB_Class:
             self.pdf = ROOT.RooCrystalBall.RooCrystalBall("model_DS_"+cat, "model_DS_"+cat, x, MH, self.sigmaL, self.alphaL, self.nL, self.alphaR, self.nR)
 
     def setStable(self):
-        if self.nL.getVal() > 30 or self.nL.getError() > 50:
+        if self.nL.getVal() > 30 or self.nL.getError() > 20:
             self.nL.setVal(20)
             self.nL.setError(0)
             self.nL.setConstant(True)

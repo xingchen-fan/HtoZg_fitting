@@ -1,0 +1,33 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    ggf1   workspaces/workspace_bkg_profile_bias_ggf1.root   workspace_bkg:multipdf_ggf1 
+shapes sig    ggf1   workspaces/workspace_sig_ggf1.root   workspace_sig:combine_sig_ggf1
+shapes data_obs   ggf1   workspaces/workspace_bkg_profile_bias_ggf1.root     workspace_bkg:hist_ggf1_data
+shapes bkg    ggf2   workspaces/workspace_bkg_profile_bias_ggf2_nomodg.root   workspace_bkg:multipdf_ggf2
+shapes sig    ggf2   workspaces/workspace_sig_ggf2.root   workspace_sig:combine_sig_ggf2
+shapes data_obs   ggf2   workspaces/workspace_bkg_profile_bias_ggf2_nomodg.root     workspace_bkg:hist_ggf2_data
+shapes bkg    ggf3   workspaces/workspace_bkg_profile_bias_ggf3_nomodg.root   workspace_bkg:multipdf_ggf3
+shapes sig    ggf3   workspaces/workspace_sig_ggf3.root   workspace_sig:combine_sig_ggf3
+shapes data_obs   ggf3   workspaces/workspace_bkg_profile_bias_ggf3_nomodg.root     workspace_bkg:hist_ggf3_data
+shapes bkg    ggf4   workspaces/workspace_bkg_profile_bias_ggf4_nomodg.root   workspace_bkg:multipdf_ggf4
+shapes sig    ggf4   workspaces/workspace_sig_ggf4.root   workspace_sig:combine_sig_ggf4
+shapes data_obs   ggf4   workspaces/workspace_bkg_profile_bias_ggf4_nomodg.root     workspace_bkg:hist_ggf4_data
+
+-------------------------------------------------
+bin		ggf1	ggf2	ggf3	ggf4
+observation	-1	-1	-1	-1
+--------------------------------------------------
+bin 		ggf1	ggf1	ggf2	ggf2	ggf3	ggf3	ggf4	ggf4
+process		bkg	sig	bkg	sig	bkg	sig	bkg	sig
+process		1	0	1	0	1	0	1	0	
+rate		1.0  	8.65	1.0	56.53	1.0	90.49	1.0	84.25
+--------------------------------------------------
+
+pdfindex_ggf1         discrete
+pdfindex_ggf2         discrete
+pdfindex_ggf3         discrete
+pdfindex_ggf4         discrete

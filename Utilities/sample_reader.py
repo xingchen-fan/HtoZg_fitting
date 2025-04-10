@@ -341,7 +341,7 @@ class readRuiROOTggFSignalVBF:
 class readRuiROOTVBFSignalggF:
     def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):
         chain = ROOT.TChain('outtree')
-        chain.Add(direct + 'GGF_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'GGF_'+year+'_output.root')
         #chain.Add(direct + 'VBF_'+year+'_pinnacles_ggf_fixed.root')
         hist1_TH1_el = ROOT.TH1F('vbfSig1_th1f_ggf_el', 'vbfSig1_th1f_ggf_el', 340, 95, 180)
         hist2_TH1_el = ROOT.TH1F('vbfSig2_th1f_ggf_el', 'vbfSig2_th1f_ggf_el', 340, 95, 180)
@@ -352,16 +352,16 @@ class readRuiROOTVBFSignalggF:
         hist3_TH1_mu = ROOT.TH1F('vbfSig3_th1f_ggf_mu', 'vbfSig3_th1f_ggf_mu', 340, 95, 180)
         hist4_TH1_mu = ROOT.TH1F('vbfSig4_th1f_ggf_mu', 'vbfSig4_th1f_ggf_mu', 340, 95, 180)
         for entry in chain:
-            if entry.bdt_score_test > bdt1 and entry.weight_corr < 0.5:
+            if entry.BDT_score_2j > bdt1 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist1_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist1_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.weight_corr < 0.5:
+            elif entry.BDT_score_2j > bdt2 and entry.BDT_score_2j < bdt1 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist2_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist2_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.weight_corr < 0.5:
+            elif entry.BDT_score_2j > bdt3 and entry.BDT_score_2j < bdt2 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist3_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist3_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.weight_corr < 0.5:
+            elif entry.BDT_score_2j > -1 and entry.BDT_score_2j < bdt3 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist4_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist4_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
         self.vbf1El = ROOT.RooDataHist('hist_vbf1_sig_ggf_el', 'hist_vbf1_sig_ggf_el', x, hist1_TH1_el)
@@ -377,10 +377,10 @@ class readRuiROOTVBFSignalVBF:
     def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):
         chain = ROOT.TChain('outtree')
         #chain.Add(direct + 'GGF_'+year+'_pinnacles_ggf_fixed.root')
-        chain.Add(direct + 'VBF_'+year+'_pinnacles_ggf_fixed.root')
-        chain.Add(direct + 'ZH_'+year+'_pinnacles_ggf_fixed.root')
-        chain.Add(direct + 'WH_'+year+'_pinnacles_ggf_fixed.root')
-        chain.Add(direct + 'ttH_'+year+'_pinnacles_ggf_fixed.root')
+        chain.Add(direct + 'VBF_'+year+'_output.root')
+        chain.Add(direct + 'ZH_'+year+'_output.root')
+        chain.Add(direct + 'WH_'+year+'_output.root')
+        chain.Add(direct + 'ttH_'+year+'_output.root')
         hist1_TH1_el = ROOT.TH1F('vbfSig1_th1f_vbf_el', 'vbfSig1_th1f_vbf_el', 340, 95, 180)
         hist2_TH1_el = ROOT.TH1F('vbfSig2_th1f_vbf_el', 'vbfSig2_th1f_vbf_el', 340, 95, 180)
         hist3_TH1_el = ROOT.TH1F('vbfSig3_th1f_vbf_el', 'vbfSig3_th1f_vbf_el', 340, 95, 180)
@@ -390,16 +390,16 @@ class readRuiROOTVBFSignalVBF:
         hist3_TH1_mu = ROOT.TH1F('vbfSig3_th1f_vbf_mu', 'vbfSig3_th1f_vbf_mu', 340, 95, 180)
         hist4_TH1_mu = ROOT.TH1F('vbfSig4_th1f_vbf_mu', 'vbfSig4_th1f_vbf_mu', 340, 95, 180)
         for entry in chain:
-            if entry.bdt_score_test > bdt1 and entry.weight_corr < 0.5:
+            if entry.BDT_score_2j > bdt1 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist1_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist1_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.weight_corr < 0.5:
+            elif entry.BDT_score_2j > bdt2 and entry.BDT_score_2j < bdt1 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist2_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist2_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.weight_corr < 0.5:
+            elif entry.BDT_score_2j > bdt3 and entry.BDT_score_2j < bdt2 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist3_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist3_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.weight_corr < 0.5:
+            elif entry.BDT_score_2j > -1 and entry.BDT_score_2j < bdt3 and entry.weight_corr < 0.5:
                 if entry.ll_lepid == 11: hist4_TH1_el.Fill(entry.llphoton_refit_m, entry.weight_corr)
                 elif entry.ll_lepid == 13: hist4_TH1_mu.Fill(entry.llphoton_refit_m, entry.weight_corr)
         self.vbf1El = ROOT.RooDataHist('hist_vbf1_sig_vbf_el', 'hist_vbf1_sig_vbf_el', x, hist1_TH1_el)

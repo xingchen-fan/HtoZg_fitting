@@ -1,22 +1,24 @@
 import ROOT
 import sys
 import os
-sys.path.append(os.path.abspath("../CMS_plotter/"))
+sys.path.append(os.path.abspath("/afs/cern.ch/user/f/fanx/CMSSW_12_6_0_patch1/src/HtoZg_fitting/CMS_plotter/"))
 from bkg_functions_class import *
 import CMS_lumi
 
 def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', note = "", CMS = "Preliminary", fullRatio = False, leftSpace=False, bins = 1):
     ROOT.gStyle.SetOptStat(0)
-    CMS_lumi.lumi_sqrtS = "13 TeV"
+    CMS_lumi.lumi_sqrtS = "137.61 fb^{-1} (13 TeV) + 62.32 fb^{-1} (13.6 TeV)"
     CMS_lumi.writeExtraText = 1
     CMS_lumi.extraText = "      " + CMS
     CMS_lumi.cmsTextSize = 0.5
-    CMS_lumi.lumiTextSize = 0.5
+    CMS_lumi.lumiTextSize = 0.3
     if sideBand:
         datahist = datahist.reduce(ROOT.RooFit.CutRange(fitRange))
-    tot = datahist.sumEntries()
+        model_hist = SBpdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
+    else:
+        model_hist = pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
+        
     h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
-    model_hist = SBpdf.generateBinned(x, tot, True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
     norm_hist = pdf.generateBinned(x, 100000, True)
     if sideBand: sum_SB = norm_hist.sumEntries('x', fitRange)
     else: sum_SB = norm_hist.sumEntries()
@@ -113,13 +115,13 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     can.SaveAs(output_dir + title+".pdf")
     x.setBins(int(4*(x.getMax() - x.getMin())))
 
-def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', best_index = 0, CMS = "Preliminary", fullRatio = True):
+def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', best_index = 0, CMS = "Preliminary", fullRatio = True, bestLabel = False):
     ROOT.gStyle.SetOptStat(0)
-    CMS_lumi.lumi_sqrtS = "13 TeV"
+    CMS_lumi.lumi_sqrtS = "137.61 fb^{-1} (13 TeV) + 62.32 fb^{-1} (13.6 TeV)"
     CMS_lumi.writeExtraText = 1
     CMS_lumi.extraText = "      " + CMS
     CMS_lumi.cmsTextSize = 0.5
-    CMS_lumi.lumiTextSize = 0.5
+    CMS_lumi.lumiTextSize = 0.3
     can2 = ROOT.TCanvas("c2","c2", 700, 500)
     can2.Divide(1,2)
     can2.cd(1)
@@ -167,17 +169,20 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     leg.SetTextFont(42)
     leg.SetTextSize(0.050)
     leg.AddEntry('hist', hist_name, 'LP')
-    for entry in classList:
-        leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName(),"L")
+    for ind, entry in enumerate(classList):
+        if bestLabel and ind == best_index:
+            leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName()+' (best)',"L")
+        else:
+            leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName(),"L")
     leg.Draw("same")
     h_hist = show_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
     print('xmin = ', x.getMin())
     ratio = ROOT.TH1D("ratio", "ratio", 65, x.getMin(), x.getMax())
-    ratio.Divide(model_hist, h_hist)
-    ratio.SetMarkerColor(best_color)
+    ratio.Divide(h_hist, model_hist)
+    ratio.SetMarkerColor(ROOT.kBlack)
     ratio.SetMarkerStyle(8)
     ratio.SetMarkerSize(1)
-    ratio.SetLineColor(best_color)
+    ratio.SetLineColor(ROOT.kBlack)
     ratio.SetTitle("")
     if fullRatio:
         minimum = 99999
