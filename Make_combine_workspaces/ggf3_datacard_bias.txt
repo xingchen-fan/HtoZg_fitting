@@ -4,9 +4,9 @@ kmax *
 
 ------------------------------------------------
 
-shapes bkg    ggf3   workspaces/workspace_bkg_profile_bias_ggf3.root   workspace_bkg:multipdf_ggf3 
-shapes sig    ggf3   workspaces/workspace_sig_ggf3.root   workspace_sig:sig_model_DS_ggf3
-shapes data_obs   ggf3   workspaces/workspace_bkg_profile_bias_ggf3.root     workspace_bkg:hist_data
+shapes bkg    ggf3   workspaces/workspace_bkg_profile_bias_asimov_ggf3.root   workspace_bkg:multipdf_ggf3 
+shapes sig    ggf3   workspaces/workspace_sig_ggf3.root   workspace_sig:combine_sig_ggf3
+shapes data_obs   ggf3   workspaces/workspace_bkg_profile_bias_asimov_ggf3.root     workspace_bkg:hist_ggf3_asimov
 
 -------------------------------------------------
 bin		ggf3
@@ -15,7 +15,7 @@ observation	-1
 bin 		ggf3		ggf3
 process	bkg		sig
 process	1		0
-rate		1.0  50.91
+rate		1.0  90.49
 --------------------------------------------------
 
 pdfindex_ggf3         discrete
