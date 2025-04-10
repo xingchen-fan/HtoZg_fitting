@@ -91,7 +91,11 @@ for func in pdfList:
     res.Print('v')
 
 #Make Plot
-multiPlotClass(x, data_hist, pdfList, title="PostFTest_multi_" + CAT, output_dir="./plots/", sideBand=True, fitRange="left,right", best_index = 1,  sideband_bins=80, ratio_range=[0.5,1.5], fullRatio=False)
+atio_range=[0.5,1.5]
+if CAT=="ttH_lep":
+  ratio_range=[0.3,1.7]
+
+multiPlotClass(x, data_hist, pdfList, title="PostFTest_multi_" + CAT, output_dir="./plots/", sideBand=True, fitRange="left,right", best_index = 1,  sideband_bins=80, ratio_range=ratio_range, fullRatio=False)
 
 profile.write_config_file(data_hist, "PostFT", config_out=CAT + '_postFT_config.json')
 

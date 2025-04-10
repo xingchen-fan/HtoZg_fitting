@@ -53,17 +53,22 @@ MH = ROOT.RooRealVar("MH", "MH", 125, 120., 130.)
 file_name = get_file_name(CAT, True)
 
 #Get data histogram as a RooDataHist
-data_hist = get_data_rdh(file_name, "rdh_" + CAT, x)
+hist_data = get_data_rdh(file_name, "hist_data", x)
 
 #Get profile from config file and use select set of functions
 profile_ = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
-profile = profile_.testSelection("postFT")
+profile = profile_.testSelection("PostFT")
+profile = profile_.testSelection("tempPruned")
+
 
 stat_list = []
 cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
 error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
 for model in profile:
     stat_list.append(ROOT.RooNLLVar("stat_"+model.pdf.GetName(), "stat_"+model.pdf.GetName(), model.SBpdf,  cuthist))
+
+#N_sig = sig_model.ntot
+N = hist_data.sumEntries()
 
 eps = 0.1
 strategy = 0
@@ -80,12 +85,12 @@ for ind, stat in enumerate(stat_list):
     else:
         nFloat = profile[ind].pdf.getParameters(hist_data).selectByAttrib('Constant',False).getSize()
     stat_vals.append(stat.getVal() + 0.5*nFloat)
-    print (profile[ind].name,' = ', nFloat)
+    #print (profile[ind].name,' = ', nFloat)
         
 for model in profile:
     model.checkBond()
 
-best_ = stat_vals.index(min(stat_vals))
+best_ =  stat_vals.index(min(stat_vals))
 print ("best is ", profile[best_].name)
 
 # Create background workspace 
@@ -98,9 +103,10 @@ multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 # Penalty term
 #multipdf.setCorrectionFactor(0.)
 
-norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N - N_sig, 0, 3*N)
+norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N, 0, 3*N)
 if int(args.asimov) == 0:
-    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
+    #f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
+    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_pruned_" + CAT + ".root", "RECREATE")
 else:
     f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_asimov_" + CAT + ".root", "RECREATE")
 
@@ -117,6 +123,11 @@ w_bkg.Print()
 w_bkg.Write()
 f_out2.Close()
 
+# Plot it
+multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_)
+#, bestLabel = True)
+
+'''
 # Cut and count significance
 CDF = False
 if CDF:
@@ -128,10 +139,8 @@ if CDF:
     print ('N bkg (sig window) = ', N*(cdf_high - cdf_low))
     print ('Significance = ', N_sig_window/math.sqrt(N*(cdf_high - cdf_low)))
 
-# Plot it
-multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = True)
 
-'''
+
 # Signal model preparation ------------------------
 #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
 #hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
