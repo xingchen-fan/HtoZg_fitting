@@ -22,6 +22,8 @@ parser.add_argument('-mi', '--mid', help = 'Middle power')
 parser.add_argument('-lo', '--low', help = 'Lower power')
 parser.add_argument('-c', '--cat', help = 'Cat')
 parser.add_argument('-r', '--ranges', help = 'Range')
+parser.add_argument('-NLL', '--NLL', help = 'Use NLL?', type=int, default=0)
+
 args = parser.parse_args()
 if int(args.high) - int(args.low) < 2 or int(args.mid) - int(args.low) <= 0 or int(args.mid) - int(args.high) >= 0:
     raise Exception('Higher power must be larger than lower power and middle power must be in the middle!')
@@ -114,11 +116,11 @@ for entry in alt_pow:
     else:
         pow_list = [int(args.high), int(args.low), int(args.mid), int(args.low) + entry[1]]
 
-    lau4_model = Lau4Class(x, mu_gauss, CAT, sigma_init = 3., step_init = 101, p1 = pow_list[0], p2 = pow_list[1], p3 = pow_list[2], p4 = pow_list[3], f_init = 1, xmax = lowx+65., const_f1 = True, di_gauss=False)
+    lau4_model = Lau4Class(x, mu_gauss, CAT, sigma_init = 3., sigma2_init = 4, step_init = 101, p1 = pow_list[0], p2 = pow_list[1], p3 = pow_list[2], p4 = pow_list[3], f1_init = 0.1, f2_init = 0.1, f3_init = 0.1, f4_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss=False, fix_sigma = False, gc_init = 1)
     cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
     n_bins = 220
-    if CAT == 'vbf1' or CAT == 'vbf2':
-        chi2 = ROOT.RooNLLVar('chi2_'+lau4_model.SBpdf.GetName(), 'chi2_'+lau4_model.SBpdf.GetName(), lau4_model.SBpdf, cuthistogram)
+    if args.NLL == True:
+        chi2 = ROOT.RooNLLVar('NLL_'+lau4_model.SBpdf.GetName(), 'NLL_'+lau4_model.SBpdf.GetName(), lau4_model.SBpdf, cuthistogram)
     else:
         chi2 = ROOT.RooChi2Var('chi2_'+lau4_model.SBpdf.GetName(), 'chi2_'+lau4_model.SBpdf.GetName(), lau4_model.SBpdf, cuthistogram)
     Minimizer_Chi2(chi2, -1, 100, False, 0)
@@ -126,16 +128,16 @@ for entry in alt_pow:
     res=Minimizer_Chi2(chi2, -1, 0.1, True, 0) 
     lau4_model.checkBond()
     res.Print('v')
-    chi2_val = chi2.getVal()
+    chi2_ = ROOT.RooChi2Var('chi2_val_'+lau4_model.SBpdf.GetName(), 'chi2_val_'+lau4_model.SBpdf.GetName(), lau4_model.SBpdf, cuthistogram)
     chi2_pV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), n_bins - res.floatParsFinal().getSize())
-    chi2_list.append(chi2_val)
+    chi2_list.append(chi2.getVal())
     pv_list.append(chi2_pV)
     list_.append(pow_list)
     print ('Finish', pow_list)
 min_chi2 = min(chi2_list)
 index_ = chi2_list.index(min_chi2)
 print ('Power combinations: ', list_)
-print ('Chi^2 list: ', chi2_list)
-print ('Best lau4 ', list_[index_], ', Chi^2 = ', chi2_list[index_], ', P-value = ', pv_list[index_])
+print ('Chi^2 (NLL) list: ', chi2_list)
+print ('Best lau4 ', list_[index_], ', Chi^2 (NLL) = ', chi2_list[index_], ', P-value = ', pv_list[index_])
 toc = time.perf_counter()
 print ('Time spent:', '%.2f'%((toc - tic)/60), 'min')
