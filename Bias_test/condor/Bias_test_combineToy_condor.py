@@ -37,6 +37,7 @@ parser.add_argument( '-i', '--it', help="It")
 parser.add_argument('-f', '--func', help = "Func")
 parser.add_argument('-c', '--cat', help = "Category")
 parser.add_argument('-con', '--config', help = "Configuration")
+parser.add_argument('-s', '--sig', help = "Signal injection", default = 0)
 
 args = parser.parse_args()
 jfile = open('../../Config/'+ args.config, 'r')
@@ -44,6 +45,7 @@ configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
 lowx = setting["Range"]
+insig = int(args.sig)
 
 # Debug Flag
 DEBUG = False
@@ -165,7 +167,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
         for pdf_ in profile_:
             #pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), hist.sumEntries()+scan_sig, 0., 5.*hist.sumEntries())
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), -scan_sig )
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), insig*N_sig-scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
             bias = BiasClass(tot_model, hist, False, "", extend = True)
@@ -201,7 +203,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
             if step == 1: pdf_.reset()
             #pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), hist.sumEntries()-scan_sig, 0, 5.*hist.sumEntries())
-            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), scan_sig )
+            c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), insig*N_sig+scan_sig )
             tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
             #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
             bias = BiasClass(tot_model, hist, False, extend = True)
@@ -249,7 +251,10 @@ for j in range(int(args.Ntoys)):
     scan_list = []      
     #x.setBins(260)
     #hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(generator.Poisson(N)))
-    file_ = "../../Make_combine_workspaces/higgsCombine."+args.func+"."+ CAT+".GenerateOnly.mH125.123456.root"
+    if insig != 0:
+        file_ = '../../Make_combine_workspaces/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
+    else:
+        file_ = '../../Make_combine_workspaces/higgsCombine.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
     print("file = ", file_)
     hist_toy = ROOT.readToy(file_, cppj)
     list = profileFit(profile, dscb_model, hist_toy)
@@ -328,7 +333,7 @@ for j in range(int(args.Ntoys)):
     r_error.append(r_error_)
     if r_error_ > 0: 
         #pull.Fill(list[2]/r_error_)
-        pull_list.append(list[2]/r_error_)
+        pull_list.append((list[2] - insig*N_sig)/r_error_)
     else: bad += 1
     print("Finish toy ", j+1)
 
