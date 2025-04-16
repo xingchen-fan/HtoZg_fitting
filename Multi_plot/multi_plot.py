@@ -7,7 +7,6 @@ import json
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
-from bkg_functions_fit import *
 from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
@@ -58,6 +57,6 @@ print('N data = ', hist_data.sumEntries())
 BEST = False
 if args.test == "FT": BEST = True
 profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
-bkg_list = profile.testSelection(args.test)
+bkg_list = testSelection(args.test)
 
 multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = int(args.best), CMS = "Preliminary", fullRatio = True, bestLabel = BEST)

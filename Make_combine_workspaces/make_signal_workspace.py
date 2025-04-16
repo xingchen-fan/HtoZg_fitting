@@ -28,6 +28,8 @@ x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
 x.setBins(260)
 MH = ROOT.RooRealVar("MH","MH"       ,125)#, 120., 130.)
 sig_model = combineSignal(x, MH, CAT, '../Config/' + args.configS)
+print('n tot = ',sig_model.ntot)
+
 f_out1 = ROOT.TFile("workspaces/workspace_sig_" + CAT + ".root", "RECREATE")
 w_sig = ROOT.RooWorkspace("workspace_sig","workspace_sig")
 getattr(w_sig, "import")(sig_model.pdf)

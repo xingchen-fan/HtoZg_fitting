@@ -5,7 +5,11 @@ sys.path.append(os.path.abspath("/afs/cern.ch/user/f/fanx/CMSSW_12_6_0_patch1/sr
 from bkg_functions_class import *
 import CMS_lumi
 
-def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', note = "", CMS = "Preliminary", fullRatio = False, leftSpace=False, bins = 1):
+def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', note = "", CMS = "Preliminary", fullRatio = False, leftSpace=False, bins = 1, toy = False, bkg_normSF = 1):
+    #-------------------------------------------------------------
+    # In the case of toy plotting, SBpdf is the background-only pdf
+    #--------------------------------------------------------------
+    
     ROOT.gStyle.SetOptStat(0)
     CMS_lumi.lumi_sqrtS = "137.61 fb^{-1} (13 TeV) + 62.32 fb^{-1} (13.6 TeV)"
     CMS_lumi.writeExtraText = 1
@@ -19,6 +23,7 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
         model_hist = pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
         
     h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
+    if toy: h_hist.Sumw2(False)
     norm_hist = pdf.generateBinned(x, 100000, True)
     if sideBand: sum_SB = norm_hist.sumEntries('x', fitRange)
     else: sum_SB = norm_hist.sumEntries()
@@ -65,7 +70,7 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     latex.SetTextSize(0.03)
     latex.SetTextAlign(13)
     x.setBins(int(bins * (x.getMax() - x.getMin())))
-    show_hist = ROOT.RooDataHist("show_hist", "show_hist", x, datahist)
+    show_hist = ROOT.RooDataHist("show_hist", "show_hist", ROOT.RooArgSet(x), datahist)
     #show_normhist = ROOT.RooDataHist("show_normhist", "show_normhist", x, normhist)
     ROOT.gStyle.SetOptStat(0)
     can = ROOT.TCanvas("c1","c1", 700, 500)
@@ -82,7 +87,10 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     ROOT.gPad.SetBottomMargin(0)
     ROOT.gPad.SetTopMargin(0.12)
     #show_normhist.plotOn( plot,ROOT.RooFit.LineColor(0), ROOT.RooFit.MarkerColor(0))
-    show_hist.plotOn( plot, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
+    if toy:
+        show_hist.plotOn( plot, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Name('hist'))
+        SBpdf.plotOn(plot,  ROOT.RooFit.LineColor(4), ROOT.RooFit.LineWidth(2), ROOT.RooFit.Name('bonly_model'), ROOT.RooFit.Normalization(bkg_normSF))
+    else: show_hist.plotOn( plot, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
     if sideBand: pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2), ROOT.RooFit.Range('full'), ROOT.RooFit.Normalization(100000./sum_SB, ROOT.RooAbsReal.Relative), ROOT.RooFit.Name('model'))#ROOT.RooFit.NormRange(fitRange))
     else: pdf.plotOn(plot,  ROOT.RooFit.LineColor(2), ROOT.RooFit.LineWidth(2), ROOT.RooFit.Name('model'))
     plot.GetYaxis().SetTitleSize(0.05)
@@ -130,9 +138,9 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     ROOT.gPad.SetTopMargin(0.12)
     plot2 = x.frame()
     x.setBins(65)
-    show_hist = ROOT.RooDataHist("show_multi_hist", "show_multi_hist", x, datahist)
+    show_hist = ROOT.RooDataHist("show_multi_hist", "show_multi_hist", ROOT.RooArgSet(x), datahist)
     if sideBand: show_hist = show_hist.reduce(ROOT.RooFit.CutRange(fitRange))
-    show_hist.plotOn(plot2,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
+    show_hist.plotOn(plot2, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
     color_index = 1
     best_color = 0
     for i,entry in enumerate(classList):

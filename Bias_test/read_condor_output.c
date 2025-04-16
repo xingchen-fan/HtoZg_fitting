@@ -16,8 +16,8 @@ void read_condor_output(TString func, TString cat, int signal){
   auto h = new TH1D("h", "h", 80, -4, 4);
   TString nsignal = to_string(signal);
   TString file_name;
-  if (signal  == 0) file_name = "condor/"+func+"_" + cat + "/output";
-  else file_name = "condor/"+func+"_" + cat + "_" + nsignal + "sig/output";
+  //if (signal  == 0) file_name = "condor/"+func+"_" + cat + "/output";
+  file_name = "condor/"+func+"_" + cat + "_" + nsignal + "sig_pow1/output";
 		       
   int ncovered = 0;
   for (int i(0); i < 200; i++){
@@ -87,5 +87,5 @@ void read_condor_output(TString func, TString cat, int signal){
   gStyle->SetOptFit(1);
   latex->DrawLatexNDC(0.15, 0.8, ("Coverage = " + to_string_with_precision(ncovered/h->GetEntries(), 2)).c_str());
   std::cout << "n good = " << h->Integral() << std::endl;
-  c->SaveAs("plots/"+func+"_" + cat+ "_pull_"+nsignal+"sig.pdf");
+  c->SaveAs("plots/"+func+"_" + cat+ "_pull_"+nsignal+"sig_pow1.pdf");
 }

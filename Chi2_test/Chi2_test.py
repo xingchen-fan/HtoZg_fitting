@@ -7,7 +7,6 @@ import json
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
-from bkg_functions_fit import *
 from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
@@ -15,8 +14,8 @@ from sample_reader import *
 from profile_class import *
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
-ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
-ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+#ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
@@ -87,7 +86,7 @@ print('N data = ', hist_data.sumEntries())
 # Bkg funcs
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
-AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
+#AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
 profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
 
 bkg_list = [profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]

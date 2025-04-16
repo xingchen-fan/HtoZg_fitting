@@ -6,6 +6,8 @@ import json
 parser = argparse.ArgumentParser(description = "Bias test heat map")
 parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-con', '--config', help = 'Configuration')
+parser.add_argument('-s', '--sig', help = 'Signal injected', default='0')
+
 args = parser.parse_args()
 jfile = open('../Config/' + args.config, 'r')
 configs = json.load(jfile)
@@ -21,7 +23,10 @@ def fill_best(best_list_, func):
 def read_dir(func, N_func):
     best_list = [0]* N_func
     for i in range(200):
-        f = open("condor/"+ func + "_" +CAT +"/output"+str(i)+".txt")
+        if args.sig == '0':
+            f = open("condor/"+ func + "_" +CAT +"/output"+str(i)+".txt")
+        else:
+            f =  open("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
         for line in f:
             best = ""
             if line[:9] == "best func":
@@ -61,7 +66,7 @@ for i in range(N_func):
       arr[i][j] /= Ntoys[i]
 
 plt.imshow(arr)
-plt.title(CAT + " Bias Test")
+plt.title(CAT + " Bias Test "+ args.sig + " Signal")
 plt.colorbar()
 for i in range(N_func): 
     for j in range(N_func): 
@@ -71,5 +76,8 @@ plt.xlabel("Fit")
 plt.ylabel("Truth") 
 plt.xticks(range(N_func), inverse_list, rotation=90)
 plt.yticks(range(N_func), func_list)
-plt.savefig("plots/heatmap_" + CAT + ".pdf", format="pdf", bbox_inches="tight")
+if args.sig == '0':
+    plt.savefig("plots/heatmap_" + CAT + ".pdf", format="pdf", bbox_inches="tight")
+else:
+    plt.savefig("plots/heatmap_" + CAT + "_" + args.sig+"sig.pdf", format="pdf", bbox_inches="tight")
 plt.show()

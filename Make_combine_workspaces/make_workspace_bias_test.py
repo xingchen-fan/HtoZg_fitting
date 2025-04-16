@@ -27,7 +27,7 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 parser = argparse.ArgumentParser(description = "Make workspace")
 parser.add_argument('-c', '--cat', help="category")
-parser.add_argument('-a', '--asimov', help="Asimov", default=0)
+parser.add_argument('-a', '--asimov', help="Asimov", default=0, type=int)
 parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
 jfile = open('../Config/'+args.config, 'r')
@@ -112,12 +112,14 @@ else:
 #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
 #hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
 sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
+#sig_model = DSCB_Class(x, MH, CAT, sigmaL_init = 1.8457, sigmaR_init = 1.3264, nL_init = 3.771, nL_bond = 100, nR_init = 9.962, nR_bond = 100, alphaL_init = 1.154, alphaR_init = 1.231, di_sigma = True)
 MH.setVal(125)
 MH.setConstant(True)
 N_sig = sig_model.ntot
 N = hist_data.sumEntries()
 #N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
 print("N sig = ", N_sig)
+sig_model.setConst(True)
 # -------------------------------------------------
 
 
@@ -177,11 +179,12 @@ best_ = stat_vals.index(min(stat_vals))
 print ("best is ", profile[best_].name)
 
 # Create Asimov (optional)
-c1= ROOT.RooRealVar('c1','c1', N_sig)#, 0, 3*N_sig)
-c2 = ROOT.RooRealVar('c2','c2', N)#, 0, 3*N)
+c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 3*N_sig)
+c2 = ROOT.RooRealVar('c2','c2', N-N_sig, 0, 3*N)
 tot_model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, profile[best_].pdf), ROOT.RooArgList(c1, c2))
 hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
 hist_asimov.SetNameTitle('hist_' + CAT + '_asimov', 'hist_' + CAT + '_asimov')
+
 '''
 nll1 = ROOT.RooNLLVar('nll1', 'nll2',  profile[best_].pdf, hist_asimov)
 r1 = Minimizer_NLL(nll1, -1, eps, True, strategy)
@@ -211,7 +214,7 @@ multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 #multipdf.setCorrectionFactor(0.)
 
 norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N - N_sig, 0, 3*N)
-if int(args.asimov) == 0:
+if args.asimov == 0:
     f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
 else:
     f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_asimov_" + CAT + ".root", "RECREATE")
