@@ -20,7 +20,8 @@ from sig_functions_class import *
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cat', help = 'Category')
-parser.add_argument('-con', '--config', help = 'Configuration')
+parser.add_argument('-conB', '--configB', help = 'Bkg configuration')
+parser.add_argument('-conS', '--configS', help = 'Sig configuration')
 args = parser.parse_args() 
 jfile = open('../Config/' + args.config, 'r')
 configs = json.load(jfile)
@@ -44,7 +45,7 @@ hist_bkg = ROOT.RooDataHist('hist_bkg', 'hist_bkg', x, hist_bkg_TH1)
 
 # Define bkg and sig model
 MH = ROOT.RooRealVar("MH","MH"       ,124.7, 120., 130.)
-profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
+profile = profileClass(x, mu_gauss, CAT, args.config)
 
 bkg_list = [profile.bern2_model]#profile.testSelection("Chi2")
 
@@ -57,7 +58,7 @@ bkg_list = [profile.bern2_model]#profile.testSelection("Chi2")
 #plotClass(x, hist_sig, dscb_model.pdf, bkg_model.SBpdf, "Signal_"+cat)
 
 
-combine_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
+combine_model = combineSignal(x, MH, CAT, args.configS)
 MH.setConstant(True)
 
 

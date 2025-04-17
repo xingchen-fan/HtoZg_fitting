@@ -146,7 +146,7 @@ MH.setConstant(True)
 
 
 #plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
-profile_ = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
+profile_ = profileClass(x, mu_gauss, CAT, args.config)
 profile = profile_.testSelection("FT")
 
 stat_list = []

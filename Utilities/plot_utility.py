@@ -123,24 +123,33 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
     can.SaveAs(output_dir + title+".pdf")
     x.setBins(int(4*(x.getMax() - x.getMin())))
 
-def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', best_index = 0, CMS = "Preliminary", fullRatio = True, bestLabel = False):
+def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/", sideBand = False, fitRange = '', best_index = 0, CMS = "Preliminary", fullRatio = True, bestLabel = False, bins = 1, ratio_range=[0.9,1.1]):
     ROOT.gStyle.SetOptStat(0)
     CMS_lumi.lumi_sqrtS = "137.61 fb^{-1} (13 TeV) + 62.32 fb^{-1} (13.6 TeV)"
     CMS_lumi.writeExtraText = 1
     CMS_lumi.extraText = "      " + CMS
     CMS_lumi.cmsTextSize = 0.5
     CMS_lumi.lumiTextSize = 0.3
+    nbins = int(bins * (x.getMax() - x.getMin()))
+    
+    #Define Canvas
     can2 = ROOT.TCanvas("c2","c2", 700, 500)
     can2.Divide(1,2)
     can2.cd(1)
     ROOT.gPad.SetPad(0.0, 0.3, 1.0, 0.99)
     ROOT.gPad.SetBottomMargin(0)
     ROOT.gPad.SetTopMargin(0.12)
+
+    #Create plot frame
     plot2 = x.frame()
-    x.setBins(65)
+    x.setBins(nbins)
+
+    #Plot histogram
     show_hist = ROOT.RooDataHist("show_multi_hist", "show_multi_hist", ROOT.RooArgSet(x), datahist)
     if sideBand: show_hist = show_hist.reduce(ROOT.RooFit.CutRange(fitRange))
     show_hist.plotOn(plot2, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
+
+    #Plot functions
     color_index = 1
     best_color = 0
     for i,entry in enumerate(classList):
@@ -155,9 +164,11 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
         if sideBand: entry.pdf.plotOn(plot2, ROOT.RooFit.LineColor(color_index), ROOT.RooFit.LineWidth(2), ROOT.RooFit.Name(entry.pdf.GetName()), ROOT.RooFit.Range('full'), ROOT.RooFit.Normalization(100000./sum_SB, ROOT.RooAbsReal.Relative))#ROOT.RooFit.NormRange(fitRange))
         else: entry.pdf.plotOn(plot2, ROOT.RooFit.LineColor(color_index), ROOT.RooFit.LineWidth(2), ROOT.RooFit.Name(entry.pdf.GetName()))
     if sideBand:
-        model_hist = classList[best_index].SBpdf.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
+        
+        #Ctreate model histograms for ratio plot
+        model_hist = classList[best_index].SBpdf.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(nbins))
     else:
-        model_hist = classList[best_index].pdf.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
+        model_hist = classList[best_index].pdf.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(nbins))
     plot2.Draw()
     #plot2.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma} (GeV)")
     plot2.GetYaxis().SetTitleOffset(1)
@@ -183,8 +194,12 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
         else:
             leg.AddEntry(entry.pdf.GetName(), entry.pdf.GetName(),"L")
     leg.Draw("same")
+
+    #Create TH1 histogram for ratio plot
     h_hist = show_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
     print('xmin = ', x.getMin())
+
+    #Create ratio plot
     ratio = ROOT.TH1D("ratio", "ratio", 65, x.getMin(), x.getMax())
     ratio.Divide(h_hist, model_hist)
     ratio.SetMarkerColor(ROOT.kBlack)
@@ -200,7 +215,8 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
                 minimum = bincont
         ratio.GetYaxis().SetRangeUser(minimum, ratio.GetBinContent(ratio.GetMaximumBin()))
     else:
-        ratio.GetYaxis().SetRangeUser(0.9, 1.1)
+        ratio.GetYaxis().SetRangeUser(ratio_range[0], ratio_range[1])
+    #Ratio plot seetings
     ratio.GetXaxis().SetTitleOffset(0.9)
     ratio.GetXaxis().SetTitleSize(0.17)
     ratio.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma}/(GeV)")
@@ -218,7 +234,7 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     line.SetLineWidth(2)
 
     CMS_lumi.CMS_lumi(can2, 0, 0)
-    #    can2.Draw()
+    #can2.Draw()
     can2.cd(2)
     ROOT.gPad.SetPad(0.0, 0.1, 1.0, 0.3)
     ROOT.gPad.SetTopMargin(0)
