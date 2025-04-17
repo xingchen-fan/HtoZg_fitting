@@ -4,9 +4,9 @@ kmax *
 
 ------------------------------------------------
 
-shapes bkg    ggf4   workspaces/workspace_bkg_profile_bias_asimov_ggf4.root   workspace_bkg:multipdf_ggf4 
+shapes bkg    ggf4   workspaces/workspace_bkg_profile_bias_ggf4_nomodg.root   workspace_bkg:multipdf_ggf4 
 shapes sig    ggf4   workspaces/workspace_sig_ggf4.root   workspace_sig:combine_sig_ggf4
-shapes data_obs   ggf4   workspaces/workspace_bkg_profile_bias_asimov_ggf4.root     workspace_bkg:hist_ggf4_asimov
+shapes data_obs   ggf4   workspaces/workspace_bkg_profile_bias_ggf4_nomodg.root     workspace_bkg:hist_ggf4_data
 
 -------------------------------------------------
 bin		ggf4
