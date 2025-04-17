@@ -119,7 +119,7 @@ We split the signal model into individual ones depending on the year(era), lepto
                 "nR ggf": 6.3908,
                 "alphaL ggf": 0.55437,
                 "alphaR ggf": 0.53537,
-
+              "mu": {
                 "disigma vbf": 1,
                 "MH vbf": 124.99,
                 "nexp vbf": 0.05,
@@ -168,7 +168,7 @@ Add the models that pass the test to the `"Chi2"` value of ggf1 in the config fi
 ## Spurious Signal Test
 To make it easier for people to run this test, the simulations with extended DY are saved as histograms at `Data/`. To run the test in ggf1, for example,
 ```
-bash$ ./Spurious_signal_test_hist.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json
+bash$ ./Spurious_signal_test_hist.py -c ggf1 -conB ../Config/chi2_config_xgboost_nodrop.json -conS ../Config/config_DSCB.json
 ```
 The signal model used is the combination of the individual models described previously by defining a `combineSignal` object. Background models tested are selected based on the `"Chi2"` value in the config file.
 
@@ -181,19 +181,19 @@ where `x` is the fitting axis, `pdf_list` is the list of the functions that you 
 
 When calling the F test, NLL fit is used by default. A command to run the F test in ggf1 is
 ```
-bash$ ./F_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json
+bash$ ./F_test.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json
 ```
 Background models tested are selected based on the `"SST"` value in the config file.Output has both the test statistics and the P-values, as well as a multi-function plot.
 ## Make Workspaces 
 To operate the next test, we need to make toys with `combine`, thus need datacards and worksapces. To generate a workspace for ggf1, for example,
 ```
-bash$ ./make_workspace_bias_test.py -c ggf1 -a 0 -con chi2_config_xgboost_nodrop.json
+bash$ ./make_workspace_bias_test.py -c ggf1 -a 0 -con ../Config/chi2_config_xgboost_nodrop.json
 ```
 where `-a` means whether you want to generate and store an Asimov histogram in the workspace. This helps us to cross check with `combine` expected significance calculation.
 
 To generate the signal workspace only, run
 ```
-bash$ ./make_signal_workspace.py -c ggf1 -con chi2_config_xgboost_nodrop.json
+bash$ ./make_signal_workspace.py -c ggf1 -conB ../Config/chi2_config_xgboost_nodrop.json -conS ../Config/config_DSCB.json
 ```
 
 ## CMS Bias Test
