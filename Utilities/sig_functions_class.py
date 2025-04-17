@@ -91,7 +91,7 @@ class DSCB_Class:
         self.disigma = config["disigma"]
         for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
             getattr(self, param).setVal(config[param])
-        self.setConst(True) #change this eventually for syst.s
+        self.setConst(True) 
         
                 
 

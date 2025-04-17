@@ -135,8 +135,8 @@ def write_workspace(category, datacard_filename, signal_config,
     x = ROOT.RooRealVar(mllg_name, mllg_name, lowx, highx)
     nbins = 130
     x.setBinning(ROOT.RooUniformBinning(lowx, highx, nbins),'full')
+    x.setBinning(ROOT.RooUniformBinning(lowx-32.5, highx+32.5, 1000),'cache')
     x.setBins(nbins,'')
-    x.setBins(1000,'cache')
     x.setRange('left', lowx, 120)
     x.setRange('right', 130, highx)
     mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
@@ -175,15 +175,15 @@ def write_workspace(category, datacard_filename, signal_config,
   
     for proc in SIGNAL_PROCS:
         proc_name = f"{proc}_cat_{category}"
-        #TODO implement shape systematics by taking differences between
-        #nominal parameters and systematic variations
         proc_settings = configs_[proc_name+"_nominal"]
         dMH = ROOT.RooRealVar(f"dMH_{proc_name}", "", 0.0, -2.0, 2.0)
-        mu_final = [ROOT.RooFormulaVar(f"mu_comb0_{proc_name}","","@0+@1",
-            ROOT.RooArgList(MH, dMH))]
         sigma = ROOT.RooRealVar(f"sigma_{proc_name}", "", 0.0, 0.01, 5.0)
-        sigma_final = [ROOT.RooFormulaVar(f"sigma_comb0_{proc_name}","","@0",
-            ROOT.RooArgList(sigma))]
+        mu_arglist = ROOT.RooArgList(MH, dMH)
+        sigma_arglist = ROOT.RooArgList(sigma)
+        mu_formulastr = "(@1"
+        sigma_formulastr = "@0"
+        mu_idx = 2
+        sigma_idx = 1
         for isyst in range(len(SYSTEMATICS)):
             syst_name = SYSTEMATICS[isyst][0]
             is_scale = SYSTEMATICS[isyst][1]
@@ -195,27 +195,25 @@ def write_workspace(category, datacard_filename, signal_config,
                     -alt_settings_up["dMH"])+abs(proc_settings["dMH"]
                     -alt_settings_down["dMH"]))/2.0)/abs(proc_settings["dMH"])
                 if (variation > 0.01):
-                    formula_idx = len(mu_final)+1
-                    mu_final.append(ROOT.RooFormulaVar(
-                        f"mu_comb{formula_idx}_{proc_name}",
-                        "",f"@0*(1.0+{variation}*@1)",
-                        ROOT.RooArgList(mu_final[-1], 
-                        shape_systematics[isyst])))
-
+                    mu_arglist.add(shape_systematics[isyst])
+                    mu_formulastr += f"*(1.0+{variation}*@{mu_idx})"
+                    mu_idx += 1
             else:
                 variation = (((abs(proc_settings["sigmaL"]
                     -alt_settings_up["sigmaL"])+abs(proc_settings["sigmaL"]
                     -alt_settings_down["sigmaL"]))/2.0)
                     /abs(proc_settings["sigmaL"]))
                 if (variation > 0.01):
-                    formula_idx = len(sigma_final)+1
-                    sigma_final.append(ROOT.RooFormulaVar(
-                        f"sigma_comb{formula_idx}_{proc_name}",
-                        "",f"@0*(1.0+{variation}*@1)",
-                        ROOT.RooArgList(sigma_final[-1], 
-                        shape_systematics[isyst])))
-        signal_model = DSCB_Class(x, mu_final[-1], sigma_final[-1], dMH, sigma,
-                                  proc_name)
+                    sigma_arglist.add(shape_systematics[isyst])
+                    sigma_formulastr += (f"*(1.0+{variation}*@{sigma_idx})")
+                    sigma_idx += 1
+        mu_formulastr += ")+@0"
+        mu_final = ROOT.RooFormulaVar(f"mu_comb_{proc_name}","",mu_formulastr,
+            mu_arglist)
+        sigma_final = ROOT.RooFormulaVar(f"sigma_comb_{proc_name}","",
+            sigma_formulastr,sigma_arglist)
+        signal_model = DSCB_Class(x, mu_final, sigma_final, dMH, sigma,
+            proc_name)
         signal_model.assignValModular(proc_settings)
         ws_signal = ROOT.RooWorkspace("WS_"+proc_name, "WS_"+proc_name)
         getattr(ws_signal,"import")(signal_model.pdf)
