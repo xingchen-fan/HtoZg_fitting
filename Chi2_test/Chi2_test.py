@@ -87,7 +87,7 @@ print('N data = ', hist_data.sumEntries())
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 #AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
-profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
+profile = profileClass(x, mu_gauss, CAT, args.config)
 
 bkg_list = [profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]
 #vbf1 no lau3,lau4 and  vbf2 no lau4
@@ -118,3 +118,4 @@ for func in bkg_list:
         pass_list.append(func)
 print('List has ', len(pass_list), ' models')
 multiPlotClass(x, hist_data, pass_list, title="Chi2_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = ("vbf" in CAT))
+profile.write_config_file(cuthistogram, "Chi2")

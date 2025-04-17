@@ -155,18 +155,20 @@ Be aware that this process takes a LONG time. Values provided in the config file
 
 To run the sideband Chi^2 fit for category ggf1 with the config file `chi2_config_xgboost_nodrop.json`, run
 ```
-bash$ ./Chi2_test.py -c ggf1 -con chi2_config_xgboost_nodrop.json >ggf1.log 2>&1
+bash$ ./Chi2_test.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json ggf1.log 2>&1
 ```
-Fitting results are save into `ggf1.log`. Then, parser it into the config file if you want to update the values,
+After the fit, the post-fit valures are parsered to the config file through `write_config_file`. Fitting results are save into `ggf1.log`. 
+
+Alternative to `write_config_file`, post-fit values can be written into the config file using
 ```
-bash$ ./config_parser.py -c ggf1 -con chi2_config_xgboost_nodrop.json -log ggf1.log
+bash$ ./config_parser.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json -log ggf1.log
 ```
 Add the models that pass the test to the `"Chi2"` value of ggf1 in the config file.
 
 ## Spurious Signal Test
 To make it easier for people to run this test, the simulations with extended DY are saved as histograms at `Data/`. To run the test in ggf1, for example,
 ```
-bash$ ./Spurious_signal_test_hist.py -c ggf1 -con chi2_config_xgboost_nodrop.json
+bash$ ./Spurious_signal_test_hist.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json
 ```
 The signal model used is the combination of the individual models described previously by defining a `combineSignal` object. Background models tested are selected based on the `"Chi2"` value in the config file.
 
