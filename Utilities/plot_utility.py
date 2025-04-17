@@ -1,7 +1,7 @@
 import ROOT
 import sys
 import os
-sys.path.append(os.path.abspath("/afs/cern.ch/user/f/fanx/CMSSW_12_6_0_patch1/src/HtoZg_fitting/CMS_plotter/"))
+sys.path.append(os.path.abspath("../CMS_plotter/"))
 from bkg_functions_class import *
 import CMS_lumi
 
