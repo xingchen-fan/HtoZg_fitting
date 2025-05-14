@@ -30,7 +30,7 @@ parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-a', '--asimov', help="Asimov", default=0, type=int)
 parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
-jfile = open('../Config/'+args.config, 'r')
+jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -40,7 +40,7 @@ lowx = setting["Range"]
 LOG = True
 SIGNAL = False
 DAT = False
-FIT = False # 'False' to read the post-fit values from config file
+FIT = True # 'False' to read the post-fit values from config file
 
 # Define variables
 x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
@@ -181,9 +181,6 @@ print ("best is ", profile[best_].name)
 # Create Asimov (optional)
 c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 3*N_sig)
 c2 = ROOT.RooRealVar('c2','c2', N-N_sig, 0, 3*N)
-tot_model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, profile[best_].pdf), ROOT.RooArgList(c1, c2))
-hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
-hist_asimov.SetNameTitle('hist_' + CAT + '_asimov', 'hist_' + CAT + '_asimov')
 
 '''
 nll1 = ROOT.RooNLLVar('nll1', 'nll2',  profile[best_].pdf, hist_asimov)
@@ -222,10 +219,13 @@ w_bkg = ROOT.RooWorkspace("workspace_bkg","workspace_bkg")
 getattr(w_bkg, "import")(cate)
 getattr(w_bkg, "import")(norm)
 getattr(w_bkg, "import")(multipdf)
-if int(args.asimov) == 0:
-    getattr(w_bkg, "import")(hist_data)
-else:
-    getattr(w_bkg, "import")(hist_asimov)
+getattr(w_bkg, "import")(hist_data)
+if int(args.asimov) == 1:
+    for entry in profile:
+        model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c1, c2))
+        hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
+        hist_asimov.SetNameTitle('hist_' +  entry.name, 'hist_' + entry.name)
+        getattr(w_bkg, "import")(hist_asimov)
 w_bkg.Print()
 w_bkg.Write()
 f_out2.Close()
