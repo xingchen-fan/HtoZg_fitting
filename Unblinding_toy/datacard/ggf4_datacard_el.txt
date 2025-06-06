@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    ggf4   workspaces/workspace_bkg_toy_unblind_ggf4.root   workspace_bkg_el:multipdf_ggf4_el 
+shapes sig    ggf4   workspaces/workspace_sig_toy_unblind_ggf4.root   workspace_sig_el:combine_sig_ggf4_el
+shapes data_obs   ggf4   workspaces/workspace_bkg_toy_unblind_ggf4.root     workspace_bkg_el:hist_ggf4_el
+
+-------------------------------------------------
+bin		ggf4
+observation	-1
+--------------------------------------------------
+bin 		ggf4		ggf4
+process	bkg		sig
+process	1		0
+rate		1.0  38.45
+--------------------------------------------------
+
+pdfindex_ggf4_el         discrete

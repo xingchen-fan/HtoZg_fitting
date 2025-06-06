@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    ggf2   workspaces/workspace_bkg_toy_unblind_ggf2.root   workspace_bkg_mu:multipdf_ggf2_mu 
+shapes sig    ggf2   workspaces/workspace_sig_toy_unblind_ggf2.root   workspace_sig_mu:combine_sig_ggf2_mu
+shapes data_obs   ggf2   workspaces/workspace_bkg_toy_unblind_ggf2.root     workspace_bkg_mu:hist_ggf2_mu
+
+-------------------------------------------------
+bin		ggf2
+observation	-1
+--------------------------------------------------
+bin 		ggf2		ggf2
+process	bkg		sig
+process	1		0
+rate		1.0  30.0
+--------------------------------------------------
+
+pdfindex_ggf2_mu         discrete

@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    vbf3   workspaces/workspace_bkg_toy_unblind_vbf3.root   workspace_bkg:multipdf_vbf3 
+shapes sig    vbf3   workspaces/workspace_sig_toy_unblind_vbf3.root   workspace_sig:combine_sig_vbf3
+shapes data_obs   vbf3   workspaces/workspace_bkg_toy_unblind_vbf3.root     workspace_bkg:hist_vbf3
+
+-------------------------------------------------
+bin		vbf3
+observation	-1
+--------------------------------------------------
+bin 		vbf3		vbf3
+process	bkg		sig
+process	1		0
+rate		1.0  13.41
+--------------------------------------------------
+
+pdfindex_vbf3         discrete

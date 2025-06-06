@@ -1,0 +1,50 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    ggf1   workspaces/workspace_bkg_toy_unblind_ggf1.root   workspace_bkg:multipdf_ggf1
+shapes sig    ggf1   workspaces/workspace_sig_toy_unblind_ggf1.root   workspace_sig:combine_sig_ggf1
+shapes data_obs   ggf1   workspaces/workspace_bkg_toy_unblind_ggf1.root     workspace_bkg:hist_ggf1
+shapes bkg    ggf2   workspaces/workspace_bkg_toy_unblind_ggf2.root   workspace_bkg:multipdf_ggf2
+shapes sig    ggf2   workspaces/workspace_sig_toy_unblind_ggf2.root   workspace_sig:combine_sig_ggf2
+shapes data_obs   ggf2   workspaces/workspace_bkg_toy_unblind_ggf2.root     workspace_bkg:hist_ggf2
+shapes bkg    ggf3   workspaces/workspace_bkg_toy_unblind_ggf3.root   workspace_bkg:multipdf_ggf3
+shapes sig    ggf3   workspaces/workspace_sig_toy_unblind_ggf3.root   workspace_sig:combine_sig_ggf3
+shapes data_obs   ggf3   workspaces/workspace_bkg_toy_unblind_ggf3.root     workspace_bkg:hist_ggf3
+shapes bkg    ggf4   workspaces/workspace_bkg_toy_unblind_ggf4.root   workspace_bkg:multipdf_ggf4
+shapes sig    ggf4   workspaces/workspace_sig_toy_unblind_ggf4.root   workspace_sig:combine_sig_ggf4
+shapes data_obs   ggf4   workspaces/workspace_bkg_toy_unblind_ggf4.root     workspace_bkg:hist_ggf4
+
+shapes bkg    vbf1   workspaces/workspace_bkg_toy_unblind_vbf1.root   workspace_bkg:multipdf_vbf1
+shapes sig    vbf1   workspaces/workspace_sig_toy_unblind_vbf1.root   workspace_sig:combine_sig_vbf1
+shapes data_obs   vbf1   workspaces/workspace_bkg_toy_unblind_vbf1.root     workspace_bkg:hist_vbf1
+shapes bkg    vbf2   workspaces/workspace_bkg_toy_unblind_vbf2.root   workspace_bkg:multipdf_vbf2
+shapes sig    vbf2   workspaces/workspace_sig_toy_unblind_vbf2.root   workspace_sig:combine_sig_vbf2
+shapes data_obs   vbf2   workspaces/workspace_bkg_toy_unblind_vbf2.root     workspace_bkg:hist_vbf2
+shapes bkg    vbf3   workspaces/workspace_bkg_toy_unblind_vbf3.root   workspace_bkg:multipdf_vbf3
+shapes sig    vbf3   workspaces/workspace_sig_toy_unblind_vbf3.root   workspace_sig:combine_sig_vbf3
+shapes data_obs   vbf3   workspaces/workspace_bkg_toy_unblind_vbf3.root     workspace_bkg:hist_vbf3
+shapes bkg    vbf4   workspaces/workspace_bkg_toy_unblind_vbf4.root   workspace_bkg:multipdf_vbf4
+shapes sig    vbf4   workspaces/workspace_sig_toy_unblind_vbf4.root   workspace_sig:combine_sig_vbf4
+shapes data_obs   vbf4   workspaces/workspace_bkg_toy_unblind_vbf4.root     workspace_bkg:hist_vbf4
+
+-------------------------------------------------
+bin             ggf1    ggf2    ggf3    ggf4	vbf1    vbf2    vbf3    vbf4
+observation     -1      -1      -1      -1	-1      -1      -1      -1
+--------------------------------------------------
+bin             ggf1    ggf1    ggf2    ggf2    ggf3    ggf3    ggf4    ggf4	vbf1    vbf1    vbf2    vbf2    vbf3    vbf3    vbf4    vbf4
+process         bkg     sig     bkg     sig     bkg     sig     bkg     sig	bkg     sig     bkg     sig     bkg     sig     bkg     sig
+process         1       0       1       0       1       0       1       0	1       0       1       0       1       0       1       0
+rate            1.0     8.65    1.0     56.53   1.0     90.49   1.0     84.25	1.0     2.1     1.0     8.66    1.0     13.41   1.0     21.94
+--------------------------------------------------
+
+pdfindex_ggf1         discrete
+pdfindex_ggf2         discrete
+pdfindex_ggf3         discrete
+pdfindex_ggf4         discrete
+pdfindex_vbf1         discrete
+pdfindex_vbf2         discrete
+pdfindex_vbf3         discrete
+pdfindex_vbf4         discrete

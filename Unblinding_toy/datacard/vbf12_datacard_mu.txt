@@ -1,0 +1,21 @@
+imax *  number of channels
+jmax *  number of backgrounds
+kmax *
+
+------------------------------------------------
+
+shapes bkg    vbf1   workspaces/workspace_bkg_toy_unblind_vbf12.root   workspace_bkg_mu:multipdf_vbf12_mu 
+shapes sig    vbf1   workspaces/workspace_sig_toy_unblind_vbf12.root   workspace_sig_mu:sig_model12_mu
+shapes data_obs   vbf1   workspaces/workspace_bkg_toy_unblind_vbf12.root     workspace_bkg_mu:hist_vbf12_mu
+
+-------------------------------------------------
+bin		vbf1
+observation	-1
+--------------------------------------------------
+bin 		vbf1		vbf1
+process	bkg		sig
+process	1		0
+rate		1.0  5.62
+--------------------------------------------------
+
+pdfindex_vbf12_mu         discrete
