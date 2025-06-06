@@ -221,23 +221,60 @@ class readRuiROOTggFdata:
         chain.Add(direct + 'data_2022_pinnacles_ggf_fixed.root')
         chain.Add(direct + 'data_2023_pinnacles_ggf_fixed.root')
         chain.Add(direct + 'data_2023BPix_pinnacles_ggf_fixed.root')
-        hist1_TH1 = ROOT.TH1F('ggf1_th1f', 'ggf1_th1f', 340, 95, 180)
-        hist2_TH1 = ROOT.TH1F('ggf2_th1f', 'ggf2_th1f', 340, 95, 180)
-        hist3_TH1 = ROOT.TH1F('ggf3_th1f', 'ggf3_th1f', 340, 95, 180)
-        hist4_TH1 = ROOT.TH1F('ggf4_th1f', 'ggf4_th1f', 340, 95, 180)
+        hist1 = ROOT.TH1F('ggf1_th1f', 'ggf1_th1f', 340, 95, 180)
+        hist2 = ROOT.TH1F('ggf2_th1f', 'ggf2_th1f', 340, 95, 180)
+        hist3 = ROOT.TH1F('ggf3_th1f', 'ggf3_th1f', 340, 95, 180)
+        hist4 = ROOT.TH1F('ggf4_th1f', 'ggf4_th1f', 340, 95, 180)
+        hist1EL_TH1 = ROOT.TH1F('ggf1el_th1f', 'ggf1el_th1f', 340, 95, 180)
+        hist2EL_TH1 = ROOT.TH1F('ggf2el_th1f', 'ggf2el_th1f', 340, 95, 180)
+        hist3EL_TH1 = ROOT.TH1F('ggf3el_th1f', 'ggf3el_th1f', 340, 95, 180)
+        hist4EL_TH1 = ROOT.TH1F('ggf4el_th1f', 'ggf4el_th1f', 340, 95, 180)
+        hist1MU_TH1 = ROOT.TH1F('ggf1mu_th1f', 'ggf1mu_th1f', 340, 95, 180)
+        hist2MU_TH1 = ROOT.TH1F('ggf2mu_th1f', 'ggf2mu_th1f', 340, 95, 180)
+        hist3MU_TH1 = ROOT.TH1F('ggf3mu_th1f', 'ggf3mu_th1f', 340, 95, 180)
+        hist4MU_TH1 = ROOT.TH1F('ggf4mu_th1f', 'ggf4mu_th1f', 340, 95, 180)
         for entry in chain:
-            if entry.bdt_score_test > bdt1 and entry.met < 90:
-                hist1_TH1.Fill(entry.llphoton_refit_m)
-            elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.met < 90:
-                hist2_TH1.Fill(entry.llphoton_refit_m)
-            elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.met < 90:
-                hist3_TH1.Fill(entry.llphoton_refit_m)
-            elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.met < 90:
-                hist4_TH1.Fill(entry.llphoton_refit_m)
-        self.ggf1 = ROOT.RooDataHist('hist_ggf1_data', 'hist_ggf1_data', x, hist1_TH1)
-        self.ggf2 = ROOT.RooDataHist('hist_ggf2_data', 'hist_ggf2_data', x, hist2_TH1)
-        self.ggf3 = ROOT.RooDataHist('hist_ggf3_data', 'hist_ggf3_data', x, hist3_TH1)
-        self.ggf4 = ROOT.RooDataHist('hist_ggf4_data', 'hist_ggf4_data', x, hist4_TH1)
+            if entry.ll_lepid == 11:
+                if entry.bdt_score_test > bdt1 and entry.met < 90:
+                    hist1EL_TH1.Fill(entry.llphoton_refit_m)
+                    hist1.Fill(entry.llphoton_refit_m)
+                elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.met < 90:
+                    hist2EL_TH1.Fill(entry.llphoton_refit_m)
+                    hist2.Fill(entry.llphoton_refit_m)
+                elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.met < 90:
+                    hist3EL_TH1.Fill(entry.llphoton_refit_m)
+                    hist3.Fill(entry.llphoton_refit_m)
+                elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.met < 90:
+                    hist4EL_TH1.Fill(entry.llphoton_refit_m)
+                    hist4.Fill(entry.llphoton_refit_m)
+            elif entry.ll_lepid == 13:
+                if entry.bdt_score_test > bdt1 and entry.met < 90:
+                    hist1MU_TH1.Fill(entry.llphoton_refit_m)
+                    hist1.Fill(entry.llphoton_refit_m)
+                elif entry.bdt_score_test > bdt2 and entry.bdt_score_test < bdt1 and entry.met < 90:
+                    hist2MU_TH1.Fill(entry.llphoton_refit_m)
+                    hist2.Fill(entry.llphoton_refit_m)
+                elif entry.bdt_score_test > bdt3 and entry.bdt_score_test < bdt2 and entry.met < 90:
+                    hist3MU_TH1.Fill(entry.llphoton_refit_m)
+                    hist3.Fill(entry.llphoton_refit_m)
+                elif entry.bdt_score_test > -1 and entry.bdt_score_test < bdt3 and entry.met < 90:
+                    hist4MU_TH1.Fill(entry.llphoton_refit_m)
+                    hist4.Fill(entry.llphoton_refit_m)
+
+        self.ggf1_el = ROOT.RooDataHist('hist_ggf1_data_el', 'hist_ggf1_data_el', x, hist1EL_TH1)
+        self.ggf2_el = ROOT.RooDataHist('hist_ggf2_data_el', 'hist_ggf2_data_el', x, hist2EL_TH1)
+        self.ggf3_el = ROOT.RooDataHist('hist_ggf3_data_el', 'hist_ggf3_data_el', x, hist3EL_TH1)
+        self.ggf4_el = ROOT.RooDataHist('hist_ggf4_data_el', 'hist_ggf4_data_el', x, hist4EL_TH1)
+        
+        self.ggf1_mu = ROOT.RooDataHist('hist_ggf1_data_mu', 'hist_ggf1_data_mu', x, hist1MU_TH1)
+        self.ggf2_mu = ROOT.RooDataHist('hist_ggf2_data_mu', 'hist_ggf2_data_mu', x, hist2MU_TH1)
+        self.ggf3_mu = ROOT.RooDataHist('hist_ggf3_data_mu', 'hist_ggf3_data_mu', x, hist3MU_TH1)
+        self.ggf4_mu = ROOT.RooDataHist('hist_ggf4_data_mu', 'hist_ggf4_data_mu', x, hist4MU_TH1)
+
+        self.ggf1 = ROOT.RooDataHist('hist_ggf1_data', 'hist_ggf1_data', x, hist1)
+        self.ggf2 = ROOT.RooDataHist('hist_ggf2_data', 'hist_ggf2_data', x, hist2)
+        self.ggf3 = ROOT.RooDataHist('hist_ggf3_data', 'hist_ggf3_data', x, hist3)
+        self.ggf4 = ROOT.RooDataHist('hist_ggf4_data', 'hist_ggf4_data', x, hist4)
 
 class readRuiROOTVBFdata:
     def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
@@ -254,19 +291,72 @@ class readRuiROOTVBFdata:
         hist2_TH1 = ROOT.TH1F('vbf2_th1f', 'vbf2_th1f', 340, 95, 180)
         hist3_TH1 = ROOT.TH1F('vbf3_th1f', 'vbf3_th1f', 340, 95, 180)
         hist4_TH1 = ROOT.TH1F('vbf4_th1f', 'vbf4_th1f', 340, 95, 180)
+        hist12_TH1 = ROOT.TH1F('vbf12_th1f', 'vbf12_th1f', 340, 95, 180)
+        
+        hist1_TH1_el = ROOT.TH1F('vbf1_th1f_el', 'vbf1_th1f_el', 340, 95, 180)
+        hist2_TH1_el = ROOT.TH1F('vbf2_th1f_el', 'vbf2_th1f_el', 340, 95, 180)
+        hist3_TH1_el = ROOT.TH1F('vbf3_th1f_el', 'vbf3_th1f_el', 340, 95, 180)
+        hist4_TH1_el = ROOT.TH1F('vbf4_th1f_el', 'vbf4_th1f_el', 340, 95, 180)
+        hist12_TH1_el = ROOT.TH1F('vbf12_th1f_el', 'vbf12_th1f_el', 340, 95, 180)
+        hist1_TH1_mu = ROOT.TH1F('vbf1_th1f_mu', 'vbf1_th1f_mu', 340, 95, 180)
+        hist2_TH1_mu = ROOT.TH1F('vbf2_th1f_mu', 'vbf2_th1f_mu', 340, 95, 180)
+        hist3_TH1_mu = ROOT.TH1F('vbf3_th1f_mu', 'vbf3_th1f_mu', 340, 95, 180)
+        hist4_TH1_mu = ROOT.TH1F('vbf4_th1f_mu', 'vbf4_th1f_mu', 340, 95, 180)
+        hist12_TH1_mu = ROOT.TH1F('vbf12_th1f_mu', 'vbf12_th1f_mu', 340, 95, 180)
+        
         for entry in chain:
-            if entry.BDT_score_2j > bdt1:
-                hist1_TH1.Fill(entry.llphoton_refit_m)
-            elif entry.BDT_score_2j > bdt2 and entry.BDT_score_2j < bdt1 :
-                hist2_TH1.Fill(entry.llphoton_refit_m)
-            elif entry.BDT_score_2j > bdt3 and entry.BDT_score_2j < bdt2 :
-                hist3_TH1.Fill(entry.llphoton_refit_m)
-            elif entry.BDT_score_2j > -1 and entry.BDT_score_2j < bdt3 :
-                hist4_TH1.Fill(entry.llphoton_refit_m)
+            if entry.ll_lepid == 11:
+                if entry.BDT_score_2j > bdt1:
+                    hist1_TH1.Fill(entry.llphoton_refit_m)
+                    hist1_TH1_el.Fill(entry.llphoton_refit_m)
+                    hist12_TH1.Fill(entry.llphoton_refit_m)
+                    hist12_TH1_el.Fill(entry.llphoton_refit_m)
+                elif entry.BDT_score_2j > bdt2 and entry.BDT_score_2j < bdt1 :
+                    hist2_TH1.Fill(entry.llphoton_refit_m)
+                    hist2_TH1_el.Fill(entry.llphoton_refit_m)
+                    hist12_TH1.Fill(entry.llphoton_refit_m)
+                    hist12_TH1_el.Fill(entry.llphoton_refit_m)
+                elif entry.BDT_score_2j > bdt3 and entry.BDT_score_2j < bdt2 :
+                    hist3_TH1.Fill(entry.llphoton_refit_m)
+                    hist3_TH1_el.Fill(entry.llphoton_refit_m)
+                elif entry.BDT_score_2j > -1 and entry.BDT_score_2j < bdt3 :
+                    hist4_TH1.Fill(entry.llphoton_refit_m)
+                    hist4_TH1_el.Fill(entry.llphoton_refit_m)
+            if entry.ll_lepid == 13:
+                if entry.BDT_score_2j > bdt1:
+                    hist1_TH1.Fill(entry.llphoton_refit_m)
+                    hist1_TH1_mu.Fill(entry.llphoton_refit_m)
+                    hist12_TH1.Fill(entry.llphoton_refit_m)
+                    hist12_TH1_mu.Fill(entry.llphoton_refit_m)
+                elif entry.BDT_score_2j > bdt2 and entry.BDT_score_2j < bdt1 :
+                    hist2_TH1.Fill(entry.llphoton_refit_m)
+                    hist2_TH1_mu.Fill(entry.llphoton_refit_m)
+                    hist12_TH1.Fill(entry.llphoton_refit_m)
+                    hist12_TH1_mu.Fill(entry.llphoton_refit_m)
+                elif entry.BDT_score_2j > bdt3 and entry.BDT_score_2j < bdt2 :
+                    hist3_TH1.Fill(entry.llphoton_refit_m)
+                    hist3_TH1_mu.Fill(entry.llphoton_refit_m)
+                elif entry.BDT_score_2j > -1 and entry.BDT_score_2j < bdt3 :
+                    hist4_TH1.Fill(entry.llphoton_refit_m)
+                    hist4_TH1_mu.Fill(entry.llphoton_refit_m)
+
         self.vbf1 = ROOT.RooDataHist('hist_vbf1_data', 'hist_vbf1_data', x, hist1_TH1)
         self.vbf2 = ROOT.RooDataHist('hist_vbf2_data', 'hist_vbf2_data', x, hist2_TH1)
         self.vbf3 = ROOT.RooDataHist('hist_vbf3_data', 'hist_vbf3_data', x, hist3_TH1)
         self.vbf4 = ROOT.RooDataHist('hist_vbf4_data', 'hist_vbf4_data', x, hist4_TH1)
+        self.vbf12 = ROOT.RooDataHist('hist_vbf12_data', 'hist_vbf12_data', x, hist12_TH1)
+        
+        self.vbf1_el = ROOT.RooDataHist('hist_vbf1_data_el', 'hist_vbf1_data_el', x, hist1_TH1_el)
+        self.vbf2_el = ROOT.RooDataHist('hist_vbf2_data_el', 'hist_vbf2_data_el', x, hist2_TH1_el)
+        self.vbf3_el = ROOT.RooDataHist('hist_vbf3_data_el', 'hist_vbf3_data_el', x, hist3_TH1_el)
+        self.vbf4_el = ROOT.RooDataHist('hist_vbf4_data_el', 'hist_vbf4_data_el', x, hist4_TH1_el)
+        self.vbf12_el = ROOT.RooDataHist('hist_vbf12_data_el', 'hist_vbf12_data_el', x, hist12_TH1_el)
+        
+        self.vbf1_mu = ROOT.RooDataHist('hist_vbf1_data_mu', 'hist_vbf1_data_mu', x, hist1_TH1_mu)
+        self.vbf2_mu = ROOT.RooDataHist('hist_vbf2_data_mu', 'hist_vbf2_data_mu', x, hist2_TH1_mu)
+        self.vbf3_mu = ROOT.RooDataHist('hist_vbf3_data_mu', 'hist_vbf3_data_mu', x, hist3_TH1_mu)
+        self.vbf4_mu = ROOT.RooDataHist('hist_vbf4_data_mu', 'hist_vbf4_data_mu', x, hist4_TH1_mu)
+        self.vbf12_mu = ROOT.RooDataHist('hist_vbf12_data_mu', 'hist_vbf12_data_mu', x, hist12_TH1_mu)
         
 class readRuiROOTggFSignalggF:
     def __init__(self, x, direct='', year='', bdt1=0, bdt2=0, bdt3=0):

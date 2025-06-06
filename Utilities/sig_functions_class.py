@@ -186,7 +186,72 @@ class combineSignal:
         self.model_2023_mu_vbf.assignVal(MH, config, "2023", cat, "mu", "vbf")
         self.model_2023BPix_mu_vbf.assignVal(MH, config, "2023BPix", cat, "mu", "vbf")
 
-
+        
         #self.pdf = ROOT.RooAddPdf('combine_sig_'+cat, 'combine_sig_'+cat, pdf_list, ROOT.RooArgList(self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, self.c8, self.c9, self.c10, self.c11, self.c12, self.c13, self.c14, self.c15, self.c16), False)
         self.pdf = ROOT.RooAddPdf("combine_sig_"+cat, "combine_sig_"+cat, ROOT.RooArgList(self.model_2016_el_ggf.pdf, self.model_2016_mu_ggf.pdf, self.model_2016APV_el_ggf.pdf, self.model_2016APV_mu_ggf.pdf, self.model_2017_el_ggf.pdf, self.model_2017_mu_ggf.pdf, self.model_2018_el_ggf.pdf, self.model_2018_mu_ggf.pdf, self.model_2022_el_ggf.pdf, self.model_2022_mu_ggf.pdf, self.model_2022EE_el_ggf.pdf, self.model_2022EE_mu_ggf.pdf, self.model_2023_el_ggf.pdf, self.model_2023_mu_ggf.pdf, self.model_2023BPix_el_ggf.pdf, self.model_2023BPix_mu_ggf.pdf, self.model_2016_el_vbf.pdf, self.model_2016_mu_vbf.pdf, self.model_2016APV_el_vbf.pdf, self.model_2016APV_mu_vbf.pdf, self.model_2017_el_vbf.pdf, self.model_2017_mu_vbf.pdf, self.model_2018_el_vbf.pdf, self.model_2018_mu_vbf.pdf, self.model_2022_el_vbf.pdf, self.model_2022_mu_vbf.pdf, self.model_2022EE_el_vbf.pdf, self.model_2022EE_mu_vbf.pdf, self.model_2023_el_vbf.pdf, self.model_2023_mu_vbf.pdf, self.model_2023BPix_el_vbf.pdf, self.model_2023BPix_mu_vbf.pdf), ROOT.RooArgList(self.c1_ggf, self.c2_ggf, self.c3_ggf, self.c4_ggf, self.c5_ggf, self.c6_ggf, self.c7_ggf, self.c8_ggf, self.c9_ggf, self.c10_ggf, self.c11_ggf, self.c12_ggf, self.c13_ggf, self.c14_ggf, self.c15_ggf, self.c16_ggf, self.c1_vbf, self.c2_vbf, self.c3_vbf, self.c4_vbf, self.c5_vbf, self.c6_vbf, self.c7_vbf, self.c8_vbf, self.c9_vbf, self.c10_vbf, self.c11_vbf, self.c12_vbf, self.c13_vbf, self.c14_vbf, self.c15_vbf))
         
+
+class combineSignalLep:
+    def __init__(self, x, MH, cat='', config='', lep='el'):
+        jfile_ = open(config, 'r')
+        configs_ = json.load(jfile_)
+        self.setting =  configs_[cat]
+        self.ntot = 0
+        for era in ["2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix"]:
+            for prod in ["ggf", "vbf"]:
+                self.ntot += self.setting[era][lep]["nexp "+prod]
+        self.c1_ggf = ROOT.RooRealVar('c2016_'+cat+'_'+lep+'_ggf','c2016_'+cat+'_'+lep+'_ggf', self.setting["2016"][lep]["nexp ggf"]/self.ntot)
+        self.c2_ggf = ROOT.RooRealVar('c2016APV_'+cat+'_'+lep+'_ggf','c2016APV_'+cat+'_'+lep+'_ggf', self.setting["2016APV"][lep]["nexp ggf"]/self.ntot)
+        self.c3_ggf = ROOT.RooRealVar('c2017_'+cat+'_'+lep+'_ggf','c2017_'+cat+'_'+lep+'_ggf', self.setting["2017"][lep]["nexp ggf"]/self.ntot)
+        self.c4_ggf = ROOT.RooRealVar('c2018_'+cat+'_'+lep+'_ggf','c2018_'+cat+'_'+lep+'_ggf', self.setting["2018"][lep]["nexp ggf"]/self.ntot)
+        self.c5_ggf = ROOT.RooRealVar('c2022_'+cat+'_'+lep+'_ggf','c2022_'+cat+'_'+lep+'_ggf', self.setting["2022"][lep]["nexp ggf"]/self.ntot)
+        self.c6_ggf = ROOT.RooRealVar('c2022EE_'+cat+'_'+lep+'_ggf','c2022EE_'+cat+'_'+lep+'_ggf', self.setting["2022EE"][lep]["nexp ggf"]/self.ntot)
+        self.c7_ggf = ROOT.RooRealVar('c2023_'+cat+'_'+lep+'_ggf','c2023_'+cat+'_'+lep+'_ggf', self.setting["2023"][lep]["nexp ggf"]/self.ntot)
+        self.c8_ggf = ROOT.RooRealVar('c2023BPix_'+cat+'_'+lep+'_ggf','c2023BPix_'+cat+'_'+lep+'_ggf', self.setting["2023BPix"][lep]["nexp ggf"]/self.ntot)
+
+        self.c1_vbf = ROOT.RooRealVar('c2016_'+cat+'_'+lep+'_vbf','c2016_'+cat+'_'+lep+'_vbf', self.setting["2016"][lep]["nexp vbf"]/self.ntot)
+        self.c2_vbf = ROOT.RooRealVar('c2016APV_'+cat+'_'+lep+'_vbf','c2016APV_'+cat+'_'+lep+'_vbf', self.setting["2016APV"][lep]["nexp vbf"]/self.ntot)
+        self.c3_vbf = ROOT.RooRealVar('c2017_'+cat+'_'+lep+'_vbf','c2017_'+cat+'_'+lep+'_vbf', self.setting["2017"][lep]["nexp vbf"]/self.ntot)
+        self.c4_vbf = ROOT.RooRealVar('c2018_'+cat+'_'+lep+'_vbf','c2018_'+cat+'_'+lep+'_vbf', self.setting["2018"][lep]["nexp vbf"]/self.ntot)
+        self.c5_vbf = ROOT.RooRealVar('c2022_'+cat+'_'+lep+'_vbf','c2022_'+cat+'_'+lep+'_vbf', self.setting["2022"][lep]["nexp vbf"]/self.ntot)
+        self.c6_vbf = ROOT.RooRealVar('c2022EE_'+cat+'_'+lep+'_vbf','c2022EE_'+cat+'_'+lep+'_vbf', self.setting["2022EE"][lep]["nexp vbf"]/self.ntot)
+        self.c7_vbf = ROOT.RooRealVar('c2023_'+cat+'_'+lep+'_vbf','c2023_'+cat+'_'+lep+'_vbf', self.setting["2023"][lep]["nexp vbf"]/self.ntot)
+        #self.c15_vbf = ROOT.RooRealVar('c2023BPix_'+cat+'_'+lep+'_vbf','c2023BPix_'+cat+'_'+lep+'_vbf', self.setting["2023BPix"][lep]["nexp vbf"]/self.ntot)
+   
+        self.model_2016_ggf = DSCB_Class(x, MH, cat+"_2016_"+lep+"_ggf", di_sigma = self.setting["2016"][lep]["disigma ggf"])
+        self.model_2016APV_ggf = DSCB_Class(x, MH, cat+"_2016APV_"+lep+"_ggf", di_sigma = self.setting["2016APV"][lep]["disigma ggf"])
+        self.model_2017_ggf = DSCB_Class(x, MH, cat+"_2017_"+lep+"_ggf", di_sigma = self.setting["2017"][lep]["disigma ggf"])
+        self.model_2018_ggf = DSCB_Class(x, MH, cat+"_2018_"+lep+"_ggf", di_sigma = self.setting["2018"][lep]["disigma ggf"])
+        self.model_2022_ggf = DSCB_Class(x, MH, cat+"_2022_"+lep+"_ggf", di_sigma = self.setting["2022"][lep]["disigma ggf"])
+        self.model_2022EE_ggf = DSCB_Class(x, MH, cat+"_2022EE_"+lep+"_ggf", di_sigma = self.setting["2022EE"][lep]["disigma ggf"])
+        self.model_2023_ggf = DSCB_Class(x, MH, cat+"_2023_"+lep+"_ggf", di_sigma = self.setting["2023"][lep]["disigma ggf"])
+        self.model_2023BPix_ggf = DSCB_Class(x, MH, cat+"_2023BPix_"+lep+"_ggf", di_sigma = self.setting["2023BPix"][lep]["disigma ggf"])
+        self.model_2016_vbf = DSCB_Class(x, MH, cat+"_2016_"+lep+"_vbf", di_sigma = self.setting["2016"][lep]["disigma vbf"])
+        self.model_2016APV_vbf = DSCB_Class(x, MH, cat+"_2016APV_"+lep+"_vbf", di_sigma = self.setting["2016APV"][lep]["disigma vbf"])
+        self.model_2017_vbf = DSCB_Class(x, MH, cat+"_2017_"+lep+"_vbf", di_sigma = self.setting["2017"][lep]["disigma vbf"])
+        self.model_2018_vbf = DSCB_Class(x, MH, cat+"_2018_"+lep+"_vbf", di_sigma = self.setting["2018"][lep]["disigma vbf"])
+        self.model_2022_vbf = DSCB_Class(x, MH, cat+"_2022_"+lep+"_vbf", di_sigma = self.setting["2022"][lep]["disigma vbf"])
+        self.model_2022EE_vbf = DSCB_Class(x, MH, cat+"_2022EE_"+lep+"_vbf", di_sigma = self.setting["2022EE"][lep]["disigma vbf"])
+        self.model_2023_vbf = DSCB_Class(x, MH, cat+"_2023_"+lep+"_vbf", di_sigma = self.setting["2023"][lep]["disigma vbf"])
+        self.model_2023BPix_vbf = DSCB_Class(x, MH, cat+"_2023BPix_"+lep+"_vbf", di_sigma = self.setting["2023BPix"][lep]["disigma vbf"])
+
+        self.model_2016_ggf.assignVal(MH, config, "2016", cat, lep, "ggf")
+        self.model_2016APV_ggf.assignVal(MH, config, "2016APV", cat, lep, "ggf")
+        self.model_2017_ggf.assignVal(MH, config, "2017", cat, lep, "ggf")
+        self.model_2018_ggf.assignVal(MH, config, "2018", cat, lep, "ggf")
+        self.model_2022_ggf.assignVal(MH, config, "2022", cat, lep, "ggf")
+        self.model_2022EE_ggf.assignVal(MH, config, "2022EE", cat, lep, "ggf")
+        self.model_2023_ggf.assignVal(MH, config, "2023", cat, lep, "ggf")
+        self.model_2023BPix_ggf.assignVal(MH, config, "2023BPix", cat, lep, "ggf")
+
+        self.model_2016_vbf.assignVal(MH, config, "2016", cat, lep, "vbf")
+        self.model_2016APV_vbf.assignVal(MH, config, "2016APV", cat, lep, "vbf")
+        self.model_2017_vbf.assignVal(MH, config, "2017", cat, lep, "vbf")
+        self.model_2018_vbf.assignVal(MH, config, "2018", cat, lep, "vbf")
+        self.model_2022_vbf.assignVal(MH, config, "2022", cat, lep, "vbf")
+        self.model_2022EE_vbf.assignVal(MH, config, "2022EE", cat, lep, "vbf")
+        self.model_2023_vbf.assignVal(MH, config, "2023", cat, lep, "vbf")
+        self.model_2023BPix_vbf.assignVal(MH, config, "2023BPix", cat, lep, "vbf")
+
+
+        self.pdf = ROOT.RooAddPdf("combine_sig_"+cat+"_"+lep, "combine_sig_"+cat+"_"+lep, ROOT.RooArgList(self.model_2016_ggf.pdf, self.model_2016APV_ggf.pdf, self.model_2017_ggf.pdf, self.model_2018_ggf.pdf, self.model_2022_ggf.pdf, self.model_2022EE_ggf.pdf, self.model_2023_ggf.pdf, self.model_2023BPix_ggf.pdf, self.model_2016_vbf.pdf, self.model_2016APV_vbf.pdf, self.model_2017_vbf.pdf, self.model_2018_vbf.pdf, self.model_2022_vbf.pdf, self.model_2022EE_vbf.pdf, self.model_2023_vbf.pdf, self.model_2023BPix_vbf.pdf), ROOT.RooArgList(self.c1_ggf, self.c2_ggf, self.c3_ggf, self.c4_ggf, self.c5_ggf, self.c6_ggf, self.c7_ggf, self.c8_ggf, self.c1_vbf, self.c2_vbf, self.c3_vbf, self.c4_vbf, self.c5_vbf, self.c6_vbf, self.c7_vbf))

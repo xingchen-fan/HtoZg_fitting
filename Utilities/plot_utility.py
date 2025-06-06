@@ -64,7 +64,8 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
         hist_name = "MC Sample"
     else:
         hist_name = "Data"
-
+    if toy:
+        hist_name = "Toy"
     
     latex = ROOT.TLatex()
     latex.SetTextSize(0.03)

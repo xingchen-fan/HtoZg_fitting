@@ -72,6 +72,30 @@ class Bern2Class:
          self.sigma.setVal(self.init_list[3])
          self.stepval.setVal(self.init_list[4])
 
+class Bern2RangeClass:
+    def __init__(self, x, gauss_mu, cat="", p0=10, p1_init=0.3, p2_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False, lowx = 100, highx = 165):
+        self.init_list = [p0, p1_init, p2_init, sigma_init, step_init]
+        self.p0 = ROOT.RooRealVar("bern2_p0_" + cat, "bern2_p0_" + cat, p0)
+        self.p1 = ROOT.RooRealVar("bern2_p1_" + cat, "bern2_p1_" + cat, p1_init ,-bond, bond)
+        self.p2 = ROOT.RooRealVar("bern2_p2_" + cat, "bern2_p2_" + cat, p2_init,-bond, bond)
+        self.sigma = ROOT.RooRealVar("bern2_sigma_" + cat,"bern2_sigma_" + cat,sigma_init,  0, 15.)
+        self.sigma.setConstant(fix_sigma)
+        self.stepval = ROOT.RooRealVar("bern2_step_" + cat, "bern2_step_" + cat, step_init, 90., 120.)
+        self.pdf = ROOT.RooGaussStepBernsteinRange("bern2_" +cat + "_model", "Bernstein2 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval,lowx, highx, ROOT.RooArgList(self.p0,self.p1,self.p2))
+        self.SBpdf = ROOT.RooGenericPdf("bern2_SB_" +cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "bern2_"+ cat
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.p1, self.p2, self.sigma, self.stepval]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[2])
+         self.sigma.setVal(self.init_list[3])
+         self.stepval.setVal(self.init_list[4])
+
 class Bern3Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p1_init=0.3, p2_init=0.3, p3_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False):
         self.init_list = [p0, p1_init, p2_init, p3_init, sigma_init, step_init]
@@ -98,6 +122,32 @@ class Bern3Class:
          self.sigma.setVal(self.init_list[4])
          self.stepval.setVal(self.init_list[5])
 
+class Bern3RangeClass:
+    def __init__(self, x, gauss_mu, cat="", p0=10, p1_init=0.3, p2_init=0.3, p3_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False, lowx = 100, highx = 165):
+        self.init_list = [p0, p1_init, p2_init, p3_init, sigma_init, step_init]
+        self.p0 = ROOT.RooRealVar("bern3_p0_" + cat, "bern3_p1_" + cat, p0)
+        self.p1 = ROOT.RooRealVar("bern3_p1_" + cat, "bern3_p1_" + cat, p1_init,-bond, bond)
+        self.p2 = ROOT.RooRealVar("bern3_p2_" + cat, "bern3_p2_" + cat, p2_init,-bond, bond)
+        self.p3 = ROOT.RooRealVar("bern3_p3_" + cat, "bern3_p3_" + cat, p3_init,-bond, bond)
+        self.sigma = ROOT.RooRealVar("bern3_sigma_" + cat,"bern3_sigma_" + cat, sigma_init,  0, 15.)
+        self.sigma.setConstant(fix_sigma)
+        self.stepval = ROOT.RooRealVar("bern3_step_" + cat, "bern3_step_" + cat, step_init, 90., 120.)
+        self.pdf = ROOT.RooGaussStepBernsteinRange("bern3_" +cat + "_model", "Bernstein3 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, lowx, highx, ROOT.RooArgList(self.p0,self.p1,self.p2,self.p3))
+        self.SBpdf = ROOT.RooGenericPdf("bern3_SB_" +cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "bern3_"+ cat
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.p1, self.p2, self.p3, self.sigma, self.stepval]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[2])
+         self.p3.setVal(self.init_list[3])
+         self.sigma.setVal(self.init_list[4])
+         self.stepval.setVal(self.init_list[5])
+        
 class Bern4Class:
     def __init__(self, x, gauss_mu, cat="", p0=10, p1_init=0.3, p2_init=0.3, p3_init=0.3, p4_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False):
         self.init_list = [p0, p1_init, p2_init, p3_init, p4_init, sigma_init, step_init]
@@ -126,6 +176,34 @@ class Bern4Class:
          self.sigma.setVal(self.init_list[5])
          self.stepval.setVal(self.init_list[6])
 
+class Bern4RangeClass:
+    def __init__(self, x, gauss_mu, cat="", p0=10, p1_init=0.3, p2_init=0.3, p3_init=0.3, p4_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False, lowx = 100, highx = 165):
+        self.init_list = [p0, p1_init, p2_init, p3_init, p4_init, sigma_init, step_init]
+        self.p0 = ROOT.RooRealVar("bern4_p0_" + cat, "bern4_p1_" + cat, p0)
+        self.p1 = ROOT.RooRealVar("bern4_p1_" + cat, "bern4_p1_" + cat, p1_init, -bond, bond)
+        self.p2 = ROOT.RooRealVar("bern4_p2_" + cat, "bern4_p2_" + cat, p2_init, -bond, bond)
+        self.p3 = ROOT.RooRealVar("bern4_p3_" + cat, "bern4_p3_" + cat, p3_init, -bond, bond)
+        self.p4 = ROOT.RooRealVar("bern4_p4_" + cat, "bern4_p4_" + cat, p4_init, -bond, bond)
+        self.sigma = ROOT.RooRealVar("bern4_sigma_" + cat,"bern4_sigma_" + cat, sigma_init,  0.1, 15.)
+        self.sigma.setConstant(fix_sigma)
+        self.stepval = ROOT.RooRealVar("bern4_step_" + cat, "bern4_step_" + cat, step_init, 90., 120.)
+        self.pdf = ROOT.RooGaussStepBernsteinRange("bern4_" +cat + "_model", "Bernstein4 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, lowx, highx, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4))
+        self.SBpdf = ROOT.RooGenericPdf("bern4_SB_" +cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "bern4_"+ cat
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.p1, self.p2, self.p3, self.p4, self.sigma, self.stepval]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[2])
+         self.p3.setVal(self.init_list[3])
+         self.p4.setVal(self.init_list[4])
+         self.sigma.setVal(self.init_list[5])
+         self.stepval.setVal(self.init_list[6])
+         
 class Bern5Class:
     def __init__(self, x, gauss_mu, cat="", p0=1., p1_init=0.3, p2_init=0.3, p3_init=0.3, p4_init=0.3, p5_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False):
         self.init_list = [p0, p1_init, p2_init, p3_init, p4_init, p5_init, sigma_init, step_init]
@@ -156,6 +234,36 @@ class Bern5Class:
          self.sigma.setVal(self.init_list[6])
          self.stepval.setVal(self.init_list[7])
 
+class Bern5RangeClass:
+    def __init__(self, x, gauss_mu, cat="", p0=1., p1_init=0.3, p2_init=0.3, p3_init=0.3, p4_init=0.3, p5_init=0.3, bond=20, sigma_init=7., step_init=105., fix_sigma = False, lowx = 100, highx = 165):
+        self.init_list = [p0, p1_init, p2_init, p3_init, p4_init, p5_init, sigma_init, step_init]
+        self.p0 = ROOT.RooRealVar("bern5_p0_" + cat, "bern5_p1_" + cat, p0)
+        self.p1 = ROOT.RooRealVar("bern5_p1_" + cat, "bern5_p1_" + cat, p1_init,-bond, bond)
+        self.p2 = ROOT.RooRealVar("bern5_p2_" + cat, "bern5_p2_" + cat, p2_init,-bond, bond)
+        self.p3 = ROOT.RooRealVar("bern5_p3_" + cat, "bern5_p3_" + cat, p3_init,-bond, bond)
+        self.p4 = ROOT.RooRealVar("bern5_p4_" + cat, "bern5_p4_" + cat, p4_init,-bond, bond)
+        self.p5 = ROOT.RooRealVar("bern5_p5_" + cat, "bern5_p5_" + cat, p5_init,-bond, bond)
+        self.sigma = ROOT.RooRealVar("bern5_sigma_" + cat,"sigma_bern5_" + cat,sigma_init,  0.1, 15.)
+        self.sigma.setConstant(fix_sigma)
+        self.stepval = ROOT.RooRealVar("bern5_step_" + cat, "bern5_step_" + cat, step_init, 90., 120.)
+        self.pdf = ROOT.RooGaussStepBernsteinRange("bern5_" +cat + "_model", "Bernstein5 (X) gauss " + cat, x,  gauss_mu, self.sigma, self.stepval, lowx, highx, ROOT.RooArgList(self.p0,self.p1,self.p2, self.p3, self.p4, self.p5))
+        self.SBpdf = ROOT.RooGenericPdf("bern5_SB_" +cat + "_model", "bern5_SB_" +cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "bern5_"+ cat
+    def checkBond(self):
+        tol = 0.001
+        par_list = [self.p1, self.p2, self.p3, self.p4, self.p5, self.sigma, self.stepval]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+    def reset(self):
+         self.p0.setVal(self.init_list[0])
+         self.p1.setVal(self.init_list[1])
+         self.p2.setVal(self.init_list[2])
+         self.p3.setVal(self.init_list[3])
+         self.p4.setVal(self.init_list[4])
+         self.p5.setVal(self.init_list[5])
+         self.sigma.setVal(self.init_list[6])
+         self.stepval.setVal(self.init_list[7])
+         
 
 #### Pow series
 class Pow1Class:
@@ -520,8 +628,8 @@ class Lau2Class:
         self.offset = ROOT.RooRealVar("lau2_os_" + cat, "lau2_os_" + cat, 1e-10)
         self.xmax = ROOT.RooRealVar("lau2_xmax_" + cat, "lau2_xmax_" + cat, xmax)
         self.t = ROOT.RooRealVar("lau2_t_" + cat, "t lau2 " + cat, step_init, 90., 118.)
-        self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f_init, 0, 30.)
-        self.f2 = ROOT.RooRealVar("lau2_f2_" + cat, "f2 lau2 " + cat, f_init, 0., 30.)
+        self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f1_init, 0, 30.)
+        self.f2 = ROOT.RooRealVar("lau2_f2_" + cat, "f2 lau2 " + cat, f2_init, 0., 30.)
         self.p1 = ROOT.RooRealVar("lau2_p1_" + cat, "p1 lau2 " + cat, p1)
         self.p2 = ROOT.RooRealVar("lau2_p2_" + cat, "p2 lau2 " + cat, p2)
         self.norm1 = ROOT.RooFormulaVar("lau2_norm1_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p1, self.xmax))
