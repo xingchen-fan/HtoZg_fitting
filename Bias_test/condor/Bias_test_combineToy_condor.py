@@ -28,7 +28,8 @@ RooDataSet *oneToy  = (RooDataSet *)dir->Get(("toy_" + std::to_string(index)).c_
 return *oneToy;
 }
 """)
-
+ROOT.gInterpreter.AddIncludePath('../../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../../Utilities/RooGaussStepBernstein_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
 parser = argparse.ArgumentParser(description = "Number of toy samples")
@@ -36,11 +37,14 @@ parser.add_argument('-n', '--Ntoys', help = "N_toy")
 parser.add_argument( '-i', '--it', help="It")
 parser.add_argument('-f', '--func', help = "Func")
 parser.add_argument('-c', '--cat', help = "Category")
-parser.add_argument('-con', '--config', help = "Configuration")
+parser.add_argument('-conB', '--configB', help = "Configuration Bkg")
+parser.add_argument('-conS', '--configS', help = "Configuration Sig")
 parser.add_argument('-s', '--sig', help = "Signal injection", default = 0)
 
 args = parser.parse_args()
-jfile = open('../../Config/'+ args.config, 'r')
+jfile_s = open(args.configS, 'r')
+configs_s = json.load(jfile_s)
+jfile = open(args.configB, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -70,17 +74,22 @@ x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 
 # Signal model (pre-fit)
-MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
-dscb_model = combineSignal(x, MH, CAT, '../../Config/config_DSCB.json')
-MH.setConstant(True)
-N_sig = dscb_model.ntot
+MH = ROOT.RooRealVar("MH","MH"       ,125)
+#dscb_model = combineSignal(x, MH, CAT, '../../Config/config_DSCB.json')
+sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
+sig_model_el.assignValDoubleModel(MH, args.configS, CAT, 'el')
+sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
+sig_model_mu.assignValDoubleModel(MH, args.configS, CAT, 'mu')
+c_el = ROOT.RooRealVar('c_el', 'c_el', configs_s[CAT]["el"]["nexp"]/(configs_s[CAT]["el"]["nexp"] + configs_s[CAT]["mu"]["nexp"]))
+dscb_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
+N_sig = configs_s[CAT]["el"]["nexp"] + configs_s[CAT]["mu"]["nexp"]
 
 # Conodr output file
 #output = open('output_'+args.Tag+'.txt', 'w')
 
 # Functions to test
 
-profile_class = profileClass(x, mu_gauss, CAT, '../../Config/'+args.config)
+profile_class = profileClass(x, mu_gauss, CAT, args.configB)
 profile = profile_class.testSelection("FT")
 
 print("Done seed PDFs")
@@ -101,7 +110,7 @@ def profileFit(profile_, sig_model, hist, fix = False, strength = 0.):
         else:
             c1 = ROOT.RooRealVar("c1_"+ele.pdf.GetName(), "c1_"+ele.pdf.GetName(), hist.sumEntries(), 0, 3.*hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ele.pdf.GetName(), "c2_"+ele.pdf.GetName(), 0., -100.*N_sig, 100.*N_sig)
-        tot_model = ROOT.RooAddPdf("tot_model_"+ele.pdf.GetName(), "tot_model_"+ele.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, ele.pdf), ROOT.RooArgList(c2, c1))
+        tot_model = ROOT.RooAddPdf("tot_model_"+ele.pdf.GetName(), "tot_model_"+ele.pdf.GetName(), ROOT.RooArgList(sig_model, ele.pdf), ROOT.RooArgList(c2, c1))
         bias = BiasClass(tot_model, hist, False, "", extend = True)
         bias.minimize(debug = False)
         #result = tot_model.fitTo(hist, ROOT.RooFit.PrintLevel(-1),  ROOT.RooFit.Save(True), ROOT.RooFit.Minimizer("Minuit2"), ROOT.RooFit.Strategy(0))
@@ -168,7 +177,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
             #pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), hist.sumEntries()+scan_sig, 0., 5.*hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), insig*N_sig-scan_sig )
-            tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
+            tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model, pdf_.pdf), ROOT.RooArgList(c2, c1))
             #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
             bias = BiasClass(tot_model, hist, False, "", extend = True)
             if step==0: 
@@ -204,7 +213,7 @@ def scanFit(profile_, sig_model, hist, r_scale_, scan_size_ = 0.3):
             #pdf_.reset()
             c1 = ROOT.RooRealVar("c1_"+ pdf_.pdf.GetName(), "c1_"+ pdf_.pdf.GetName(), hist.sumEntries()-scan_sig, 0, 5.*hist.sumEntries())
             c2 = ROOT.RooRealVar("c2_"+ pdf_.pdf.GetName(), "c2_"+ pdf_.pdf.GetName(), insig*N_sig+scan_sig )
-            tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1))
+            tot_model = ROOT.RooAddPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model, pdf_.pdf), ROOT.RooArgList(c2, c1))
             #tot_model = ROOT.RooRealSumPdf("tot_"+ pdf_.pdf.GetName(), "tot_"+ pdf_.pdf.GetName(), ROOT.RooArgList(sig_model.pdf, pdf_.pdf), ROOT.RooArgList(c2, c1), False)
             bias = BiasClass(tot_model, hist, False, extend = True)
             bias.minimize(skip_hesse = True)

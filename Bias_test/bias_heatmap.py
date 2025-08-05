@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 import numpy as np 
 import matplotlib.pyplot as plt
 import argparse
 import json
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description = "Bias test heat map")
 parser.add_argument('-c', '--cat', help="category")
@@ -9,7 +11,7 @@ parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-s', '--sig', help = 'Signal injected', default='0')
 
 args = parser.parse_args()
-jfile = open('../Config/' + args.config, 'r')
+jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -23,10 +25,10 @@ def fill_best(best_list_, func):
 def read_dir(func, N_func):
     best_list = [0]* N_func
     for i in range(200):
-        if args.sig == '0':
-            f = open("condor/"+ func + "_" +CAT +"/output"+str(i)+".txt")
-        else:
-            f =  open("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
+        file_path = Path("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
+        if not file_path.is_file():
+            continue
+        f =  open("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
         for line in f:
             best = ""
             if line[:9] == "best func":
