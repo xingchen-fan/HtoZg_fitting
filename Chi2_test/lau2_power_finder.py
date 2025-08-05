@@ -8,7 +8,6 @@ import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
-from bkg_functions_fit import *
 from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
@@ -66,7 +65,7 @@ if DAT:
 
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_commonparam/', 0.85, 0.64,0.42)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -76,7 +75,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286, 0.083)
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_xgb_neweight/', 0.95, 0.83, 0.58)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -86,10 +85,12 @@ else:
         elif CAT == 'vbf4':
             hist_data = read_data.vbf4
 
+
 # Bkg funcs
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 list_ = []
+stat_list = []
 chi2_list = []
 pv_list = []
 
@@ -133,14 +134,16 @@ for i in range(int(args.low), int(args.high) + 1):
         res.Print('v')
         chi2_ = ROOT.RooChi2Var('chi2_val_'+lau2_model.SBpdf.GetName(), 'chi2_val_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)
         chi2_pV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), n_bins - res.floatParsFinal().getSize())
-        chi2_list.append(chi2.getVal())
+        stat_list.append(chi2.getVal())
+        chi2_list.append(chi2_.getVal())
         pv_list.append(chi2_pV)
         list_.append(pow_list)
         print ('Finish', pow_list)
-min_chi2 = min(chi2_list)
-index_ = chi2_list.index(min_chi2)
+min_stat = min(stat_list)
+index_ = stat_list.index(min_stat)
 print ('Power combinations: ', list_)
-print ('Chi^2 (NLL) list: ', chi2_list)
-print ('Best lau2 ', list_[index_], ', Chi^2 (NLL) = ', chi2_list[index_], ', P-value = ', pv_list[index_])
+print ('Test stat list: ', stat_list)
+print ('Chi^2 list: ', chi2_list)
+print ('Best lau2 ', list_[index_], ', Chi^2 = ', chi2_list[index_], ', P-value = ', pv_list[index_])
 toc = time.perf_counter()
 print ('Time spent:', '%.2f'%((toc - tic)/60), 'min')
