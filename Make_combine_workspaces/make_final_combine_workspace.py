@@ -36,8 +36,8 @@ SIGNAL_PROCS = ["Htozg_el", "Htozg_mu", "Htomm"]
 SYSTEMATICS = [("CMS_scale_e", True),
                ("CMS_res_e", False),
                ("CMS_scale_g", True),
-               ("CMS_res_g", False),
-               ("CMS_scale_m", True)]
+               ("CMS_res_g", False)]
+               #("CMS_scale_m", True)
 
 rng = ROOT.TRandom3()
 
@@ -51,7 +51,6 @@ def parse_args():
     parser.add_argument('-s', '--sig_config', help = 'Signal Configuration')
     parser.add_argument('-b', '--bak_config', help = 'Background Configuration')
     parser.add_argument('-d', '--datacard', help = 'Datacard filename')
-    parser.add_argument('-t', '--threads', type=int, default=1)
     args = parser.parse_args()
     return args
 

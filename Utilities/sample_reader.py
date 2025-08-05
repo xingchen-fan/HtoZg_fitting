@@ -432,12 +432,12 @@ class readPico: #draw_pico datacard format
         PROCS = ["data_obs", "Htozg_el", "Htozg_mu", "Htomm"]
         SYST_NAMES = ["nominal", "CMS_scale_eUp", "CMS_scale_eDown", 
                       "CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", 
-                      "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown", 
-                      "CMS_scale_mUp", "CMS_scale_mDown"]
+                      "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown"]
+                      #"CMS_scale_mUp", "CMS_scale_mDown"]
 
         self.default_var = x
         mllg_vars = []
-        datasets_raw = []
+        #datasets_raw = []
         root_file = ROOT.TFile(directory)
         weight = ROOT.RooRealVar("weight", "", -50.0, 50.0)
         for proc in PROCS:
@@ -459,12 +459,12 @@ class readPico: #draw_pico datacard format
                     ws_name = f"WS_{proc}_cat_{cat_name}"
                     mllg_vars.append(getattr(root_file, ws_name)
                         .var(f"mllg_cat_{cat_name}"))
-                    datasets_raw.append(getattr(root_file, ws_name)
-                        .data(dataname).reduce(mllg_cut))
+                    dataset_raw = (getattr(root_file, ws_name)
+                                   .data(dataname).reduce(mllg_cut))
 
                     #create RooDataHist and save as an attribute of this class
                     setattr(self, dataname, self.convert_datahist_variable(
-                        dataname, datasets_raw[-1], mllg_vars[-1], x))
+                        dataname, dataset_raw, mllg_vars[-1], x))
 
     def convert_datahist_variable(self, name, dataset, x_original, x):
         """Converts a RooDataSet into a RooDataHist with variable x

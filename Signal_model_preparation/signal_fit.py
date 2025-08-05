@@ -25,7 +25,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--sampletype', help = 'Sample Type', default='')
     parser.add_argument('-i', '--input_file', help = 'Input File', default='')
-    parser.add_argument('-c', '--cat', help = 'Category', default='')
+    parser.add_argument('-c', '--cat', help = 'Category', default='all')
     parser.add_argument('-v', '--variation', help = 'Variation', 
                         default='nominal')
     parser.add_argument('-y', '--year', help = 'Year', default='')
@@ -148,7 +148,7 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = True):
         CMS = "Simulation", fullRatio = True, leftSpace=True, bins = 2)
     return get_param_dict(sig_model, nexp)
 
-def do_category_fit(args, queue=None):
+def do_category_fit(args, queue=None, thread=-1):
     """Performs fit to signal in appropriate category and draws output plot.
     The stdout from this process can be used with config_parser.py in this
     directory to produce the DSCB config file
@@ -168,7 +168,7 @@ def do_category_fit(args, queue=None):
         hist = getattr(pico_reader, pico_name)
         output = perform_signal_model_fit(x, MH, hist, name, False)
         if queue != None:
-          queue.put(output)
+          queue.put((output,thread))
         else:
           return output
     else:
@@ -194,7 +194,9 @@ def perform_all_category_fits(args):
     args_proxy.input_file = args.input_file
     cats = ["ggf4","ggf3","ggf2","ggf1","vbf4","vbf3","vbf2","vbf1","vh3l",
             "vhmet","tthhad","tthlep"]
-    if args.cat == 'ggf':
+    if args.cat == 'all':
+        pass
+    elif args.cat == 'ggf':
         cats = ["ggf4","ggf3","ggf2","ggf1"]
     elif args.cat == 'vbf':
         cats = ["vbf4","vbf3","vbf2","vbf1"]
@@ -210,21 +212,25 @@ def perform_all_category_fits(args):
         for prod in ["Htozg_el","Htozg_mu","Htomm"]:
             for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown", 
                          "CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp",
-                         "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown", 
-                         "CMS_scale_mUp", "CMS_scale_mDown"]:
+                         "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown"]:
+                         #"CMS_scale_mUp", "CMS_scale_mDown"]:
                 args_proxy.cat = cat
                 args_proxy.prod = prod
                 args_proxy.variation = syst
                 cat_fit_processes.append(Process(target=do_category_fit, 
-                    args=(args_proxy,cat_fit_output,)))
+                    args=(args_proxy,cat_fit_output,len(cat_fit_processes))))
                 cat_fit_processes[-1].start()
                 cat_fit_names.append(f"{prod}_cat_{cat}_{syst}")
     #save outputs
+    fit_params = {}
     for iproc in range(len(cat_fit_processes)):
         print('waiting for '+cat_fit_names[iproc])
         cat_fit_processes[iproc].join()
-        fit_params = cat_fit_output.get()
-        save_params_to_json(fit_params, "../Config/DSCB_config_new.json",
+        fit_param = cat_fit_output.get()
+        fit_params[fit_param[1]] = fit_param[0]
+    for iproc in range(len(cat_fit_processes)):
+        save_params_to_json(fit_params[iproc], 
+                            "../Config/DSCB_config_new_test.json",
                             cat_fit_names[iproc])
     print("Successfully finished all fits")
     
