@@ -5,7 +5,6 @@ import sys
 import json
 import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
-from bkg_functions_fit import *
 from bkg_functions_class import *
 from sig_functions_class import *
 from Xc_Minimizer import *
@@ -13,8 +12,11 @@ from plot_utility import *
 from sample_reader import *
 from profile_class import *
 from sig_functions_class import *
+
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
 
 # ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
@@ -23,7 +25,9 @@ parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-conB', '--configB', help = 'Bkg configuration')
 parser.add_argument('-conS', '--configS', help = 'Sig configuration')
 args = parser.parse_args() 
-jfile = open('../Config/' + args.config, 'r')
+jfile = open(args.configB, 'r')
+jfile_s = open(args.configS, 'r')
+configs_s = json.load(jfile_s)
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -35,7 +39,8 @@ mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 x.setBins(260)
 
 # SST histograms stored in root files
-file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
+#file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
+file_open_bkg = ROOT.TFile.Open('~/EOS_space/DY_sample_combine/sst_ggf_hist_xgboost_final.root', 'READ')
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 hist_bkg_TH1 = file_open_bkg.Get(CAT+'_dy_sm')
 #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+CAT)
@@ -44,10 +49,10 @@ hist_bkg = ROOT.RooDataHist('hist_bkg', 'hist_bkg', x, hist_bkg_TH1)
 #hist_sig = ROOT.RooDataHist('hist_sig', 'hist_sig', x, hist_sig_TH1)
 
 # Define bkg and sig model
-MH = ROOT.RooRealVar("MH","MH"       ,124.7, 120., 130.)
-profile = profileClass(x, mu_gauss, CAT, args.config)
+MH = ROOT.RooRealVar("MH","MH"       ,125)#, 120., 130.)
+profile = profileClass(x, mu_gauss, CAT, args.configB)
 
-bkg_list = [profile.bern2_model]#profile.testSelection("Chi2")
+bkg_list = profile.testSelection("Chi2")
 
 
 # Signal model 
@@ -58,14 +63,19 @@ bkg_list = [profile.bern2_model]#profile.testSelection("Chi2")
 #plotClass(x, hist_sig, dscb_model.pdf, bkg_model.SBpdf, "Signal_"+cat)
 
 
-combine_model = combineSignal(x, MH, CAT, args.configS)
-MH.setConstant(True)
-
+#combine_model = combineSignal(x, MH, CAT, args.configS)
+sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
+sig_model_el.assignValDoubleModel(MH, args.configS, CAT, 'el')
+sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
+sig_model_mu.assignValDoubleModel(MH, args.configS, CAT, 'mu')
+c_el = ROOT.RooRealVar('c_el', 'c_el', configs_s[CAT]["el"]["nexp"]/(configs_s[CAT]["el"]["nexp"] + configs_s[CAT]["mu"]["nexp"]))
+combine_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
+NLL = True
 
 # Bkg fit
 for bkg_model in bkg_list:
     print ("Starting ", bkg_model.name)
-    if CAT == 'vbf1':
+    if NLL:
         r = bkg_model.pdf.fitTo(hist_bkg, ROOT.RooFit.Save(True), \
                                ROOT.RooFit.AsymptoticError(True),ROOT.RooFit.PrintLevel(-1))
         th1_hist = hist_bkg.createHistogram("hist_ks", x, ROOT.RooFit.Binning(260))
@@ -83,8 +93,8 @@ for bkg_model in bkg_list:
 # S+B fit
     c01 = ROOT.RooRealVar("c1", "c1", hist_bkg.sumEntries(), 0, 3.* hist_bkg.sumEntries())
     c02 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
-    tot_model = ROOT.RooAddPdf(bkg_model.name + "_tot", bkg_model.name + "_tot", ROOT.RooArgList(combine_model.pdf, bkg_model.pdf), ROOT.RooArgList(c02, c01))
-    if CAT == 'vbf1':
+    tot_model = ROOT.RooAddPdf(bkg_model.name + "_tot", bkg_model.name + "_tot", ROOT.RooArgList(combine_model, bkg_model.pdf), ROOT.RooArgList(c02, c01))
+    if NLL:
         res1 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.SumW2Error(False), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
         note_chi2 = ''
     else:
@@ -101,7 +111,7 @@ for bkg_model in bkg_list:
     delta_NS = c02.getError()
     #plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_Poisson_"+tot_model.GetName(), note='', CMS = 'Simulation', fullRatio = True)
 
-    if CAT == 'vbf1':
+    if NLL:
         res2 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
     else:
         chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Extended(True))
