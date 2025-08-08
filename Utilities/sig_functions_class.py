@@ -2,8 +2,101 @@ import ROOT
 import json
 import sys
 
+def getEffSigma(mass, pdf, wmin=115, wmax=130, step=0.02, eps=1e-4):
+    cdf = pdf.createCdf(ROOT.RooArgList(mass))
+    point = wmin
+    points = []
+    while point<wmax:
+        mass.setVal(point)
+        if pdf.getVal() > eps:
+            points.append((point, cdf.getVal()))
+        point += step
+    low = wmin
+    high = wmax
+    width = wmax - wmin
+    for i in range(len(points)):
+        for j in range(i, len(points)):
+            wy = points[j][1] - points[i][1]
+            if abs(wy - 0.683) < eps:
+                wx = points[j][0] - points[i][0]
+                if wx < width:
+                    low = points[i][0]
+                    high = points[j][0]
+                    width = wx
+    return (low, high)
+
+class DSCB_sys_Class:
+    '''
+    To include Michael's systematics implementation, mu_form, sigmaL_form and sigmaR_form take any forms of RooFormulaVar or a simple RooRealVar.
+    Different category/production mode/lepton share the same MH provided externally in mu_form.
+    To be able to set dMH and sigma (without systematics) to certain values and set as constant, there are separate arguements for them.
+    '''
+    def __init__(self, x, mu_form, sigmaL_form, sigmaR_form, dMH, sigmaL, sigmaR, cat = "", nL_init = 3, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False):
+        self.disigma = di_sigma
+        self.dMH = dMH
+        self.sigmaL = sigmaL
+        self.sigmaR = sigmaR
+        self.nL =  ROOT.RooRealVar("nL_"+cat, "nL_"+cat, nL_init, 0.01, nL_bond)
+        self.nR =  ROOT.RooRealVar("nR_"+cat, "nR_"+cat, nR_init, 0.01, nR_bond)
+        self.alphaL = ROOT.RooRealVar("alphaL_"+cat, "alphaL_"+cat, alphaL_init, 0.01, 5.)
+        self.alphaR = ROOT.RooRealVar("alphaR_"+cat, "alphaR_"+cat, alphaR_init, 0.01, 5.)
+        pdf_name = "model_DS_"+cat
+        pdf_name = cat
+        if self.disigma:
+            self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, mu_form, sigmaL_form, sigmaR_form, self.alphaL, self.nL, self.alphaR, self.nR)
+        else:
+            self.pdf = ROOT.RooCrystalBall.RooCrystalBall(cat, cat, x, mu_form, sigmaL_form, self.alphaL, self.nL, self.alphaR, self.nR)
+
+    def setStable(self):
+        if self.nL.getVal() > 30:
+            self.nL.setVal(20)
+            self.nL.setError(0)
+            self.nL.setConstant(True)
+        elif self.nL.getError() > 50:
+            self.nL.setError(0)
+            self.nL.setConstant(True)
+
+        if self.nR.getVal() > 30:
+            self.nR.setVal(20)
+            self.nR.setError(0)
+            self.nR.setConstant(True)
+        elif self.nR.getError() > 50:
+            self.nR.setError(0)
+            self.nR.setConstant(True)
+
+        if self.nL.getVal() < 0.1:
+            self.nL.setVal(0)
+            self.nL.setError(0)
+            self.nL.setConstant(True)
+        if self.nR.getVal() < 0.1:
+            self.nR.setVal(0)
+            self.nR.setError(0)
+            self.nR.setConstant(True)
+            
+    def setConst(self, constant = True):
+        self.dMH.setConstant(constant)
+        self.sigmaL.setConstant(constant)
+        self.sigmaR.setConstant(constant)
+        self.nL.setConstant(constant)
+        self.nR.setConstant(constant)
+        self.alphaL.setConstant(constant)
+        self.alphaR.setConstant(constant)
+    def assignValModular(self, config):
+        """Assigns values based on dictionary
+
+        Args:
+          config: dictionary with parameters (disigma, sigmaL, nL, etc.)
+        """
+        self.disigma = config["disigma"]
+        for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
+            getattr(self, param).setVal(config[param])
+        self.setConst(True) 
+
 class DSCB_Class:
-    def __init__(self, x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False, MH_init = 125):
+    """
+    Original DSCB model class. Signal model with multiple models is based on this class.
+    """
+    def __init__(self, x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False):
         self.disigma = di_sigma
         self.sigmaL = ROOT.RooRealVar("sigmaL_"+cat,"sigmaL_"+cat       , sigmaL_init, 0.01, 5.)
         self.sigmaR = ROOT.RooRealVar("sigmaR_"+cat,"sigmaR_"+cat       , sigmaR_init, 0.01, 5.)
@@ -11,7 +104,7 @@ class DSCB_Class:
         self.nR =  ROOT.RooRealVar("nR_"+cat, "nR_"+cat, nR_init, 0.01, nR_bond)
         self.alphaL = ROOT.RooRealVar("alphaL_"+cat, "alphaL_"+cat, alphaL_init, 0.01, 5.)
         self.alphaR = ROOT.RooRealVar("alphaR_"+cat, "alphaR_"+cat, alphaR_init, 0.01, 5.)
-        self.dMH = ROOT.RooRealVar("dMH_"+cat, "dMH_"+cat, MH_init-MH.getVal(), -3, 3)
+        self.dMH = ROOT.RooRealVar("dMH_"+cat, "dMH_"+cat, 0, -3, 3)
         self.mean = ROOT.RooFormulaVar("DSCB_mean_"+cat, "@0+@1", ROOT.RooArgList(MH, self.dMH))
         if self.disigma:
             self.pdf = ROOT.RooCrystalBall.RooCrystalBall("model_DS_"+cat, "model_DS_"+cat, x, self.mean, self.sigmaL, self.sigmaR, self.alphaL, self.nL, self.alphaR, self.nR)
@@ -19,14 +112,22 @@ class DSCB_Class:
             self.pdf = ROOT.RooCrystalBall.RooCrystalBall("model_DS_"+cat, "model_DS_"+cat, x, self.mean, self.sigmaL, self.alphaL, self.nL, self.alphaR, self.nR)
 
     def setStable(self):
-        if self.nL.getVal() > 30 or self.nL.getError() > 20:
+        if self.nL.getVal() > 30:
             self.nL.setVal(20)
             self.nL.setError(0)
             self.nL.setConstant(True)
-        if self.nR.getVal() > 30 or self.nR.getError() > 50:
+        elif self.nL.getError() > 50:
+            self.nL.setError(0)
+            self.nL.setConstant(True)
+
+        if self.nR.getVal() > 30:
             self.nR.setVal(20)
             self.nR.setError(0)
             self.nR.setConstant(True)
+        elif self.nR.getError() > 50:
+            self.nR.setError(0)
+            self.nR.setConstant(True)
+
         if self.nL.getVal() < 0.1:
             self.nL.setVal(0)
             self.nL.setError(0)
@@ -45,17 +146,21 @@ class DSCB_Class:
         self.alphaR.setConstant(constant)
         self.dMH.setConstant(constant)
 
-    def assignVal(self, MH, config='', year="", cat="", lep="", prod="", debug = False):
+    def assignVal(self, config='', year="", cat="", lep="", prod="", sys="nominal", debug = False):
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
-        setting = configs_[cat]
-        self.sigmaL.setVal(setting[year][lep]["sigmaL "+prod])
-        self.sigmaR.setVal(setting[year][lep]["sigmaR "+prod]) 
-        self.nL.setVal(setting[year][lep]["nL "+prod])
-        self.nR.setVal(setting[year][lep]["nR "+prod])
-        self.alphaL.setVal(setting[year][lep]["alphaL "+prod])
-        self.alphaR.setVal(setting[year][lep]["alphaR "+prod])
-        self.dMH.setVal(setting[year][lep]["MH "+prod] - MH.getVal())
+        if not year in ["2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix", ""]:
+            raise ValueError("Unknown year")
+        if not prod in ["ggf", "vbf", ""]:
+            raise ValueError("Unknown production mode")
+        if (year == "" and prod != "") or (year != "" and prod == ""):
+            raise Exception("If separation, need to separate by year and production mode")
+        if year == "" and prod == "":
+            setting = configs_[f"Htozg_{lep}_cat_{cat}_{sys}"]
+        else:
+            setting = configs_[f"Htozg_{lep}_{cat}_{year}_{prod}"]
+        for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
+            getattr(self, param).setVal(setting[param])
         if debug:
             print("sigmaL = ",  self.sigmaL.getVal())
             print("sigmaR = ",  self.sigmaR.getVal())
