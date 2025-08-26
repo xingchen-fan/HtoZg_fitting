@@ -20,6 +20,13 @@ from sig_functions_class import *
 # ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 import ctypes
 #ROOT.gSystem.Load('../../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../../Utilities/RooGaussStepBernstein_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../../Utilities/AsymGenGaussian.h')
+ROOT.gSystem.Load('../../Utilities/AsymGenGaussian_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../../Utilities/EXModGaus.h')
+ROOT.gSystem.Load('../../Utilities/EXModGaus_cxx.so')
+
 ROOT.gInterpreter.Declare("""
 RooDataSet readToy(TString filename, int& index){
 auto file_ = new TFile(filename, "READ");
@@ -77,20 +84,15 @@ x.setRange('full', lowx, lowx+65)
 MH = ROOT.RooRealVar("MH","MH"       ,125)
 #dscb_model = combineSignal(x, MH, CAT, '../../Config/config_DSCB.json')
 sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
-sig_model_el.assignValDoubleModel(MH, args.configS, CAT, 'el')
+sig_model_el.assignVal(args.configS, cat=CAT, lep="el")
 sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
-sig_model_mu.assignValDoubleModel(MH, args.configS, CAT, 'mu')
-c_el = ROOT.RooRealVar('c_el', 'c_el', configs_s[CAT]["el"]["nexp"]/(configs_s[CAT]["el"]["nexp"] + configs_s[CAT]["mu"]["nexp"]))
+sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
+c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
 dscb_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
-N_sig = configs_s[CAT]["el"]["nexp"] + configs_s[CAT]["mu"]["nexp"]
+N_sig = sig_model_el.nsig + sig_model_mu.nsig
 
 # Conodr output file
 #output = open('output_'+args.Tag+'.txt', 'w')
-
-# Functions to test
-
-profile_class = profileClass(x, mu_gauss, CAT, args.configB)
-profile = profile_class.testSelection("FT")
 
 print("Done seed PDFs")
 
@@ -102,6 +104,7 @@ def profileFit(profile_, sig_model, hist, fix = False, strength = 0.):
     r_error_ = -999
     best_=''
     unstable = []
+    ratio_ = hist.sumEntries("CMS_hzg_mass_"+CAT+" > 155")/hist.sumEntries("CMS_hzg_mass_"+CAT+" <= 155")
     for i, ele in enumerate(profile_):
         #ele.reset()
         if (fix): 
@@ -129,10 +132,13 @@ def profileFit(profile_, sig_model, hist, fix = False, strength = 0.):
             best_= ele.pdf.GetName()
         elif bias.stable != 0:
             unstable.append(i)
+    """
     if len(unstable)!=0:
         for bad in unstable:
             del profile_[bad]
-    return [ind, min_nll, r_sig_, r_error_, best_]
+    """
+    if len(unstable)!=0: best_ = "BAD_"+profile_[unstable[0]].pdf.GetName()
+    return [ind, min_nll, r_sig_, r_error_, best_, ratio_]
 
 # Method 1 (WRONG)
 def scanFitPlot(bkgclass, sig_model, hist, r_sig_, min_nll, scan_size_ = 0.1, N_scan_ = 20):
@@ -251,8 +257,12 @@ r_error = []
 best_list = []
 best_error = []
 bad = 0
+bad_func = []
+good_ratio = []
+bad_ratio = []
 pull_list = []
-    
+good_hist = [0]*260
+bad_hist = [0]*260
 for j in range(int(args.Ntoys)):
     toynum = j+1+ int(args.it)*5
     print (toynum)
@@ -260,14 +270,27 @@ for j in range(int(args.Ntoys)):
     scan_list = []      
     #x.setBins(260)
     #hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(generator.Poisson(N)))
-    if insig != 0:
-        file_ = '../../Make_combine_workspaces/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
-    else:
-        file_ = '../../Make_combine_workspaces/higgsCombine.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
+    file_ = '../../Make_combine_workspaces/higgsCombine'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
     print("file = ", file_)
+
+    # Functions to test
+    profile_class = profileClass(x, mu_gauss, CAT, args.configB)
+    profile = profile_class.testSelection("CMSBias")
+    
     hist_toy = ROOT.readToy(file_, cppj)
     list = profileFit(profile, dscb_model, hist_toy)
-        
+    if list[4][0:3] == "BAD":
+        bad += 1
+        bad_func.append(list[4][4:])
+        bad_ratio.append(list[5])
+        for i in range(260):
+            hist_toy.get(i)
+            bad_hist[i] += hist_toy.weight()
+        continue
+    good_ratio.append(list[5])
+    for i in range(260):
+        hist_toy.get(i)
+        good_hist[i] += hist_toy.weight()
         # Method1 ##########################
         # for ele in profile:
         #     ele.reset()
@@ -365,3 +388,9 @@ print("all r = ", r_sig)
 print("all r error from fit = ", best_error)
 print("all r error from scan = ", r_error)
 print("pull = ", pull_list)
+
+print("bad function = ", bad_func)
+print("bad ratio = ", bad_ratio)
+print("good ratio = ", good_ratio)
+print("bad hist = ", bad_hist)
+print("good hist = ", good_hist)
