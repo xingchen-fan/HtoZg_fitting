@@ -183,9 +183,9 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     else:
         hist_name = "Data"
     leg = ROOT.TLegend(.55,.3,.9,.8)
-    leg.SetBorderSize(0)
-    leg.SetFillColor(0)
-    leg.SetFillStyle(0)
+    leg.SetBorderSize(1)
+    #leg.SetFillColor(0)
+    #leg.SetFillStyle(0)
     leg.SetTextFont(42)
     leg.SetTextSize(0.050)
     leg.AddEntry('hist', hist_name, 'LP')
