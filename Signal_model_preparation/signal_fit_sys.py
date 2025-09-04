@@ -210,7 +210,8 @@ def perform_all_category_fits(args):
     if args.sampletype == "pico":
         for cat in cats:
             for prod in ["Htozg_el","Htozg_mu","Htomm"]:
-                for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown"]:
+                #for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown"]:
+                for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown"]:
                     args_proxy.cat = cat
                     args_proxy.prod = prod
                     args_proxy.variation = syst
