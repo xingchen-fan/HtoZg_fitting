@@ -11,6 +11,7 @@ import CMS_lumi, tdrstyle
 from sig_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
+from constants import *
 from sample_reader import *
 from multiprocessing import Process, Queue
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
@@ -146,7 +147,7 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = False):
     else:
         note = '#splitline{#splitline{#sigma = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+'}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%(MH.getVal()+dMH.getVal()) +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
     plotClass(x, hist, sig_model.pdf, sig_model.pdf, name, note=note, 
-        CMS = "Simulation", fullRatio = True, leftSpace=True, bins = 2)
+        CMS = "Simulation", fullRatio = True, leftSpace=True, bins = 1) #TEMP
     return get_param_dict(sig_model, nexp)
 
 def do_category_fit(args, queue=None):
@@ -162,7 +163,8 @@ def do_category_fit(args, queue=None):
         x = ROOT.RooRealVar("x", "mllg", 118, 130)
         MH = ROOT.RooRealVar("MH", "MH", 125, 120, 130)
         MH.setConstant()
-        x.setBins(int(4* (x.getMax() - x.getMin())))
+        #x.setBins(int(4* (x.getMax() - x.getMin())))
+        x.setBins(int(1* (x.getMax() - x.getMin()))) #TEMP DO NOT COMMIT
         pico_reader = readPico(x, args.input_file, args.cat, args.prod, args.variation)
         name = f"{args.prod}_cat_{args.cat}_{args.variation}"
         pico_name = f"mcdata_{name}"
@@ -193,15 +195,14 @@ def perform_all_category_fits(args):
     args_proxy = types.SimpleNamespace()
     args_proxy.sampletype = args.sampletype
     args_proxy.input_file = args.input_file
-    cats = ["ggf4","ggf3","ggf2","ggf1","vbf4","vbf3","vbf2","vbf1","vh3l",
-            "vhmet","tthhad","tthlep"]
+    cats = CATEGORIES
     if args.cat == 'ggf':
         cats = ["ggf4","ggf3","ggf2","ggf1"]
     elif args.cat == 'vbf':
         cats = ["vbf4","vbf3","vbf2","vbf1"]
     elif args.cat == 'vhtth':
-        cats = ["vh3l","vhmet","tthhad","tthlep"]
-    else:
+        cats = ["vh3l","vhmet","tthhad","tthlep","untagged"]
+    elif args.cat != '':
         cats = [args.cat]
     cat_fit_processes = []
     cat_fit_names = []
@@ -210,8 +211,7 @@ def perform_all_category_fits(args):
     if args.sampletype == "pico":
         for cat in cats:
             for prod in ["Htozg_el","Htozg_mu","Htomm"]:
-                #for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown"]:
-                for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown"]:
+                for syst in SYSTEMATICS:
                     args_proxy.cat = cat
                     args_proxy.prod = prod
                     args_proxy.variation = syst

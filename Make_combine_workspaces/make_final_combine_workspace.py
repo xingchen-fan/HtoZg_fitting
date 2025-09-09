@@ -13,6 +13,7 @@ from plot_utility import *
 from sample_reader import *
 from profile_class import *
 from sig_functions_class import *
+from constants import *
 from multiprocessing import Process
 
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
@@ -26,18 +27,15 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 # Signal model is fitted and fixed.
 ##############################################
 
-CATEGORIES = ["ggf4", "ggf3", "ggf2", "ggf1", "vbf4", "vbf3", "vbf2", "vbf1",
-              "vh3l", "vhmet", "tthhad", "tthlep"]
-
 #can split according to year, prod mode, whatever, currently just el vs mu
 SIGNAL_PROCS = ["Htozg_el", "Htozg_mu", "Htomm"] 
 
 #stored as (name, is_scale)
-SYSTEMATICS = [("CMS_scale_e", True),
-               ("CMS_res_e", False),
-               ("CMS_scale_g", True),
-               ("CMS_res_g", False),
-               ("CMS_scale_m", True)]
+SYSTEMATICS_DATACARD = [("CMS_scale_e", True),
+                        ("CMS_res_e", False),
+                        ("CMS_scale_g", True),
+                        ("CMS_res_g", False),
+                        ("CMS_scale_m", True)]
 
 rng = ROOT.TRandom3()
 
@@ -51,7 +49,7 @@ def parse_args():
     parser.add_argument('-s', '--sig_config', help = 'Signal Configuration')
     parser.add_argument('-b', '--bak_config', help = 'Background Configuration')
     parser.add_argument('-d', '--datacard', help = 'Datacard filename')
-    parser.add_argument('-t', '--threads', type=int, default=1)
+    #parser.add_argument('-t', '--threads', type=int, default=1)
     args = parser.parse_args()
     return args
 
@@ -144,7 +142,7 @@ def write_workspace(category, datacard_filename, signal_config,
     MH.setVal(125)
     MH.setConstant(True)
     shape_systematics = []
-    for syst_name, is_scale in SYSTEMATICS:
+    for syst_name, is_scale in SYSTEMATICS_DATACARD:
         shape_systematics.append(ROOT.RooRealVar(syst_name, "", 0.0, -5.0, 
                                                  5.0))
 
@@ -177,16 +175,19 @@ def write_workspace(category, datacard_filename, signal_config,
         proc_name = f"{proc}_cat_{category}"
         proc_settings = configs_[proc_name+"_nominal"]
         dMH = ROOT.RooRealVar(f"dMH_{proc_name}", "", 0.0, -2.0, 2.0)
-        sigma = ROOT.RooRealVar(f"sigma_{proc_name}", "", 0.0, 0.01, 5.0)
+        sigmaL = ROOT.RooRealVar(f"sigmaL_{proc_name}", "", 0.0, 0.01, 5.0)
+        sigmaR = ROOT.RooRealVar(f"sigmaR_{proc_name}", "", 0.0, 0.01, 5.0)
         mu_arglist = ROOT.RooArgList(MH, dMH)
-        sigma_arglist = ROOT.RooArgList(sigma)
+        sigmaL_arglist = ROOT.RooArgList(sigmaL)
+        sigmaR_arglist = ROOT.RooArgList(sigmaR)
         mu_formulastr = "(@1"
-        sigma_formulastr = "@0"
+        sigmaL_formulastr = "@0"
+        sigmaR_formulastr = "@0"
         mu_idx = 2
         sigma_idx = 1
-        for isyst in range(len(SYSTEMATICS)):
-            syst_name = SYSTEMATICS[isyst][0]
-            is_scale = SYSTEMATICS[isyst][1]
+        for isyst in range(len(SYSTEMATICS_DATACARD)):
+            syst_name = SYSTEMATICS_DATACARD[isyst][0]
+            is_scale = SYSTEMATICS_DATACARD[isyst][1]
             syst_var = shape_systematics[isyst]
             alt_settings_up = configs_[proc_name+f"_{syst_name}Up"]
             alt_settings_down = configs_[proc_name+f"_{syst_name}Down"]
@@ -199,21 +200,29 @@ def write_workspace(category, datacard_filename, signal_config,
                     mu_formulastr += f"*(1.0+{variation}*@{mu_idx})"
                     mu_idx += 1
             else:
-                variation = (((abs(proc_settings["sigmaL"]
+                variationL = (((abs(proc_settings["sigmaL"]
                     -alt_settings_up["sigmaL"])+abs(proc_settings["sigmaL"]
                     -alt_settings_down["sigmaL"]))/2.0)
                     /abs(proc_settings["sigmaL"]))
-                if (variation > 0.01):
-                    sigma_arglist.add(shape_systematics[isyst])
-                    sigma_formulastr += (f"*(1.0+{variation}*@{sigma_idx})")
+                variationR = (((abs(proc_settings["sigmaR"]
+                    -alt_settings_up["sigmaR"])+abs(proc_settings["sigmaR"]
+                    -alt_settings_down["sigmaR"]))/2.0)
+                    /abs(proc_settings["sigmaR"]))
+                if (variationL > 0.01) or (variationR > 0.01):
+                    sigmaL_arglist.add(shape_systematics[isyst])
+                    sigmaL_formulastr += (f"*(1.0+{variation}*@{sigma_idx})")
+                    sigmaR_arglist.add(shape_systematics[isyst])
+                    sigmaR_formulastr += (f"*(1.0+{variation}*@{sigma_idx})")
                     sigma_idx += 1
         mu_formulastr += ")+@0"
         mu_final = ROOT.RooFormulaVar(f"mu_comb_{proc_name}","",mu_formulastr,
             mu_arglist)
-        sigma_final = ROOT.RooFormulaVar(f"sigma_comb_{proc_name}","",
-            sigma_formulastr,sigma_arglist)
-        signal_model = DSCB_Class(x, mu_final, sigma_final, dMH, sigma,
-            proc_name)
+        sigmaL_final = ROOT.RooFormulaVar(f"sigmaL_comb_{proc_name}","",
+            sigmaL_formulastr,sigmaL_arglist)
+        sigmaR_final = ROOT.RooFormulaVar(f"sigmaR_comb_{proc_name}","",
+            sigmaR_formulastr,sigmaR_arglist)
+        signal_model = DSCB_sys_Class(x, mu_final, sigmaL_final, sigmaR_final, 
+            dMH, sigmaL, sigmaR, proc_name, di_sigma=True)
         signal_model.assignValModular(proc_settings)
         ws_signal = ROOT.RooWorkspace("WS_"+proc_name, "WS_"+proc_name)
         getattr(ws_signal,"import")(signal_model.pdf)

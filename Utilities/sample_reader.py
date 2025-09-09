@@ -703,7 +703,6 @@ class readPico: #draw_pico datacard format
         
         """
 
-        #TODO CAT_NAMES should be moved to some global location
         self.default_var = x
         root_file = ROOT.TFile(directory)
         weight = ROOT.RooRealVar("weight", "", -50.0, 50.0)
@@ -720,13 +719,7 @@ class readPico: #draw_pico datacard format
         datasets_raw = getattr(root_file, ws_name).data(dataname).reduce(mllg_cut)
         setattr(self, dataname, self.convert_datahist_variable(dataname, datasets_raw, mllg_vars, x))
         '''
-        CAT_NAMES = ["ggf1", "ggf2", "ggf3", "ggf4", "vbf1", "vbf2", "vbf3",
-                     "vbf4", "vh3l", "vhmet", "tthhad", "tthlep"]
         PROCS = ["data_obs", "Htozg_el", "Htozg_mu", "Htomm"]
-        SYST_NAMES = ["nominal", "CMS_scale_eUp", "CMS_scale_eDown", 
-                      "CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", 
-                      "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown", 
-                      "CMS_scale_mUp", "CMS_scale_mDown"]
 
         self.default_var = x
         mllg_vars = []
@@ -734,8 +727,8 @@ class readPico: #draw_pico datacard format
         root_file = ROOT.TFile(directory)
         weight = ROOT.RooRealVar("weight", "", -50.0, 50.0)
         for proc in PROCS:
-            for cat_name in CAT_NAMES:
-                for syst in SYST_NAMES:
+            for cat_name in CATEGORIES:
+                for syst in SYSTEMATICS:
                     is_data = (proc == "data_obs")
                     dataname = "{}_cat_{}".format(proc, cat_name)
                     if is_data:

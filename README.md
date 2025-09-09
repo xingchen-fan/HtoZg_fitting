@@ -80,6 +80,15 @@ sig_model = combineSignal(x, MH, cat='', config='')
 ```
 To fit the signal MC samples, go to the `Signal_model_preparation/` folder and `./run.sh` where the fitting results are save to a log in `/logs` and then parsed to a config file. Right now we only use DSCB model.
 
+To perform a fit including all systematic variations and Higgs to MuMu, run
+```sh
+cd Signal_model_preparation/
+python3 signal_fit_sys.py -i mydatacard_rawdata.root -s pico -con ../Config/DSCB_config_2.json
+
+python3 validate_signal_fits.py -c ../Config/DSCB_config_2.json
+```
+where `mydatacard_rawdata.root` is the root file produced by [draw_pico's write_datacard.cxx](https://github.com/richstu/draw_pico/blob/master/src/zgamma/write_datacard.cxx). The validation script provides a quick check that none of the fit parameters are too unreasonable.
+
 ## Minimizer
 Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. A typical minimization of certain test statistics is like this:
 ```
