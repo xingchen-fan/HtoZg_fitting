@@ -23,6 +23,8 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-con', '--config', help = 'Configuration')
+parser.add_argument('-nll', '--NLL', help = 'NLL', type = int, default = 1)
+
 args = parser.parse_args()
 CAT = args.cat
 jfile = open(args.config, 'r')
@@ -65,7 +67,7 @@ if DAT:
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/', 0.82, 0.64,0.46)
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -75,7 +77,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_xgb_neweight/', 0.95, 0.83, 0.58)
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -88,26 +90,28 @@ print('N data = ', hist_data.sumEntries())
 # Bkg funcs
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
-#AGG_model = AGGClass(x, CAT, kappa_init = -1.27, alpha_init = 14, zeta_init = 105, x_low = lowx, x_high = lowx+65)
 profile = profileClass(x, mu_gauss, CAT, args.config)
-bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]
+bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model, profile.exmg_model, profile.agg_model]
 
 # Sideband Chi^2 fit
 cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
 th1_cuthist = cuthistogram.createHistogram("cuthist_ks", x, ROOT.RooFit.Binning(260))
 n_bins = 220
-NLL = True
+NLL = args.NLL
 pass_list = []
 for func in bkg_list:
     if NLL:
         chi2 = ROOT.RooNLLVar('chi2_'+func.SBpdf.GetName(), 'chi2_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
     else:
+        print("Chi2 fit")
         chi2 = ROOT.RooChi2Var('chi2_'+func.SBpdf.GetName(), 'chi2_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
     Minimizer_Chi2(chi2, -1, 10, True, 0)
-    res=Minimizer_Chi2(chi2, -1, 0.1, True, 0) 
+    res = Minimizer_Chi2(chi2, 1, 0.1, True, 0) 
+    #res=Minimizer_Chi2(chi2, -1, 1, False, 0)
+    #res = func.SBpdf.fitTo(cuthistogram, ROOT.RooFit.Save(True),ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(1))
     func.checkBond()
     res.Print('v')
-    chi2_ = ROOT.RooChi2Var('chi2_val_'+func.SBpdf.GetName(), 'chi2_val_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
+    chi2_ = ROOT.RooChi2Var('chi2_val_'+func.SBpdf.GetName(), 'chi2_val_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
     chi2_val = chi2_.getVal()
     dof = n_bins - res.floatParsFinal().getSize()
     chi2_PV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), dof)
@@ -118,5 +122,5 @@ for func in bkg_list:
         pass_list.append(func)
 print('List has ', len(pass_list), ' models')
 if len(pass_list)>0:
-    multiPlotClass(x, hist_data, pass_list, title="Chi2_single_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = ("vbf" in CAT))
+    multiPlotClass(x, hist_data, pass_list, title="Chi2_lau_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = ("vbf" in CAT))
     profile.write_config_file(cuthistogram, "All")

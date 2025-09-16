@@ -9,7 +9,7 @@ parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-log', '--log', help = 'Fitting log')
 args = parser.parse_args()
 CAT = args.cat
-jfile = open('../Config/'+ args.config, 'r')
+jfile = open(args.config, 'r')
 configs = json.load(jfile)
 setting = configs[CAT]
 log = open(args.log)
@@ -210,7 +210,7 @@ for line in log:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp1"]["sigma2"] =  float(r[1])
         setting["exp1"]["di_gauss"] = 1
-    elif "exp1_p1" in line:
+    elif "exp1_p" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exp1"]["p"] = float(r[1])
     elif "exp1_gc_" in line:
@@ -374,18 +374,18 @@ for line in log:
         setting["modg"]["m0"] = float(r[1])
     elif "modg_nuL" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
-        setting["modg"]["vl"] = float(r[1])
+        setting["modg"]["nuL"] = float(r[1])
     elif "modg_nuRange" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
-        setting["modg"]["vr"] = float(r[1])
+        setting["modg"]["nuRange"] = float(r[1])
     elif "modg_sigmaL" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
-        setting["modg"]["sl"] = float(r[1])
+        setting["modg"]["sigmaL"] = float(r[1])
     elif "modg_sigmaH" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
-        setting["modg"]["sh"] = float(r[1])
+        setting["modg"]["sigmaH"] = float(r[1])
 
-
+"""
      if "agg_kappa" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["agg"]["kappa"] = float(r[1])
@@ -406,7 +406,7 @@ for line in log:
     elif "exmg_xsi" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exmg"]["xsi"] = float(r[1])
-
-jfile_mod =  open('../Config/'+args.config, 'w')
+"""
+jfile_mod =  open(args.config, 'w')
 modify = json.dump(configs, jfile_mod, indent=4)
 #f = open('chi2.log')

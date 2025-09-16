@@ -14,13 +14,17 @@ from sample_reader import *
 from profile_class import *
 ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
 ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
+ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-t', '--test', help = 'Test name')
-parser.add_argument('-b', '--best', help = 'Best func index', default = 0)
+parser.add_argument('-b', '--best', help = 'Best func index', default = -1, type=int)
 args = parser.parse_args()
 CAT = args.cat
 jfile = open(args.config, 'r')
@@ -35,7 +39,7 @@ x.setRange('full', lowx, lowx+65)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/', 0.82, 0.64,0.46)
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -45,7 +49,7 @@ if 'ggf' in CAT:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
 elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_xgb/', 0.95,0.86, 0.66)
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -57,8 +61,6 @@ elif 'vbf' in CAT:
 
 print('N data = ', hist_data.sumEntries())
 
-BEST = True
-if args.test == "FT": BEST = True
 profile = profileClass(x, mu_gauss, CAT, args.config)
 bkg_list = profile.testSelection(args.test)
-multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = int(args.best), CMS = "Preliminary", fullRatio = True, bestLabel = BEST)
+multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = args.best, CMS = "Preliminary", fullRatio = True, bestLabel = args.best > -1)
