@@ -119,7 +119,11 @@ We split the signal model into individual ones depending on the year(era), lepto
                 "nR ggf": 6.3908,
                 "alphaL ggf": 0.55437,
                 "alphaR ggf": 0.53537,
+<<<<<<< HEAD
               "mu": {
+=======
+              "mu":{
+>>>>>>> 56819f35b7f5e1d0120e2cf8e3c64579f50f6059
                 "disigma vbf": 1,
                 "MH vbf": 124.99,
                 "nexp vbf": 0.05,
