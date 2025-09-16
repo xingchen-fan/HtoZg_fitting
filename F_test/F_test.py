@@ -7,21 +7,23 @@ import argparse
 sys.path.append(os.path.abspath("../Utilities/"))
 sys.path.append(os.path.abspath("../CMS_plotter/"))
 import CMS_lumi, tdrstyle
-from bkg_functions_fit import *
+#from bkg_functions_fit import *
 from bkg_functions_class import *
 from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
 from profile_class import *
-ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
-ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
+#ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
 
 parser = argparse.ArgumentParser(description = "F test bin and function class")
 #parser.add_argument("method")
 parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-con', '--config', help = 'Configuration')
 args = parser.parse_args()
-jfile = open('../Config/'+args.config, 'r')
+jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
@@ -134,41 +136,41 @@ if DAT:
     if CAT=='ggf1':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
     elif CAT=='ggf2':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF2_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
     elif CAT=='ggf3':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF3_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
     elif CAT=='ggf4':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
-        data_hist = ROOT.RooDataHist('hist_data','hist_data', x, data)
+        hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
         if CAT == 'ggf1':
-            data_hist = read_data.ggf1
+            hist_data = read_data.ggf1
         elif CAT == 'ggf2':
-            data_hist = read_data.ggf2
+            hist_data = read_data.ggf2
         elif CAT == 'ggf3':
-            data_hist = read_data.ggf3
+            hist_data = read_data.ggf3
         elif CAT == 'ggf4':
-            data_hist = read_data.ggf4
+            hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286 , 0.083)
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
         if CAT == 'vbf1':
-            data_hist = read_data.vbf1
+            hist_data = read_data.vbf1
         elif CAT == 'vbf2':
-            data_hist = read_data.vbf2
+            hist_data = read_data.vbf2
         elif CAT == 'vbf3':
-            data_hist = read_data.vbf3
+            hist_data = read_data.vbf3
         elif CAT == 'vbf4':
-            data_hist = read_data.vbf4
+            hist_data = read_data.vbf4
 
 # Define PDF classes
 core_bern2_model = CoreBern2Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
@@ -181,7 +183,7 @@ core_pow1_model = CorePow1Class(x, CAT, -6, fileName="ZGCoreShape_01jet_NAFCorr"
 core_pow2_model = CorePow2Class(x, CAT, -6, -15, 0.5,  fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
 core_pow_list = [core_pow1_model, core_pow2_model]
 
-profile = profileClass(x, mu_gauss, CAT, '../Config/'+args.config)
+profile = profileClass(x, mu_gauss, CAT, args.config)
 bern_list = []
 pow_list = []
 exp_list = []
@@ -218,32 +220,34 @@ if "lau4" in setting["SST"]:
     
 best_list = []
 # Goodness of fit test (NOT USED)
-# goodness(bern_list, reader.data_hist_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-#goodness(pow_list, reader.data_hist_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
-#goodness(exp_list, reader.data_hist_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
-# goodness(lau_list, reader.data_hist_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(bern_list, reader.hist_data_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+#goodness(pow_list, reader.hist_data_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
+#goodness(exp_list, reader.hist_data_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
+# goodness(lau_list, reader.hist_data_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
 
 # F Tset
 # singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
 # singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 #singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 #singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
-
+"""
 if len(bern_list) > 1:
-    singleFTestSidebandNLL(x, bern_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = True)
+    singleFTestSidebandNLL(x, bern_list, hist_data, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = True)
 if len(pow_list) > 1:
-    singleFTestSidebandNLL(x, pow_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
+    singleFTestSidebandNLL(x, pow_list, hist_data, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 if len(exp_list) > 1:
-    singleFTestSidebandNLL(x, exp_list, data_hist, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
+    singleFTestSidebandNLL(x, exp_list, hist_data, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 if len(lau_list) > 1:
-    singleFTestSidebandNLL(x, lau_list, data_hist, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
-
+    singleFTestSidebandNLL(x, lau_list, hist_data, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
+"""
+if len(pow_list) > 1:
+    singleFTestSidebandNLL(x, pow_list, hist_data, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 
 # can2 = ROOT.TCanvas("c2","c2", 500, 500)
 # can2.cd()
 # plot2 = x.frame()
 # # x.setBins(65)
-# show_hist_data = data_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
+# show_hist_data = hist_data.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
 # show_hist_mc = mc_hist.createHistogram("h_hist_mc", x, ROOT.RooFit.Binning(65))
 
 # show_hist_data.Scale(1./show_hist_data.Integral())

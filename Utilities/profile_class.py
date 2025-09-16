@@ -6,7 +6,8 @@ class profileClass:
     def __init__(self, x, mu_gauss, cat='', config=''):
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
-        setting = configs_[cat[:4]]
+        #setting = configs_[cat[:4]]
+        setting = configs_[cat]
         self.config_file = config
         self.cat = cat
         self.setting_ = setting
@@ -19,7 +20,11 @@ class profileClass:
         self.bern3_range_model = Bern3RangeClass(x, mu_gauss, cat, setting["bern3"]['p0'], setting["bern3"]['p1'], setting["bern3"]['p2'], setting["bern3"]['p3'], setting["bern3"]['bond'],setting["bern3"]['sigma'],setting["bern3"]['step'], setting["bern3"]['fix_sigma'], setting["Range"], setting["Range"] + 65)
         self.bern4_range_model = Bern4RangeClass(x, mu_gauss, cat, setting["bern4"]['p0'], setting["bern4"]['p1'], setting["bern4"]['p2'], setting["bern4"]['p3'], setting["bern4"]['p4'], setting["bern4"]['bond'],setting["bern4"]['sigma'],setting["bern4"]['step'], setting["bern4"]['fix_sigma'], setting["Range"], setting["Range"]+65)
         self.bern5_range_model = Bern5RangeClass(x, mu_gauss, cat, setting["bern5"]['p0'], setting["bern5"]['p1'], setting["bern5"]['p2'], setting["bern5"]['p3'], setting["bern5"]['p4'], setting["bern5"]['p5'], setting["bern5"]['bond'],setting["bern5"]['sigma'],setting["bern5"]['step'], setting["bern5"]['fix_sigma'], setting["Range"], setting["Range"]+65)
-        
+
+        self.bern2_FFT_model = Bern2FFTClass(x, mu_gauss, cat, setting["bern2"]['p0'], setting["bern2"]['p1'], setting["bern2"]['p2'], setting["bern2"]['bond'],setting["bern2"]['sigma'], 2, setting["bern2"]['step'], False, setting["bern2"]['fix_sigma'])
+        self.bern3_FFT_model = Bern3FFTClass(x, mu_gauss, cat, setting["bern3"]['p0'], setting["bern3"]['p1'], setting["bern3"]['p2'], setting["bern3"]['p3'], setting["bern3"]['bond'],setting["bern3"]['sigma'], 2, setting["bern3"]['step'], False, setting["bern3"]['fix_sigma'])
+
+
         self.pow1_model = Pow1Class(x, mu_gauss, cat, setting["pow1"]['sigma'], setting["pow1"]['sigma2'], setting["pow1"]['step'], setting["pow1"]['p'], setting["pow1"]['p_low'], setting["pow1"]['p_high'], setting["pow1"]['di_gauss'], setting["pow1"]['fix_sigma'], setting["pow1"]['gc'])
         self.pow2_model = Pow2Class(x, mu_gauss, cat, setting["pow2"]['sigma'], setting["pow2"]['sigma2'], setting["pow2"]['step'], setting["pow2"]['p1'], setting["pow2"]['p1_low'], setting["pow2"]['p1_high'], setting["pow2"]['p2'], setting["pow2"]['p2_low'], setting["pow2"]['p2_high'], setting["pow2"]['f1'], setting["pow2"]['f2'], setting["pow2"]['xmax'], setting["pow2"]['const_f1'], setting["pow2"]['di_gauss'], setting["pow2"]['fix_sigma'], setting["pow2"]['gc'])
         self.pow3_model = Pow3Class(x, mu_gauss, cat,setting["pow3"]['sigma'], setting["pow1"]['sigma2'], setting["pow3"]['step'], setting["pow3"]['p1'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1'], setting["pow3"]['f2'], setting["pow3"]['f3'], setting["pow3"]['xmax'], setting["pow3"]['const_f1'], setting["pow3"]['di_gauss'], setting["pow3"]['fix_sigma'], setting["pow3"]['gc'])
@@ -33,8 +38,8 @@ class profileClass:
         self.lau4_model = Lau4Class(x, mu_gauss, cat, setting["lau4"]['sigma'], setting["lau4"]['sigma2'], setting["lau4"]['step'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f1'], setting["lau4"]['f2'], setting["lau4"]['f3'], setting["lau4"]['f4'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'], setting["lau4"]['di_gauss'], setting["lau4"]['fix_sigma'], setting["lau4"]['gc'])
 
         self.modg_model = ModGausClass(x, cat, x.getMin(), x.getMax(), setting["modg"]['m0'], setting["modg"]['sigmaL'], setting["modg"]['sigmaH'], setting["modg"]['nuL'], setting["modg"]['nuRange'])
-        #self.exmg_model = EXMGClass(x, cat, setting["exmg"]['mu'], setting["exmg"]['sigma'], setting["exmg"]['xsi'])
-        #self.agg_model = AGGClass(x, cat, setting["agg"]['kappa'], setting["agg"]['alpha'], setting["agg"]['zeta'])
+        self.exmg_model = EXMGClass(x, cat, setting["exmg"]['mu'], setting["exmg"]['sigma'], setting["exmg"]['xsi'])
+        self.agg_model = AGGClass(x, cat, setting["agg"]['kappa'], setting["agg"]['alpha'], setting["agg"]['zeta'])
 
     def testSelection(self, test=""):
         profile_ = []

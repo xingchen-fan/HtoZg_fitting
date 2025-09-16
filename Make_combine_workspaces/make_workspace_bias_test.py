@@ -16,6 +16,12 @@ from sig_functions_class import *
 
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
+ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 ##############################################
@@ -29,16 +35,22 @@ parser = argparse.ArgumentParser(description = "Make workspace")
 parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-a', '--asimov', help="Asimov", default=0, type=int)
 parser.add_argument('-con', '--config', help = 'Configuration')
+parser.add_argument('-conS', '--configS', help = 'Signal Configuration')
+parser.add_argument('-t', '--test', help = 'What test to build?')
+
 args = parser.parse_args()
 jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
 lowx = setting["Range"]
+if not CAT in ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vbf4"]:
+    raise ValueError("Unknown category")
+if not args.test in ["FT", "CMSBias"]:
+    raise ValueError("Wrong test")
 
 # Save all the fit results? Make signal workspace? Read dat files? Do fit?
 LOG = True
-SIGNAL = False
 DAT = False
 FIT = True # 'False' to read the post-fit values from config file
 
@@ -87,7 +99,7 @@ if DAT:
         hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou//SWAN_projects/Classifier/Output_ggF_pinnacles_fix/relpt_peking_run2p3/TreeB/', 0.81, 0.64, 0.47)
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -97,7 +109,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_2JClassic_input_run2p3/', 0.489,0.286 ,0.083)
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -106,21 +118,6 @@ else:
             hist_data = read_data.vbf3
         elif CAT == 'vbf4':
             hist_data = read_data.vbf4
-
-
-# Signal model preparation ------------------------
-#hist_sig_TH1 = file_open_sig.Get('hist_sig_'+'ggf1')
-#hist_sig = ROOT.RooDataHist('hist_sig_'+CAT, 'hist_sig_'+CAT, x, hist_sig_TH1)
-sig_model = combineSignal(x, MH, CAT, '../Config/config_DSCB.json')
-#sig_model = DSCB_Class(x, MH, CAT, sigmaL_init = 1.8457, sigmaR_init = 1.3264, nL_init = 3.771, nL_bond = 100, nR_init = 9.962, nR_bond = 100, alphaL_init = 1.154, alphaR_init = 1.231, di_sigma = True)
-MH.setVal(125)
-MH.setConstant(True)
-N_sig = sig_model.ntot
-N = hist_data.sumEntries()
-#N_sig_window =  hist_sig.sumEntries('CMS_hzg_mass_' + CAT + ' > 120 && ' + 'CMS_hzg_mass_' + CAT+ ' < 130')
-print("N sig = ", N_sig)
-sig_model.setConst(True)
-# -------------------------------------------------
 
 
 #print("N sig window= ", N_sig_window)
@@ -144,10 +141,9 @@ MH.setVal(125.)
 MH.setConstant(True)
 '''
 
-
 #plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
 profile_ = profileClass(x, mu_gauss, CAT, args.config)
-profile = profile_.testSelection("FT")
+profile = profile_.testSelection(args.test)
 
 stat_list = []
 cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
@@ -179,7 +175,15 @@ best_ = stat_vals.index(min(stat_vals))
 print ("best is ", profile[best_].name)
 
 # Create Asimov (optional)
-c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 3*N_sig)
+N = hist_data.sumEntries()
+sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
+sig_model_el.assignVal(args.configS, cat=CAT, lep="el")
+sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
+sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
+c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
+combine_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
+N_sig = sig_model_el.nsig + sig_model_mu.nsig
+c1= ROOT.RooRealVar('c1','c1', N_sig, 0, 300)
 c2 = ROOT.RooRealVar('c2','c2', N-N_sig, 0, 3*N)
 
 '''
@@ -191,15 +195,6 @@ r2 = Minimizer_NLL(nll2, -1, eps, True, strategy)
 nll2_val = nll2.getVal()
 '''
 
-# Create signal workspace
-if SIGNAL:
-    f_out1 = ROOT.TFile("workspaces/workspace_sig_" + CAT + ".root", "RECREATE")
-    w_sig = ROOT.RooWorkspace("workspace_sig","workspace_sig")
-    getattr(w_sig, "import")(sig_model.pdf)
-    w_sig.Print()
-    w_sig.Write()
-    f_out1.Close()
-
 # Create background workspace 
 cate = ROOT.RooCategory("pdfindex_"+CAT, "Index of Pdf which is active for "+CAT)
 models = ROOT.RooArgList()
@@ -208,9 +203,9 @@ for model in profile:
 multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 
 # Penalty term
-#multipdf.setCorrectionFactor(0.)
+multipdf.setCorrectionFactor(0.)
 
-norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N - N_sig, 0, 3*N)
+norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N, 0, 3*N)
 if args.asimov == 0:
     f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
 else:
@@ -220,9 +215,9 @@ getattr(w_bkg, "import")(cate)
 getattr(w_bkg, "import")(norm)
 getattr(w_bkg, "import")(multipdf)
 getattr(w_bkg, "import")(hist_data)
-if int(args.asimov) == 1:
+if args.asimov == 1:
     for entry in profile:
-        model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(sig_model.pdf, entry.pdf), ROOT.RooArgList(c1, c2))
+        tot_model = ROOT.RooAddPdf('tot_pdf', 'tot_pdf', ROOT.RooArgList(combine_model, entry.pdf), ROOT.RooArgList(c1, c2))
         hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
         hist_asimov.SetNameTitle('hist_' +  entry.name, 'hist_' + entry.name)
         getattr(w_bkg, "import")(hist_asimov)
@@ -246,6 +241,7 @@ if CDF:
 
 # Plot it
 multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = True)
+#profile_.write_config_file(cuthist, "CMSBias")
 
 # Create toy histogram (depreciated)
 bias = False

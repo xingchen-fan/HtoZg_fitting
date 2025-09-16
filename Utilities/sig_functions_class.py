@@ -106,6 +106,7 @@ class DSCB_Class:
         self.alphaR = ROOT.RooRealVar("alphaR_"+cat, "alphaR_"+cat, alphaR_init, 0.01, 5.)
         self.dMH = ROOT.RooRealVar("dMH_"+cat, "dMH_"+cat, 0, -3, 3)
         self.mean = ROOT.RooFormulaVar("DSCB_mean_"+cat, "@0+@1", ROOT.RooArgList(MH, self.dMH))
+        self.nsig = 0
         if self.disigma:
             self.pdf = ROOT.RooCrystalBall.RooCrystalBall("model_DS_"+cat, "model_DS_"+cat, x, self.mean, self.sigmaL, self.sigmaR, self.alphaL, self.nL, self.alphaR, self.nR)
         else:
@@ -161,6 +162,7 @@ class DSCB_Class:
             setting = configs_[f"Htozg_{lep}_{cat}_{year}_{prod}"]
         for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
             getattr(self, param).setVal(setting[param])
+        self.nsig = setting["nexp"]
         if debug:
             print("sigmaL = ",  self.sigmaL.getVal())
             print("sigmaR = ",  self.sigmaR.getVal())

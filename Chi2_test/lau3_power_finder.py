@@ -20,7 +20,9 @@ parser.add_argument('-hi', '--high', help = 'Higher power')
 parser.add_argument('-lo', '--low', help = 'Lower power')
 parser.add_argument('-c', '--cat', help = 'Cat')
 parser.add_argument('-r', '--ranges', help = 'Range')
-parser.add_argument('-NLL', '--NLL', help = 'Use NLL?', type=int, default=0)
+parser.add_argument('-NLL', '--NLL', help = 'Use NLL?', type=int, default=1)
+parser.add_argument('-d', '--duo', help = 'Double sigma', type=int, default = 0)
+parser.add_argument('-f', '--fix', help = 'Fix sigma', type=int, default = 0)
 
 args = parser.parse_args()
 if int(args.high) <= int(args.low):
@@ -64,7 +66,7 @@ if DAT:
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/', 0.82, 0.64,0.46)
+        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -74,7 +76,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_xgb_neweight/', 0.95, 0.83, 0.58)
+        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -119,7 +121,7 @@ for entry in alt_pow:
     else:
         pow_list = [int(args.high), int(args.low), int(args.low) + entry[1]]
 
-    lau3_model = Lau3Class(x, mu_gauss, CAT, sigma_init = 3.,sigma2_init = 4,  step_init = 101, p1 = pow_list[1], p2 = pow_list[0], p3 = pow_list[2], f1_init = 0.1, f2_init = 0.1, f3_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = False, fix_sigma = False, gc_init = 1)
+    lau3_model = Lau3Class(x, mu_gauss, CAT, sigma_init = 3.,sigma2_init = 4,  step_init = 101, p1 = pow_list[0], p2 = pow_list[1], p3 = pow_list[2], f1_init = 0.1, f2_init = 0.1, f3_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = args.duo, fix_sigma = args.fix, gc_init = 1)
     cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
     n_bins = 220
     if args.NLL == True:

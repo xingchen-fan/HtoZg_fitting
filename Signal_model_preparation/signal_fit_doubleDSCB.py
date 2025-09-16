@@ -33,7 +33,7 @@ if 'ggf' in CAT:
     direct = '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/'
     reader = readRuiROOTggFSignal(x, direct, 0.91,0.82,0.61)
 elif 'vbf' in CAT:
-    direct = '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/'
+    direct = '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/'
     reader = readRuiROOTVBFSignal(x, direct, 0.95, 0.91, 0.76)
     
 hist_el = getattr(reader, f"{CAT}El")

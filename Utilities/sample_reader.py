@@ -376,7 +376,7 @@ class readRuiROOTVBFdata:
 class readRuiROOTggFSignal:
     def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
         year = ['2016', '2016APV', '2017', '2018', '2022', '2022EE', '2023', '2023BPix']
-        prod = ['GGF', 'VBF']#, 'ZH', 'WH', 'ttH']
+        prod = ['GGF', 'VBF', 'ZH', 'WH', 'ttH']
         chain = ROOT.TChain('outtree')
         for y in year:
             for p in prod:
@@ -532,11 +532,14 @@ class readRuiROOTggFSignalVBF:
 class readRuiROOTVBFSignal:
     def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
         year = ['2016', '2016APV', '2017', '2018', '2022', '2022EE', '2023', '2023BPix']
-        prod = ['GGF', 'VBF', 'ZH', 'WH', 'ttH']
+        prod = [ 'ZH', 'WH', 'ttH']
         chain = ROOT.TChain('outtree')
+        
         for y in year:
             for p in prod:
                 chain.Add(direct +p+'_'+y+'_output.root')
+        
+        chain.Add(direct + 'sig.root')
         hist1_TH1_el = ROOT.TH1F('vbfSig1_th1f_el', 'vbfSig1_th1f_el', 340, 95, 180)
         hist2_TH1_el = ROOT.TH1F('vbfSig2_th1f_el', 'vbfSig2_th1f_el', 340, 95, 180)
         hist3_TH1_el = ROOT.TH1F('vbfSig3_th1f_el', 'vbfSig3_th1f_el', 340, 95, 180)

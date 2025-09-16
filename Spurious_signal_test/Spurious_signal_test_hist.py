@@ -40,7 +40,7 @@ x.setBins(260)
 
 # SST histograms stored in root files
 #file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
-file_open_bkg = ROOT.TFile.Open('~/EOS_space/DY_sample_combine/sst_ggf_hist_xgboost_final.root', 'READ')
+file_open_bkg = ROOT.TFile.Open('~/EOS_space/DY_sample_combine/sst_vbf_hist_811.root', 'READ')
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 hist_bkg_TH1 = file_open_bkg.Get(CAT+'_dy_sm')
 #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+CAT)
@@ -53,7 +53,8 @@ MH = ROOT.RooRealVar("MH","MH"       ,125)#, 120., 130.)
 profile = profileClass(x, mu_gauss, CAT, args.configB)
 
 bkg_list = profile.testSelection("Chi2")
-
+#bkg_list = [profile.lau2_model, profile.lau3_model, profile.lau4_model]
+#bkg_list = [profile.exp3_model]
 
 # Signal model 
 #x.setRange("signal",110, 132)
@@ -62,13 +63,12 @@ bkg_list = profile.testSelection("Chi2")
 #res.Print("V")
 #plotClass(x, hist_sig, dscb_model.pdf, bkg_model.SBpdf, "Signal_"+cat)
 
-
 #combine_model = combineSignal(x, MH, CAT, args.configS)
 sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
-sig_model_el.assignValDoubleModel(MH, args.configS, CAT, 'el')
+sig_model_el.assignVal(args.configS, cat=CAT, lep="el")
 sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
-sig_model_mu.assignValDoubleModel(MH, args.configS, CAT, 'mu')
-c_el = ROOT.RooRealVar('c_el', 'c_el', configs_s[CAT]["el"]["nexp"]/(configs_s[CAT]["el"]["nexp"] + configs_s[CAT]["mu"]["nexp"]))
+sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
+c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
 combine_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
 NLL = True
 
@@ -95,8 +95,15 @@ for bkg_model in bkg_list:
     c02 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
     tot_model = ROOT.RooAddPdf(bkg_model.name + "_tot", bkg_model.name + "_tot", ROOT.RooArgList(combine_model, bkg_model.pdf), ROOT.RooArgList(c02, c01))
     if NLL:
+        tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(False), ROOT.RooFit.SumW2Error(False), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
         res1 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.SumW2Error(False), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
-        note_chi2 = ''
+        #nll_tot = ROOT.RooNLLVar('nll', 'nll', tot_model, hist_bkg, ROOT.RooFit.SumW2Error(False))
+        #Minimizer_Chi2(nll_tot, -1, 100, False, 0)
+        #res1 = Minimizer_Chi2(nll_tot, -1, 0.1, False, 0)
+        chi2_ = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
+        chi2_val = chi2_.getVal()
+        pV = ROOT.Math.chisquared_cdf_c(chi2_val, 260 - res1.floatParsFinal().getSize())
+        note_chi2 = '#Chi^{2} = %.2f'%chi2_val+',P-value = %.2f'%pV
     else:
         chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
         chi2_val = chi2_tot.getVal()
@@ -112,7 +119,11 @@ for bkg_model in bkg_list:
     #plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_Poisson_"+tot_model.GetName(), note='', CMS = 'Simulation', fullRatio = True)
 
     if NLL:
+        tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(False), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
         res2 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
+        #chi2_tot = ROOT.RooNLLVar('nll', 'nll', tot_model, hist_bkg, ROOT.RooFit.AsymptoticError(True))
+        #Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
+        #res2 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
     else:
         chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Extended(True))
         Minimizer_Chi2(chi2_tot, -1, 100, False, 0)

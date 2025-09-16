@@ -18,40 +18,57 @@ setting = configs[CAT]
 func_list = setting["CMSBias"]
 N_func = len(func_list)
 
-def fill_best(best_list_, func):
+def fill_best(best_list_, func, file_):
+    found = False
     for i, entry in enumerate(func_list):
-        if func == entry + "_" + CAT +"_model": best_list_[N_func - 1 - i]+=1 
+        if func == entry + "_" + CAT +"_model":
+            best_list_[N_func - 1 - i]+=1
+            found = True
+    if not found:
+        print(func, file_)
+        
 
 def read_dir(func, N_func):
     best_list = [0]* N_func
     for i in range(200):
+        #print ('file ',func, ' ',i)
         file_path = Path("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
         if not file_path.is_file():
             continue
         f =  open("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
         for line in f:
             best = ""
-            if line[:9] == "best func":
+            if line[:9] == "bad funct":
                 #print("the first 9 = ", line[:9])
                 brac = line.find("[")
                 comma = line.find(",")
+                if comma == -1:
+                    best = line[brac+2:line.find("]")-1]
+                    fill_best(best_list, best, i)
+                    #print (best)
+                    continue
                 #print("brac = ", brac)
                 #print("comma = ", comma)
                 best = line[brac+2:comma-1]
-                fill_best(best_list, best)
+                #print (best)
+                fill_best(best_list, best, i)
                 theEnd = False
                 while not theEnd:
                     left = comma
                     comma = line.find(",", left+1)
-                    best = line[left+3: comma-1]
-                    fill_best(best_list, best)
-                    if line.find(",", comma+1) == -1:
+                    if comma == -1:
+                        best = line[left+3: line.find("]")-1]
+                        #print (best)
+                        fill_best(best_list, best, i)
                         theEnd = True
-                best = line[comma+3: line.find("]")-1]
-                fill_best(best_list, best)
+                    else:
+                        best = line[left+3: comma-1]
+                        #print (best)
+                        fill_best(best_list, best, i)
+
         f.close()
     return best_list
-        
+
 
 inverse_list = [0]*N_func
 for i in range(N_func):
@@ -79,7 +96,8 @@ plt.ylabel("Truth")
 plt.xticks(range(N_func), inverse_list, rotation=90)
 plt.yticks(range(N_func), func_list)
 if args.sig == '0':
-    plt.savefig("plots/heatmap_" + CAT + ".pdf", format="pdf", bbox_inches="tight")
+    plt.savefig("plots/bad_heatmap_" + CAT + ".pdf", format="pdf", bbox_inches="tight")
 else:
-    plt.savefig("plots/heatmap_" + CAT + "_" + args.sig+"sig.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig("plots/bad_heatmap_" + CAT + "_" + args.sig+"sig.pdf", format="pdf", bbox_inches="tight")
 plt.show()
+
