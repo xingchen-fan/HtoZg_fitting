@@ -1,6 +1,6 @@
 universe = vanilla
 executable = condor_parser.sh
-arguments = $(ProcId) modg ggf4 5
+arguments = $(ProcId) pow1 untag 0
 error   = out_err/err.$(ProcId)
 output  = out_err/out.$(ProcId)
 log =   bias.log
