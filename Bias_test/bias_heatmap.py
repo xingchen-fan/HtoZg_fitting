@@ -21,7 +21,7 @@ N_func = len(func_list)
 if args.bad:
     keyword = "bad funct"
 else:
-    keyword = "good func"
+    keyword = "best func"
 
 def fill_best(best_list_, func, file_):
     found = False
