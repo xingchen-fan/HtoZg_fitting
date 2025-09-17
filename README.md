@@ -4,13 +4,21 @@
 The code is tested under `CMSSW_14_0_4/` and `CMSSW_14_1_0_pre4`, and `combine v10.1.0`. 
 Should work without `CMSSW` or `combine` but plain `pyroot`, but require an extra step.
 
-Make sure `RooGaussStepBernstein` is properly installed!
+Certain functions are not installed in the default `ROOT`. They are:
+
+* `RooGaussStepBernstein`: Defined in `Utilities/HZGRooPdfs.cxx`
+* `RooGaussStepBernsteinRange`: Only used when the range of plotting is different from evaluation. Defined in `Utilities/RooGaussStepBernstein.cxx`.
+* `AsymGenGaussian`: Defined in `Utilities/AsymGenGaussian.cxx`.
+* `EXModGaus`: Defined in `Utilities/EXModGaus.cxx`.
+* `ModGaus`: Defined in `Utilities/ModGaus.cxx`.
+
+Two options to install them.
 
 ### Option 1: 
-  It is installed in the `combine v10.1.0`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
+  Install them in the `combine v10.1.0`, specificly in their own `cxx` file at `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/`.
 
 ### Option 2: 
-  No dependence on `combine` or `CMSSW`. Generate a c++ dictionary `.so` file, `Utilities/HZGRooPdfs_cxx.so` using the following line ([reference](https://root.cern/manual/io_custom_classes/#generating-dictionaries))
+  Thier `cxx` and header files locate at `Utilities/`. No dependence on `combine` or `CMSSW`. Generate a c++ dictionary `.so` file, `Utilities/HZGRooPdfs_cxx.so` using the following line ([reference](https://root.cern/manual/io_custom_classes/#generating-dictionaries))
   ```
   root[] .L HZGRooPdfs.cxx+
   ```
@@ -21,8 +29,8 @@ Depdending on the option, you may or may not need to include the library at the 
 ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ```
-
-Note: On the LXPLUS machine, the ROOT doesn't have the FFT package properly installed and when running the fit, you may see some errors accordingly. I suggest you use the ROOT in any CMSSW environment. 
+> [!NOTE]
+> On the LXPLUS machine, the default ROOT doesn't have the FFT package properly installed and when running the fit, you may see some errors accordingly. I suggest you use the ROOT in any CMSSW environment. 
 
 # User Guide
 
@@ -48,7 +56,7 @@ where `x` is the fitting axis, `gauss_mu` is the mean of the convolution Gaussia
 
 Note that every bkg function has a sideband version blinding (120, 130) as a member, `self.SBpdf`.
 
-To further automate the process, you can also choose to use the `profileClass` where 14 background functions are defined as members and their essential initial values are assigned through a configuration file.
+To further automate the process, you can also choose to use the `profileClass` where multiple background functions are defined as members and their essential initial values are assigned through a configuration file.
 ```
 profile = profileClass(x, mu_gauss, cat='', config='')
 ```
@@ -64,17 +72,41 @@ To add your own background model, follow the steps:
 4. Add it as a attribute of `profileClass` in `Utilities/profile_class.py`
 
 5. If you want to set the initial values from the config file, you need to edit the config file so that it includes the keys of the parameters.
+
+> [!NOTE]
+> This method will not add your function into `combine`, thus not useable by any `combine` test.
    
 ## Signal Functions
 The functions are defined in `Utilities/sig_functions_class.py`. A typical definition of a model is like this:
 ```
 sig_model = #PDF#Class(x, MH, cat, ...#PDF# specific arguments...)
 ```
-where `x` is the fitting axis, `MH` is the higgs mass variable, and `cat` is the category name.
+where `x` is the fitting axis, `MH` is the higgs mass variable (can be a `RooFormulaVar`), and `cat` is the category name.
 
-So far, only Double Sided Crystal Ball (DSCB) function is used. And there is a feature to set the parameter values to the post-fit values, `assignVal()`, using a configuration file.
+So far, only Double Sided Crystal Ball (DSCB) function is used. Two versions of DSCB are defined, `DSCB_sys_Class` and `DSCB_Class`.
 
-Each year(era), category, lepton flavor and production mode has its own signal model. And the final model is the combination of them. So far, we only include two production modes, ggF and VBF. In total, we define 32 individual DSCB models. To use the combined signal model,
+* `DSCB_sys_Class`:
+  ```
+  DSCB_sys_Class(x, mu_form, sigmaL_form, sigmaR_form, dMH, sigmaL, sigmaR, cat = "", nL_init = 3, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False)
+  ```
+  To include Michael's systematics implementation, `mu_form`, `sigmaL_form` and `sigmaR_form` take any forms of `RooFormulaVar` or a simple `RooRealVar`. Different category/production mode/lepton share the same `MH` variable provided externally in `mu_form`.
+  To be able to set `dMH` and `sigmaL` (`sigmaR`) without systematics to certain values and set as constant, there are separate arguements for them.
+  And there is a feature to set the parameter values to the post-fit values, `assignVal()`, using a configuration file.
+  `assignValModular` set the variables to values provided from the config file.
+
+* `DSCB_Class`:
+  ```
+  DSCB_Class(x, MH, cat = "", sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 4, nR_bond = 100, alphaL_init = 0.5, alphaR_init = 0.5, di_sigma = False)
+  ```
+  Different category/production mode/lepton share the same `MH` variable provided by `MH`.
+  Each year(era), category, lepton flavor and production mode can have its own signal model. The parameter values stored in the config file are passed to the model by `assignVal`:
+  ```
+  assignVal(self, config='', year="", cat="", lep="", prod="", sys="nominal", debug = False)
+  ```
+> [!NOTE]
+ > For our final analysis, we will only have separate per lepton flavor `lep` and per category `cat` DSCB. Leaving the other arguments blank is expected if the fianl model is a double (el + mu) DSCB per category. 
+
+To study the effect of having individual signal model per lepton flavor, per year (era), per production mode (ggF, VBF) and per category, class `combineSignal` is defined based on `DSCB_Class` So far, we only include two production modes, ggF and VBF. In total, we define 32 individual DSCB models (Run 2). To use the combined signal model,
 ```
 sig_model = combineSignal(x, MH, cat='', config='')
 ```
