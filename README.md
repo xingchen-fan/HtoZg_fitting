@@ -92,7 +92,7 @@ So far, only Double Sided Crystal Ball (DSCB) function is used. Two versions of 
   To include Michael's systematics implementation, `mu_form`, `sigmaL_form` and `sigmaR_form` take any forms of `RooFormulaVar` or a simple `RooRealVar`. Different category/production mode/lepton share the same `MH` variable provided externally in `mu_form`.
   To be able to set `dMH` and `sigmaL` (`sigmaR`) without systematics to certain values and set as constant, there are separate arguements for them.
   And there is a feature to set the parameter values to the post-fit values, `assignVal()`, using a configuration file.
-  `assignValModular` set the variables to values provided from the config file.
+  `assignValModular` set the variables to values provided from the config file. The fitting of the signal model for difference systematic alternatives happens in `Signal_model_preparation/signal_fit_sys.py`. Post-fit parameter values stored in `Config/DSCB_config_sys.json`.
 
 * `DSCB_Class`:
   ```
@@ -104,13 +104,15 @@ So far, only Double Sided Crystal Ball (DSCB) function is used. Two versions of 
   assignVal(self, config='', year="", cat="", lep="", prod="", sys="nominal", debug = False)
   ```
 > [!NOTE]
- > For our final analysis, we will only have separate per lepton flavor `lep` and per category `cat` DSCB. Leaving the other arguments blank is expected if the fianl model is a double (el + mu) DSCB per category. 
+> For our final analysis, we will only have separate per lepton flavor `lep` and per category `cat` DSCB. Leaving the other arguments blank is expected if the fianl model is a double (el + mu) DSCB per category.
+
+Double DSCB fitting to the nominal MC happens in `Signal_model_preparation/signal_fit_doubleDSCB.py`. Post-fit parameter values are parsered to `Config/config_DSCB_double_flat.json`
 
 To study the effect of having individual signal model per lepton flavor, per year (era), per production mode (ggF, VBF) and per category, class `combineSignal` is defined based on `DSCB_Class` So far, we only include two production modes, ggF and VBF. In total, we define 32 individual DSCB models (Run 2). To use the combined signal model,
 ```
 sig_model = combineSignal(x, MH, cat='', config='')
 ```
-To fit the signal MC samples, go to the `Signal_model_preparation/` folder and `./run.sh` where the fitting results are save to a log in `/logs` and then parsed to a config file. Right now we only use DSCB model.
+To fit the 32 signal models, go to the `Signal_model_preparation/Multimodel_scripts/` folder and `./run.sh` where the fitting results are save to a log in `/logs` and then parsed to a config file, `Config/config_DSCB_flat.json`.
 
 ## Minimizer
 Define a test statistics (either `RooChi2Var` or `RooNLLVar`) using a `RooDataHist` and `model.pdf`. A typical minimization of certain test statistics is like this:
@@ -124,7 +126,8 @@ Configurations `.json` files of background functions and signal functions can be
 Each category has its own multi-layer dictionary, for example, for ggf1:
 ```
 "ggf1":{
-  "Range":97,
+  "Range":[97, 162],
+  "Bins": 260,
   "Chi2":[],
   "SST":[],
   "FT":[],
@@ -134,48 +137,34 @@ Each category has its own multi-layer dictionary, for example, for ggf1:
   ...
 }
 ```
-The value of `Range` is the starting mllg value of the fitting range of this category. Lists after the key `Chi2`, `SST`, `FT` and `CMSBias` contain the names of the background functions that pass the corresponding test. And the contents of the function keys, such as `bern2`, `bern3`, are the post-fit values of the models. They are used as initial values for the next fit.
+The value of `Range` is the mllg fitting range of this category. `Bins` is the number of bins used in the binned-fit. Lists after the key `Chi2`, `SST`, `FT` and `CMSBias` contain the names of the background functions that pass the corresponding test. And the contents of the function keys, such as `bern2`, `bern3`, are the post-fit values of the models. They are used as initial values for the next fit.
 ### Signal config file
-We split the signal model into individual ones depending on the year(era), lepton flavor and production mode. A typical block in the DSCB config file looks like this:
+We split the signal model into individual ones depending on the lepton flavor and BDT category (or production mode or year(era)). A typical block in the DSCB config file looks like this:
 ```
 {
-    "ggf1": {
-        "2016": {
-            "el": {
-                "disigma ggf": 1,
-                "MH ggf": 124.99,
-                "nexp ggf": 0.31,
-                "sigmaL ggf": 0.84726,
-                "sigmaR ggf": 0.39915,
-                "nL ggf": 5.327,
-                "nR ggf": 6.3908,
-                "alphaL ggf": 0.55437,
-                "alphaR ggf": 0.53537,
-              "mu": {
-              "mu":{
-                "disigma vbf": 1,
-                "MH vbf": 124.99,
-                "nexp vbf": 0.05,
-                "sigmaL vbf": 0.8124,
-                "sigmaR vbf": 0.43476,
-                "nL vbf": 5.5343,
-                "nR vbf": 6.6618,
-                "alphaL vbf": 0.5494,
-                "alphaR vbf": 0.55964
-            },
-...
-        }
-    }
+   "Htozg_el_cat_ggf1_nominal": {
+    "disigma": true,
+    "nexp": 0.8886373972111211,
+    "sigmaL": 1.65766119136833,
+    "sigmaR": 0.823308580027148,
+    "nL": 1.993337870785072,
+    "nR": 18.37252806042449,
+    "alphaL": 1.5050571118870453,
+    "alphaR": 1.021482204450084,
+    "dMH": 0.0707401603039021
+  },
+  ...
 }
 
 ```
-Notise that each key has the production mode name in the end, `ggf` or `vbf`. Whether two sigmas are used in the model is controled by `disigma` and `nexp` shows the expected signal events in this category, year, lepton channel and production mode. The rest of parameter values is obvious as they are the post-fit values.
-## Chi^2 Test (Data Sideband Fit Test)
+`disigma` controls whether there are two sigmas in the DSCB. If false, only `sigmaL` will be used and `sigmaR` is ignored.
+
+## Data Sideband Fit Test
 Laurent series is a family that we need to take extra care of, as we are not sure about what powers to use for specific category. So please run `lau2_power_finder.py`, `lau3_power_finder.py` and `lau4_power_finder.py` before running the full test.
 ```
-bash$ ./lau2_power_finder.py -c ggf1 -lo -10 -hi -5
+bash$ ./lau2_power_finder.py -c ggf1 -lo -10 -hi -5 -NLL 1 -d 0 -f 0
 ```
-This `/lau2_power_finder.py` command looks for the best combination of two powers between -10 and -5 for category ggf1.
+This `/lau2_power_finder.py` command looks for the best combination of two powers between -10 and -5 for category ggf1. By default, `-NLL 1` indicates using NLL fit, `-d 0` indicates not using di-Gaussian in the convolution, `-f 0` indicates not fixing sigma of the Gaussian in the convolution.
 ```
 bash$ ./lau3_power_finder.py -c ggf1 -lo -9 -hi -6
 ```
@@ -186,7 +175,7 @@ bash$ ./lau4_power_finder.py -c ggf1 -lo -9 -mi -8 -hi -6
 This `/lau4_power_finder.py` command looks for the best combination of four powers, given -9, -8 and -6 are the best three powers, for category ggf1.
 Be aware that this process takes a LONG time. Values provided in the config file are found through this process, unless the data sample is changed, there is no need to run these again.
 
-To run the sideband Chi^2 fit for category ggf1 with the config file `chi2_config_xgboost_nodrop.json`, run
+To run the sideband NLL fit for category ggf1 with the config file `chi2_config_xgboost_nodrop.json`, run
 ```
 bash$ ./Chi2_test.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json ggf1.log 2>&1
 ```
@@ -197,13 +186,15 @@ Alternative to `write_config_file`, post-fit values can be written into the conf
 bash$ ./config_parser.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json -log ggf1.log
 ```
 Add the models that pass the test to the `"Chi2"` value of ggf1 in the config file.
+> [!TIP]
+> When running `Chi2_test.py` for multiple categories simultaneously, `write_config_file` will cause conflict in the config file, please use the `config_parser.py` method instead!
 
 ## Spurious Signal Test
-To make it easier for people to run this test, the simulations with extended DY are saved as histograms at `Data/`. To run the test in ggf1, for example,
+The path of the high stats MC histograms is hard-coded in `Spurious_signal_test_hist.py`. Contact me if you want to do this test and the up-to-date path will be provided. To run the test in ggf1, for example,
 ```
-bash$ ./Spurious_signal_test_hist.py -c ggf1 -conB ../Config/chi2_config_xgboost_nodrop.json -conS ../Config/config_DSCB.json
+bash$ ./Spurious_signal_test_hist.py -c ggf1 -conB ../Config/config_xgboost_final_final.json -conS ../Config/config_DSCB_double_flat.json
 ```
-The signal model used is the combination of the individual models described previously by defining a `combineSignal` object. Background models tested are selected based on the `"Chi2"` value in the config file.
+The signal model used is the combination of the two individual DSCB models. Background models tested are selected based on the `"Chi2"` value in the config file.
 
 ## F Test
 One single F test is defined as
@@ -214,51 +205,69 @@ where `x` is the fitting axis, `pdf_list` is the list of the functions that you 
 
 When calling the F test, NLL fit is used by default. A command to run the F test in ggf1 is
 ```
-bash$ ./F_test.py -c ggf1 -con ../Config/chi2_config_xgboost_nodrop.json
+bash$ ./F_test.py -c ggf1 -con ../Config/config_xgboost_final_final.json
 ```
 Background models tested are selected based on the `"SST"` value in the config file.Output has both the test statistics and the P-values, as well as a multi-function plot.
+
 ## Make Workspaces 
-To operate the next test, we need to make toys with `combine`, thus need datacards and worksapces. To generate a workspace for ggf1, for example,
+To operate the next test, we need to make toys with `combine`, thus need datacards and worksapces. To generate a background workspace for ggf1, for example,
 ```
-bash$ ./make_workspace_bias_test.py -c ggf1 -a 0 -con ../Config/chi2_config_xgboost_nodrop.json
+bash$ ./make_bkg_workspace.py -c ggf1 -a 0 -con ../Config/config_xgboost_final_final.json -conS ../Config/config_DSCB_double_flat.json -t FT
 ```
 where `-a` means whether you want to generate and store an Asimov histogram in the workspace. This helps us to cross check with `combine` expected significance calculation.
+`-t` indicates for what specific background models you want to create the workspace for. For the bias test, we want to include all the functions passing the F test, thus `-t FT`.
+But depending on the bias test (signal injection test) result, new workspaces may be necessary with `-t CMSBias`.
 
-To generate the signal workspace only, run
+To generate a signal workspace, run
 ```
-bash$ ./make_signal_workspace.py -c ggf1 -conB ../Config/chi2_config_xgboost_nodrop.json -conS ../Config/config_DSCB.json
+bash$ ./make_signal_workspace.py -c ggf1 -conB ../Config/config_xgboost_final_final.json -conS ../Config/config_DSCB_double_flat.json
 ```
+To generate a signal workspace including all the systematics (preferably don't create bkg workspace with this) for 4 ggF and 4 VBF categories, run
+```
+bash$ ./make_final_combine_workspace.py -s ../Config/DSCB_config_sys.json -b ../Config/config_xgboost_final_final.json -d DATACARD.txt
+```
+## CMS Bias Test and Signal Injection Test
+Two approaches are available for the envelope bias test: using the `combine`, or using `Bias_test/condor/Bias_test_combineToy_condor.py`.
+In either approach, we use `combine` to generate toys. So both signal and background worksapces, as well as a datacard, are expected:
+```
+bash$ combine DATACARD_BIAS_CAT.txt -M GenerateOnly --setParameters pdfindex_CAT=MEMBER_FUNC_ID --toysFrequentist -t 1000 --expectSignal X --saveToys -m 125 --freezeParameters pdfindex_CAT -n .Xsig.CAT.MEMBER_FUNC
+```
+1000 toys for category `CAT` and bkg function `MEMBER_FUNC` as the true shape with `X` signal injected are generated and saved. Run this command in `Make_combine_workspaces/` to save the toys in that folder.
 
-## CMS Bias Test
-Two approaches are available for the envelope bias test: using the `combine`, or using `Bias_test/Bias_test.py`. 
-### Using `Bias_test/Bias_test.py`
+### Using `Bias_test/condor/Bias_test_combineToy_condor.py`
+For example, in ggF1, we want to run tests for 0, 1 and 5 folds of signals for bern4 and pow1 bkg functions:
 ```
-bash$ python3 Bias_test.py N_toys
+bash$ ./submitter.sh "ggf1" "(bern4 pow1)" "(0 1 5)"
 ```
-where you decided how many toy samples generated for each member of the profile.
+where we use LXPLUS condor system to run the jobs. Each job includes only 5 toys.
 
-The steps can be summarized as the following: 1. Define varables. 2. Read samples. 3. Define signal model and fix it. 4. Define the seed bkg profile functions. 5. Define the fit bkg profile functions. 6. Fit the seed to the sample histogram. 7. Gnerate toy samples. 7. Discerete profiling fit. 8. NLL scan using the envelope.
+To run a single toy(s), you can run 
+```
+bash$ ./Bias_test_combineToy_condor.py -n 1 -i 1 -f pow1 -c ggf1 -conB ../Config/config_xgboost_final_final.json -conS ../Config/config_DSCB_double_flat.json -s 0
+```
+This run the bias test on the 6th toy of ggF1 pow1 toys with 0 signal injected. Asumming each condor job have 5 toys, `-n 1` means we will run 1 toy and the toy is the first after the first iteration (5 jobs) `-i 1`.
 
-After reading the samples, select which category to do the test in the script. The seed functions are used to generate toy samples, and they are fit to the histogram of the category accoding to the selection. 
+The steps in the bias test can be summarized as the following: 
+  1. Define varables.
+  2. Read samples.
+  3. Define signal model and fix it.
+  4. Define the seed bkg profile functions.
+  5. Define the fit bkg profile functions.
+  6. Discerete profiling fit.
+  7. NLL scan using the envelope.
 
 The fit functions are the RooAbsPdf objects that are used to fit the toy samples. A single discrete profiling fit using the fit functions with the fixed signal model will report the best-fit signal yield. Then, an NLL scan over the signal strength will give an NLL curve for the envelope. The error should be obtained from the curve.
 
-Note: This script is still experimental. 
-
 ### Using `combine`
-Please run the script `Make_combine_workspaces/make_workspace_bias_test.py`.
-
-In the script, firstly define the variables, read the samples and select the category you want to test. Similarly, define the signal and background functions. After fitting the signal function and background functions, output the two workspaces (one signal and one background). Write the `combine` datacard.
-
-Run the `combine` command to generate toys for a certain member of the envelope:
+Run the `combine` command to get the pull distribution using the toys generated previously:
 ```
-bash$ combine DATACARD_BIAS_CAT.txt -M GenerateOnly --setParameters pdfindex_CAT=MEMBER_FUNC_ID --toysFrequentist -t 1000 --expectSignal 0 --saveToys -m 125 --freezeParameters pdfindex_CAT -n .CAT.MEMBER_FUNC
+bash$ combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCombine.Xsig.CAT.MEMBER_FUNC.GenerateOnly.mH125.123456.root -t 1000 --rMin -4 --rMax 4 --cminDefaultMinimizerStrategy=0 -n .Xsig.CAT.MEMBER_FUNC
 ```
-Next, run the `combine` command to get the pull distribution using the toys generated previously:
-```
-bash$ combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCombine.CAT.MEMBER_FUNC.GenerateOnly.mH125.123456.root  -t 1000 --rMin -4 --rMax 4 --cminDefaultMinimizerStrategy=0 -n .CAT.MEMBER_FUNC
-```
-
+ 
+> [!TIP]
+> An output file `fitDiagnostics.Xsig.CAT.MEMBER_FUNC.root` will be craeted.
+> Post-fit signal strengths of 1000 toys are stored in the branch `r` of the tree `tree_fit_sb`. Only plot the ones with `fit_status > 0`. ([Reference](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/#roomultipdf-conventional-bias-studies))
+ 
 ## Reference Log
 I upload some results when I run the scripts so that you can comapre with.
 
