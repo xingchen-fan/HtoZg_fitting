@@ -241,6 +241,9 @@ bash$ ./submitter.sh "ggf1" "(bern4 pow1)" "(0 1 5)"
 ```
 where we use LXPLUS condor system to run the jobs. Each job includes only 5 toys.
 
+A folder `Bias_test/condor/MEMBER_FUNC_CAT_Xsig/` (i.e. `Bias_test/condor/pow1_ggf1_0sig/`) will be created to store the corresponding 1000 toy outputs.
+And `Bias_test/bias_heatmap.py` and `Bias_test/read_condor_output.c` can get the heat map and pull distributions out of the output files.
+
 To run a single toy(s), you can run 
 ```
 bash$ ./Bias_test_combineToy_condor.py -n 1 -i 1 -f pow1 -c ggf1 -conB ../Config/config_xgboost_final_final.json -conS ../Config/config_DSCB_double_flat.json -s 0
