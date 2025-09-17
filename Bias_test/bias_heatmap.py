@@ -25,7 +25,7 @@ def fill_best(best_list_, func, file_):
             best_list_[N_func - 1 - i]+=1
             found = True
     if not found:
-        print(func, file_)
+        print('Not found', func, file_)
         
 
 def read_dir(func, N_func):
@@ -38,7 +38,7 @@ def read_dir(func, N_func):
         f =  open("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
         for line in f:
             best = ""
-            if line[:9] == "bad funct":
+            if line[:9] == "best func":
                 #print("the first 9 = ", line[:9])
                 brac = line.find("[")
                 comma = line.find(",")
