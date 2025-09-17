@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description = "Bias test heat map")
 parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-s', '--sig', help = 'Signal injected', default='0')
+parser.add_argument('-b', '--bad', help = 'Bad toy heat map?', type=bool, default=False)
 
 args = parser.parse_args()
 jfile = open(args.config, 'r')
@@ -17,6 +18,10 @@ CAT = args.cat
 setting = configs[CAT]
 func_list = setting["CMSBias"]
 N_func = len(func_list)
+if args.bad:
+    keyword = "bad funct"
+else:
+    keyword = "good func"
 
 def fill_best(best_list_, func, file_):
     found = False
@@ -38,7 +43,7 @@ def read_dir(func, N_func):
         f =  open("condor/"+ func + "_" +CAT +"_"+args.sig+"sig/output"+str(i)+".txt")
         for line in f:
             best = ""
-            if line[:9] == "best func":
+            if line[:9] == keyword:
                 #print("the first 9 = ", line[:9])
                 brac = line.find("[")
                 comma = line.find(",")
@@ -95,9 +100,13 @@ plt.xlabel("Fit")
 plt.ylabel("Truth") 
 plt.xticks(range(N_func), inverse_list, rotation=90)
 plt.yticks(range(N_func), func_list)
-if args.sig == '0':
+if args.sig == '0' and not args.bad:
+    plt.savefig("plots/heatmap_" + CAT + ".pdf", format="pdf", bbox_inches="tight")
+elif args.sig == '0' and args.bad:
     plt.savefig("plots/bad_heatmap_" + CAT + ".pdf", format="pdf", bbox_inches="tight")
-else:
+elif args.sig != '0' and not args.bad:
+    plt.savefig("plots/heatmap_" + CAT + "_" + args.sig+"sig.pdf", format="pdf", bbox_inches="tight")
+elif args.sig != '0' and args.bad:
     plt.savefig("plots/bad_heatmap_" + CAT + "_" + args.sig+"sig.pdf", format="pdf", bbox_inches="tight")
 plt.show()
 
