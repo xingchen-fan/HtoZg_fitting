@@ -274,14 +274,14 @@ def write_workspace(category, datacard_filename, signal_config,
     configs_bkg_ = {}
     with open(background_config, "r") as jfile_:
         configs_bkg_ = json.load(jfile_)
-    lowx = configs_bkg_[category]["Range"]
-    highx = lowx+65.0
+    lowx = configs_bkg_[category]["Range"][0]
+    highx = configs_bkg_[category]["Range"][1]
 
     # Define variables
     # For now use full range, needs to match draw_pico
     mllg_name = f"mllg_cat_{category}"
     x = ROOT.RooRealVar(mllg_name, mllg_name, lowx, highx)
-    nbins = 260
+    nbins = int(configs_bkg_[category]["Bins"])
     x.setBinning(ROOT.RooUniformBinning(lowx, highx, nbins),'full')
     #x.setBinning(ROOT.RooUniformBinning(lowx-32.5, highx+32.5, 1000),'cache')
     x.setBins(20000, "cache")

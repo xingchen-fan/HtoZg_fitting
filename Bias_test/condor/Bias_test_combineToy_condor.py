@@ -273,7 +273,7 @@ for j in range(int(args.Ntoys)):
     scan_list = []      
     #x.setBins(nbins)
     #hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(generator.Poisson(N)))
-    file_ = '../../Make_combine_workspaces/higgsCombine'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
+    file_ = '../../Make_combine_workspaces/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
     print("file = ", file_)
 
     # Functions to test
