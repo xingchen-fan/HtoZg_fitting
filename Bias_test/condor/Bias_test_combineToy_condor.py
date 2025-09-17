@@ -56,7 +56,9 @@ jfile = open(args.configB, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-lowx = setting["Range"]
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
 insig = int(args.sig)
 
 # Debug Flag
@@ -64,7 +66,7 @@ DEBUG = False
 DEBUG_SCAN = False
 # Define variables
 
-x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
+x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, highx)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -76,10 +78,10 @@ njet = ROOT.RooRealVar("njet", "njet", 0, 10)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 
-x.setBins(260)
+x.setBins(nbins)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+65)
+x.setRange('right', 130, highx)
+x.setRange('full', lowx, highx)
 
 # Signal model (pre-fit)
 MH = ROOT.RooRealVar("MH","MH"       ,125)
@@ -262,14 +264,14 @@ bad_func = []
 good_ratio = []
 bad_ratio = []
 pull_list = []
-good_hist = [0]*260
-bad_hist = [0]*260
+good_hist = [0]*nbins
+bad_hist = [0]*nbins
 for j in range(int(args.Ntoys)):
     toynum = j+1+ int(args.it)*5
     print (toynum)
     cppj = ctypes.c_int(int(toynum))
     scan_list = []      
-    #x.setBins(260)
+    #x.setBins(nbins)
     #hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(generator.Poisson(N)))
     file_ = '../../Make_combine_workspaces/higgsCombine'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
     print("file = ", file_)
@@ -284,12 +286,12 @@ for j in range(int(args.Ntoys)):
         bad += 1
         bad_func.append(list[4][4:])
         bad_ratio.append(list[5])
-        for i in range(260):
+        for i in range(nbins):
             hist_toy.get(i)
             bad_hist[i] += hist_toy.weight()
         continue
     good_ratio.append(list[5])
-    for i in range(260):
+    for i in range(nbins):
         hist_toy.get(i)
         good_hist[i] += hist_toy.weight()
         # Method1 ##########################

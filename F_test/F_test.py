@@ -27,10 +27,11 @@ jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-lowx = setting["Range"]
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
 
-
-def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = 260, className = "Default"):
+def goodness(pdfClass, histogram,  e_type = "Poisson", eps = 0.1, n_bins = nbins, className = "Default"):
     if e_type == "Poisson": error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
     elif e_type == "SumW2": error = ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)
     good_PV = []
@@ -102,7 +103,7 @@ def singleFTestSidebandNLL(x, pdfList, histogram, cat = '', eps = 0.1, offset = 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 
 # Define variables
-x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", lowx, lowx + 65.)
+x = ROOT.RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", lowx, highx)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -123,10 +124,10 @@ list = [x, y, w, bdt, year, lep, ph_eta, nlep, njet]
 # expbkg_u4 =  u4_bkg_run2.sumEntries()
 
 # Cornell MC sample dat reader and make RooDataHist
-x.setBins(260)
+x.setBins(nbins)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+65)
+x.setRange('right', 130, highx)
+x.setRange('full', lowx, highx)
 #reader = readDat(list, "/afs/cern.ch/user/f/fanx/public/samples/")
 
 #Zebing core func hist
@@ -173,15 +174,17 @@ else:
             hist_data = read_data.vbf4
 
 # Define PDF classes
-core_bern2_model = CoreBern2Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
-core_bern3_model = CoreBern3Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
-core_bern4_model = CoreBern4Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
-core_bern5_model = CoreBern5Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
-core_bern_list = [core_bern2_model, core_bern3_model, core_bern4_model, core_bern5_model]
+CORE = False
+if CORE:
+    core_bern2_model = CoreBern2Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
+    core_bern3_model = CoreBern3Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
+    core_bern4_model = CoreBern4Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
+    core_bern5_model = CoreBern5Class(x, CAT, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
+    core_bern_list = [core_bern2_model, core_bern3_model, core_bern4_model, core_bern5_model]
 
-core_pow1_model = CorePow1Class(x, CAT, -6, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
-core_pow2_model = CorePow2Class(x, CAT, -6, -15, 0.5,  fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
-core_pow_list = [core_pow1_model, core_pow2_model]
+    core_pow1_model = CorePow1Class(x, CAT, -6, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
+    core_pow2_model = CorePow2Class(x, CAT, -6, -15, 0.5,  fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
+    core_pow_list = [core_pow1_model, core_pow2_model]
 
 profile = profileClass(x, mu_gauss, CAT, args.config)
 bern_list = []
@@ -220,17 +223,12 @@ if "lau4" in setting["SST"]:
     
 best_list = []
 # Goodness of fit test (NOT USED)
-# goodness(bern_list, reader.hist_data_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
-#goodness(pow_list, reader.hist_data_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Bern")
-#goodness(exp_list, reader.hist_data_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = 260, className="Exp")
-# goodness(lau_list, reader.hist_data_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = 260, className="Bern")
+# goodness(bern_list, reader.hist_data_untagged2_bkg,  e_type = "Poisson", eps = 0.1, n_bins = nbins, className="Bern")
+#goodness(pow_list, reader.hist_data_untagged2_bkg,  e_type = "SumW2", eps = 0.1, n_bins = nbins, className="Bern")
+#goodness(exp_list, reader.hist_data_untagged1_bkg,  e_type = "SumW2", eps = 0.1, n_bins = nbins, className="Exp")
+# goodness(lau_list, reader.hist_data_untagged1_bkg,  e_type = "Poisson", eps = 0.1, n_bins = nbins, className="Bern")
 
 # F Tset
-# singleBernFTest(x, mu_gauss, reader.data_u2, CAT, args.method, "Poisson", eps = 0.1, offset = True, strategy = 0, range_ = "left,right", n_bins = 220)
-# singleFTestSidebandNLL(x, pow_list, reader.data_u2, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Pow")
-#singleFTestSidebandNLL(x, exp_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Exp")
-#singleFTestSidebandNLL(x, lau_list, reader.data_u1, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", calssName = "Lau")
-"""
 if len(bern_list) > 1:
     singleFTestSidebandNLL(x, bern_list, hist_data, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Bern", sideBand = True)
 if len(pow_list) > 1:
@@ -239,7 +237,6 @@ if len(exp_list) > 1:
     singleFTestSidebandNLL(x, exp_list, hist_data, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Exp")
 if len(lau_list) > 1:
     singleFTestSidebandNLL(x, lau_list, hist_data, cat = CAT, eps = 0.1, offset = True, strategy = 0, range_= "left,right", className = "Lau")
-"""
 if len(pow_list) > 1:
     singleFTestSidebandNLL(x, pow_list, hist_data, cat = CAT, eps = 0.01, offset = True, strategy = 0, range_= "left,right", className = "Pow")
 

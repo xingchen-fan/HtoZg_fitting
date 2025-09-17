@@ -18,10 +18,10 @@ from sig_functions_class import *
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
 ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
-ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
-ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
-ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
-ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+#ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
+#ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
+#ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 ##############################################
@@ -43,7 +43,9 @@ jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-lowx = setting["Range"]
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
 if not CAT in ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vbf4"]:
     raise ValueError("Unknown category")
 if not args.test in ["FT", "CMSBias"]:
@@ -55,7 +57,7 @@ DAT = False
 FIT = True # 'False' to read the post-fit values from config file
 
 # Define variables
-x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
+x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, highx)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -72,10 +74,10 @@ list = [x, y, w, w_year, bdt, year, lep, ph_eta, nlep, njet]
 
 # Cornell MC and data sample dat reader and make RooDataHist
 # Zebing hist data reader
-x.setBins(260)
+x.setBins(nbins)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+65)
+x.setRange('right', 130, highx)
+x.setRange('full', lowx, highx)
 #ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
 
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
@@ -251,7 +253,7 @@ if bias:
     f_out3 = ROOT.TFile("~/EOS_space/toy_wsp/workspace_toy_" + CAT + ".root", "RECREATE")
     w_toy = ROOT.RooWorkspace("workspace_toy","workspace_toy")
     for entry in profile:
-        x.setBins(260)
+        x.setBins(nbins)
         for i in range(N_toy):
             hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(N))
             hist_toy.SetNameTitle("hist_"+entry.pdf.GetName()+"_"+str(i), "hist_"+entry.pdf.GetName()+"_"+str(i))

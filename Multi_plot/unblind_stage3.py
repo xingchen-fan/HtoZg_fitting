@@ -25,13 +25,14 @@ setting = configs[CAT]
 
 f = ROOT.TFile(args.input)
 w = f.Get("w")
-lowx = setting["Range"]
-nbins = 65
-binning = ROOT.RooFit.Binning(nbins,lowx,lowx+65)
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
+binning = ROOT.RooFit.Binning(nbins,lowx,highx)
 
 x = w.var('CMS_hzg_mass_'+CAT)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
+x.setRange('right', 130, highx)
 
 
 data = w.data("data_obs")
@@ -41,9 +42,9 @@ sb_model = w.pdf('model_s').getPdf(CAT)
 w.loadSnapshot("MultiDimFit")
 #nbkg = w.function('n_exp_final_bin'+CAT+'_proc_bkg').getVal()
 #print("post fit nbkg = ", nbkg)
-x.setBins(260)
+x.setBins(nbins)
 hdata = ROOT.RooDataHist('hdata', 'hdata', x, data)
-for i in range(260):
+for i in range(nbins):
     hdata.get(i)
     print(hdata.weight())
 #chi2 = ROOT.RooChi2Var('chi2', 'chi2', sb_model, hdata)

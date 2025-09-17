@@ -30,10 +30,12 @@ CAT = args.cat
 jfile = open(args.config, 'r')
 configs = json.load(jfile)
 setting = configs[CAT]
+nbins = int(setting["Bins"])
 
 # Define vars
-lowx = setting["Range"]
-x = ROOT.RooRealVar("x", "mllg", lowx, lowx+65.)
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+x = ROOT.RooRealVar("x", "mllg", lowx, highx)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -44,10 +46,10 @@ ph_eta = ROOT.RooRealVar("ph_eta", "ph_eta", -3, 3)
 nlep = ROOT.RooRealVar("nlep", "nlep", 0, 10)
 njet = ROOT.RooRealVar("njet", "njet", 0, 10)
 
-x.setBins(260)
+x.setBins(nbins)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+65)
+x.setRange('right', 130, highx)
+x.setRange('full', lowx, highx)
 
 if CAT == 'ggf1':
     NAMECAT = 'ggF1'
@@ -95,8 +97,8 @@ bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profi
 
 # Sideband Chi^2 fit
 cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
-th1_cuthist = cuthistogram.createHistogram("cuthist_ks", x, ROOT.RooFit.Binning(260))
-n_bins = 220
+th1_cuthist = cuthistogram.createHistogram("cuthist_ks", x, ROOT.RooFit.Binning(nbins))
+nbins_SB = int(nbins * (highx - lowx -10)/(highx - lowx))
 NLL = args.NLL
 pass_list = []
 for func in bkg_list:
@@ -113,9 +115,9 @@ for func in bkg_list:
     res.Print('v')
     chi2_ = ROOT.RooChi2Var('chi2_val_'+func.SBpdf.GetName(), 'chi2_val_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
     chi2_val = chi2_.getVal()
-    dof = n_bins - res.floatParsFinal().getSize()
+    dof = nbins_SB - res.floatParsFinal().getSize()
     chi2_PV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), dof)
-    ks_model_hist = func.SBpdf.generateBinned(x, cuthistogram.sumEntries(), True).createHistogram("hist_"+func.SBpdf.GetName(), x, ROOT.RooFit.Binning(260))
+    ks_model_hist = func.SBpdf.generateBinned(x, cuthistogram.sumEntries(), True).createHistogram("hist_"+func.SBpdf.GetName(), x, ROOT.RooFit.Binning(nbins))
     ks_PV = th1_cuthist.KolmogorovTest(ks_model_hist)
     plotClass(x, hist_data, func.pdf, func.SBpdf, title=func.pdf.GetName(), output_dir="plots/", sideBand = True, fitRange = 'left,right', note='#splitline{#Chi^{2}/dof = ' + '%.2f'%chi2_val + '/%i'%dof +'}{#splitline{#Chi^{2} P-value = ' + '%.2f'%chi2_PV + '}{KS P-value = ' + '%.2f'%ks_PV + '}}', fullRatio = True)
     if chi2_PV>0.1 and ks_PV>0.1 and res.status() == 0:

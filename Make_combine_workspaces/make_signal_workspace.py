@@ -22,10 +22,12 @@ jfile = open(args.configB, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-lowx = setting["Range"]
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
 
-x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, lowx + 65.)
-x.setBins(260)
+x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, highx)
+x.setBins(nbins)
 MH = ROOT.RooRealVar("MH","MH"       ,125)#, 120., 130.)
 sig_model = combineSignal(x, MH, CAT, args.configS)
 print('n tot = ',sig_model.ntot)

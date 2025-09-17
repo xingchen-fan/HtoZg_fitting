@@ -22,13 +22,14 @@ setting = configs[CAT]
 
 f = ROOT.TFile(args.input)
 w = f.Get("w")
-lowx = setting["Range"]
-nbins = 65
-binning = ROOT.RooFit.Binning(nbins,lowx,lowx+65)
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
+binning = ROOT.RooFit.Binning(nbins,lowx,highx)
 
 x = w.var('CMS_hzg_mass_'+CAT)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
+x.setRange('right', 130, highx)
 
 plot = x.frame()
 plot1 = x.frame()
@@ -53,7 +54,7 @@ nll = ROOT.RooNLLVar('nll_SB', 'nll_SB', SBpdf, dataSB)
 Minimizer_NLL(nll, -1, 1, False, 0)
 res=Minimizer_NLL(nll, -1, 0.1, True, 0)
 res.Print('v')
-dof = 260 - res.floatParsFinal().getSize()
+dof = nbins - res.floatParsFinal().getSize()
 
 # Prefit
 b_model.plotOn( plot, ROOT.RooFit.LineColor(2), ROOT.RooFit.Name("prefit"), ROOT.RooFit.Normalization(nbkg_prefit/nSB))
@@ -63,11 +64,11 @@ b_model.plotOn( plot1, ROOT.RooFit.LineColor(2), ROOT.RooFit.Name("prefit"), ROO
 w.loadSnapshot("MultiDimFit")
 nbkg = w.function('n_exp_final_bin'+CAT+'_proc_bkg').getVal()
 print("post fit nbkg = ", nbkg)
-x.setBins(260)
+x.setBins(nbins)
 hdata = ROOT.RooDataHist('hdata', 'hdata', x, data)
 chi2 = ROOT.RooChi2Var('chi2', 'chi2', b_model, hdata)
 val_chi2 = chi2.getVal()
-x.setBins(65)
+x.setBins(int(highx - lowx))
 latex = ROOT.TLatex()
 latex.SetTextSize(0.03)
 latex.SetTextAlign(13)

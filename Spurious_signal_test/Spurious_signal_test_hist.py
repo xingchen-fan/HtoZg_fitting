@@ -31,12 +31,14 @@ configs_s = json.load(jfile_s)
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-lowx = setting["Range"]
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
 
 # Define variables
-x = ROOT.RooRealVar("x", "mllg", lowx, lowx + 65.)
+x = ROOT.RooRealVar("x", "mllg", lowx, highx)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
-x.setBins(260)
+x.setBins(nbins)
 
 # SST histograms stored in root files
 #file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
@@ -78,15 +80,15 @@ for bkg_model in bkg_list:
     if NLL:
         r = bkg_model.pdf.fitTo(hist_bkg, ROOT.RooFit.Save(True), \
                                ROOT.RooFit.AsymptoticError(True),ROOT.RooFit.PrintLevel(-1))
-        th1_hist = hist_bkg.createHistogram("hist_ks", x, ROOT.RooFit.Binning(260))
-        ks_model_hist = bkg_model.pdf.generateBinned(x,hist_bkg.sumEntries(), True).createHistogram("model_hist_ks", x, ROOT.RooFit.Binning(260))
+        th1_hist = hist_bkg.createHistogram("hist_ks", x, ROOT.RooFit.Binning(nbins))
+        ks_model_hist = bkg_model.pdf.generateBinned(x,hist_bkg.sumEntries(), True).createHistogram("model_hist_ks", x, ROOT.RooFit.Binning(nbins))
         ks_PV = ks_model_hist.KolmogorovTest(th1_hist, 'X')
         note_ = 'KS P-value = %.2f'%ks_PV
     else:    
         chi2 = ROOT.RooChi2Var("chi2_bkg_" + CAT, "chi2 bkg " + CAT, bkg_model.pdf,  hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
         Minimizer_Chi2(chi2, -1, 100, False, 0)
         r = Minimizer_Chi2(chi2, -1, 0.1, False, 0)
-        note_ = '#Chi^{2}/dof = %.2f'%chi2.getVal()+'/%i'%(260-r.floatParsFinal().getSize())
+        note_ = '#Chi^{2}/dof = %.2f'%chi2.getVal()+'/%i'%(nbins-r.floatParsFinal().getSize())
     bkg_model.checkBond()
     r.Print("V")
     plotClass(x, hist_bkg, bkg_model.pdf, bkg_model.SBpdf, "B_"+bkg_model.name,  note=note_, CMS = 'Simulation', fullRatio = True)
@@ -102,14 +104,14 @@ for bkg_model in bkg_list:
         #res1 = Minimizer_Chi2(nll_tot, -1, 0.1, False, 0)
         chi2_ = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
         chi2_val = chi2_.getVal()
-        pV = ROOT.Math.chisquared_cdf_c(chi2_val, 260 - res1.floatParsFinal().getSize())
+        pV = ROOT.Math.chisquared_cdf_c(chi2_val, nbins - res1.floatParsFinal().getSize())
         note_chi2 = '#Chi^{2} = %.2f'%chi2_val+',P-value = %.2f'%pV
     else:
         chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
         chi2_val = chi2_tot.getVal()
         Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
         res1 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
-        pV = ROOT.Math.chisquared_cdf_c(chi2_val, 260 - res1.floatParsFinal().getSize())
+        pV = ROOT.Math.chisquared_cdf_c(chi2_val, nbins - res1.floatParsFinal().getSize())
         note_chi2 = '#Chi^{2} = %.2f'%chi2_val+',P-value = %.2f'%pV
     bkg_model.checkBond()
     print("Poisson error:")

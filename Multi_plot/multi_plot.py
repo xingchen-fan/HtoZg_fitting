@@ -30,12 +30,15 @@ CAT = args.cat
 jfile = open(args.config, 'r')
 configs = json.load(jfile)
 setting = configs[CAT]
-lowx = setting["Range"]
-x = ROOT.RooRealVar("x", "mllg", lowx, lowx+65.)
-x.setBins(260)
+lowx = setting["Range"][0]
+highx = setting["Range"][1]
+nbins = int(setting["Bins"])
+
+x = ROOT.RooRealVar("x", "mllg", lowx, highx)
+x.setBins(nbins)
 x.setRange('left', lowx, 120)
-x.setRange('right', 130, lowx+65)
-x.setRange('full', lowx, lowx+65)
+x.setRange('right', 130, highx)
+x.setRange('full', lowx, highx)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 if 'ggf' in CAT:
@@ -60,7 +63,6 @@ elif 'vbf' in CAT:
             hist_data = read_data.vbf4
 
 print('N data = ', hist_data.sumEntries())
-
 profile = profileClass(x, mu_gauss, CAT, args.config)
 bkg_list = profile.testSelection(args.test)
 multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = args.best, CMS = "Preliminary", fullRatio = True, bestLabel = args.best > -1)
