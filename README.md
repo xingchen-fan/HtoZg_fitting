@@ -5,7 +5,7 @@
 # HtoZg_fitting
 Welcome to the fitting framework of the analysis H ➝ ZΥ (HIG-25-010). ([CADI link](https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=HIG-25-010&tp=an&id=3014&ancode=HIG-25-010))
 
-The Fitting sequence is shown in this diagram. And this framework is developed to conduct this sequence.
+The fitting sequence is shown in this diagram. And this framework is developed to conduct this sequence.
 <img width="1200" height="300" alt="Screenshot 2025-09-18 134804" src="https://github.com/user-attachments/assets/05cb8b48-683c-49e3-8924-efa915211810" />
 
 # Environment
