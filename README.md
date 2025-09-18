@@ -74,7 +74,8 @@ To add your own background model, follow the steps:
 5. If you want to set the initial values from the config file, you need to edit the config file so that it includes the keys of the parameters.
 
 > [!NOTE]
-> This method will not add your function into `combine`, thus not useable by any `combine` test.
+> This method can **NOT** add your function into `combine`, thus not useable by any `combine` test.
+> To do so, replace the first two steps with the [Option 1](https://github.com/xingchen-fan/HtoZg_fitting/edit/main/README.md#option-1).
    
 ## Signal Functions
 The functions are defined in `Utilities/sig_functions_class.py`. A typical definition of a model is like this:
