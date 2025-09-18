@@ -14,10 +14,6 @@ from sample_reader import *
 from profile_class import *
 ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
 ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
-ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
-ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
-ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
-ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
