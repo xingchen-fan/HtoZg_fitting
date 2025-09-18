@@ -1,5 +1,9 @@
-# HtoZg_fitting
+<img width="128" height="128" alt="cmslogo" src="https://github.com/user-attachments/assets/6afe9e5a-28cf-4fc4-8bc4-85eec9af0f15" /> <img width="128" height="128" alt="Cornell_University_seal svg" src="https://github.com/user-attachments/assets/d1ddec45-ac40-4fdb-8b39-1129e48fa2fd" />
+<img width="128" height="128" alt="ucsblogo" src="https://github.com/user-attachments/assets/3a03c2ed-9d5d-4552-94f7-adde461db159" />
 
+
+# HtoZg_fitting
+Welcome to the fitting framework of the analysis H ➝ ZΥ (HIG-25-010). ([CADI link](https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=HIG-25-010&tp=an&id=3014&ancode=HIG-25-010))
 # Environment
 The code is tested under `CMSSW_14_0_4/` and `CMSSW_14_1_0_pre4`, and `combine v10.1.0`. 
 Should work without `CMSSW` or `combine` but plain `pyroot`, but require an extra step.
