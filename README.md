@@ -270,7 +270,14 @@ bash$ combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCom
 > [!TIP]
 > An output file `fitDiagnostics.Xsig.CAT.MEMBER_FUNC.root` will be craeted.
 > Post-fit signal strengths of 1000 toys are stored in the branch `r` of the tree `tree_fit_sb`. Only plot the ones with `fit_status > 0`. ([Reference](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/#roomultipdf-conventional-bias-studies))
- 
+
+## Plotting Features
+In the `Multi_plot/` folder, there are three important plotting scripts:
+* `multi_plot.py`: Plot selected bkg models with data sideband, controlled by the arguments.
+* `money_plot.py`: Plot a combined S+B and data of all categories over a given range (toy only before unblinding).
+* `plot_signal_errorbar.py`: Plot observed signal strength of all categories with errorbars (toy only before unblinding).
+> [!NOTE]
+> When `matplotlib` is called, please use a CMSSW environment where the library is correctly installed. You may need to switch to a different environment from where you are running the rest of the scripts.
 ## Reference Log
 I upload some results when I run the scripts so that you can comapre with.
 
