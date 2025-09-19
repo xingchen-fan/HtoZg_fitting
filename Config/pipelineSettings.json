@@ -1,0 +1,35 @@
+{
+    "general_settings":{
+            "categories":       ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vbf4"],
+            "flavors":          ["el","mu"],
+            "years":            ["2016APV","2016","2017","2018","2022","2022EE","2023","2023BPix"],
+            "modes":            ["ggf","vbf"],
+	    "blinding_window":  [120,130],
+            "bin_factor":       4,
+            "display_bins":     2,
+            "range_info":       [340,95,180]
+            },
+    "bdt_settings":{
+            "ggf_bins":         [0.81,0.64,0.47],
+            "vbf_bins":         [0.489,0.286,0.083]
+            },
+    "signal_settings":{ 
+            "base_path":        "/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/",
+            "ggf_path":         "./",
+            "vbf_path":         "./",
+            "splits":           [1,0,1,1],
+            "shape_config":     "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Config/config_DSCB_flat_jdg.json",
+            "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/signal_fits.log"
+            },
+    "bkg_settings":{
+            "base_path":        "/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/",
+	    "ggf_path":         "./",
+            "vbf_path":         "./",
+            "splits":           [1,1,0,0]
+            },
+    "Chi2_settings":{
+            "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/chi2_step.log"
+            }
+     
+}
+

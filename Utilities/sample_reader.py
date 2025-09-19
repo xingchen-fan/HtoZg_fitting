@@ -691,6 +691,59 @@ class readRuiROOTVBFSignalVBF:
         self.vbf3Mu = ROOT.RooDataHist('hist_vbf3_sig_vbf_mu', 'hist_vbf3_sig_vbf_mu', x, hist3_TH1_mu)
         self.vbf4Mu = ROOT.RooDataHist('hist_vbf4_sig_vbf_mu', 'hist_vbf4_sig_vbf_mu', x, hist4_TH1_mu)
 
+class readRuiROOTSignal:
+    def __init__(self, x, direct='', sampParam = ['ggf1','el','2016APV','ggf'], bdtBins=[0,0,0], rangeInfo=[340,95,180]):
+        chain = ROOT.TChain('outtree')
+
+        cat = sampParam[0]
+        flav = sampParam[1]
+        year = sampParam[2]
+        prod = sampParam[3]
+
+        bins = rangeInfo[0]
+        lower = rangeInfo[1]
+        upper = rangeInfo[2]
+
+        metCut = 90
+        if flav == 'el': lep = 11
+        elif flav == 'mu': lep = 13
+
+        if prod == 'ggf':
+            chain = ROOT.TChain('outtree')
+            chain.Add(direct + 'GGF_'+year+'_output.root')
+        elif prod == 'vbf':
+            chain = ROOT.TChain('outtree')
+            chain.Add(direct + 'VBF_'+year+'_output.root')
+            chain.Add(direct + 'ZH_'+year+'_output.root')
+            chain.Add(direct + 'WH_'+year+'_output.root')
+            chain.Add(direct + 'ttH_'+year+'_output.root')
+
+        label = cat + '_th1f_' + prod + '_' + flav + '_' + year
+        histlabel = 'hist' + label
+        hist_TH1 = ROOT.TH1F(label, label, bins, lower, upper)
+        for entry in chain:
+            if entry.ll_lepid != lep:
+                continue
+            if cat == 'vbf1' and entry.BDT_score > bdtBins[0] and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'vbf2' and entry.BDT_score > bdtBins[1] and entry.BDT_score < bdtBins[0] and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'vbf3' and entry.BDT_score > bdtBins[2] and entry.BDT_score < bdtBins[1] and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'vbf4' and entry.BDT_score > -1 and entry.BDT_score < bdtBins[2] and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'ggf1' and entry.BDT_score > bdtBins[0] and entry.met < metCut and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'ggf2' and entry.BDT_score > bdtBins[1] and entry.BDT_score < bdtBins[0] and entry.met < metCut and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'ggf3' and entry.BDT_score > bdtBins[2] and entry.BDT_score < bdtBins[1] and entry.met < metCut and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+            elif cat == 'ggf4' and entry.BDT_score > -1 and entry.BDT_score < bdtBins[2] and entry.met < metCut and entry.weight_corr < 0.5:
+                hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
+
+        self.catflav = ROOT.RooDataHist(histlabel, histlabel, x, hist_TH1)
+
+
 
 class readPico: #draw_pico datacard format
     def __init__(self, x, directory="", cat="", proc="", syst=""):
