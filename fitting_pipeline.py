@@ -28,7 +28,7 @@ tsStart = time.perf_counter()
 #----------------------Generate signal models-----------------------#
 #Split by lepton flavor, and by BDT category.
 #This script can be run as a subprocess inside other function, or directly from command line.
-settingsFile = '/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipelineE2E/pipelineSettings.json'
+settingsFile = '/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Config/pipeline_settings.json'
 jfile = open(settingsFile)
 configs = json.load(jfile)
 sigSettings = configs["signal_settings"]
@@ -40,7 +40,7 @@ logging.basicConfig(filename=logFile, level=logging.INFO)
 timeStamp = str(time.time())
 logging.info("Beginning signal model generation")
 
-fitArgs = ['../Signal_model_preparation/signal_fit_jdg.py','-j', settingsFile]
+fitArgs = ['./Signal_model_preparation/signal_fit_jdg.py','-j', settingsFile]
 with open(logFile, 'a') as logfile:
     subprocess.run(fitArgs, stdout=logfile, stderr=logfile)
 logging.info("...........................")

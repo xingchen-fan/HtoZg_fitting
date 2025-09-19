@@ -270,7 +270,20 @@ bash$ combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCom
 > [!TIP]
 > An output file `fitDiagnostics.Xsig.CAT.MEMBER_FUNC.root` will be craeted.
 > Post-fit signal strengths of 1000 toys are stored in the branch `r` of the tree `tree_fit_sb`. Only plot the ones with `fit_status > 0`. ([Reference](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/#roomultipdf-conventional-bias-studies))
+
+## Fitting pipeline
+
+This is a work in progress feature to perform as many aspects of the fitting as possible in an end to end fashion with as few breaks for user input as possible. While scripts are work in progress, they are tagged with `_jdg`. When reviewed, this tag will be removed.
+
+Finalized:
+
+Under Review:
+> signal\_fit\_jdg.py: Run standalone with `python3 signal_fit_jdg.py -j Config/pipeline_settings.json` from the main directory. Signal fit information is stored in `Config/config_DSCB_flat_jdg.json`. 
  
+All scripts can also be run by calling the `fitting_pipeline.py` script from the main directory. Status information from the fitting pipeline is stored in `pipeline_logs/signal_fits.log`.
+
+General configuration settings for the pipeline can be found in `Config/pipeline_settings.json`. Most are self explanatory. The configuration parameter splits refers to the ways in which a signal sample may be split, in the form of a list of booleans. The order is [categories, flavors, years, production modes], with 0 denoting splitting, and 1 denoting combination.
+
 ## Reference Log
 I upload some results when I run the scripts so that you can comapre with.
 
