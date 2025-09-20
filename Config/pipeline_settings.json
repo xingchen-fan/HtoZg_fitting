@@ -17,7 +17,7 @@
             "base_path":        "/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/",
             "ggf_path":         "./",
             "vbf_path":         "./",
-            "splits":           [1,0,1,1],
+            "splits":           [0,0,1,1],
             "shape_config":     "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Config/config_DSCB_flat_jdg.json",
             "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/signal_fits.log"
             },
