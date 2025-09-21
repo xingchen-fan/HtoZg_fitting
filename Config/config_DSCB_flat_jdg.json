@@ -1,0 +1,24 @@
+{
+    "Htozg_el_comb_comb_comb_nominal": {
+        "MH": -0.097087,
+        "alphaL": 1.0129,
+        "alphaR": 1.3259,
+        "nL": 4.303,
+        "nR": 13.242,
+        "sigmaL": 1.5338,
+        "sigmaR": 1.2012,
+        "nexp": 9.27,
+        "disigma": 0
+    },
+    "Htozg_mu_comb_comb_comb_nominal": {
+        "MH": -0.069802,
+        "alphaL": 1.2044,
+        "alphaR": 1.4566,
+        "nL": 3.0683,
+        "nR": 17.992,
+        "sigmaL": 1.2081,
+        "sigmaR": 1.1577,
+        "nexp": 1.0,
+        "disigma": 0
+    }
+}
