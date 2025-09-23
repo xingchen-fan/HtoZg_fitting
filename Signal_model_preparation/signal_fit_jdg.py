@@ -17,8 +17,8 @@ from config_parser_jdg import *
 
 
 def performSignalFits():
-#------------------Input Parsing--------------------#
-#Inputs are taken from the input json file
+    #------------------Input Parsing--------------------#
+    #Inputs are taken from the input json file
     DISIGMA = True
 
     parser = argparse.ArgumentParser()
@@ -37,13 +37,22 @@ def performSignalFits():
     binFactor     = genSettings["bin_factor"]
     dispBinFactor = genSettings["display_bins"]
     rangeInfo     = genSettings["range_info"]
-    sampParams = [(a,b,c,d) for a in cats for b in flavs for c in years for d in prods]
 
     signalSettings = configs["signal_settings"]
     ruiInBasePath     = signalSettings["base_path"]
     ggfPath           = signalSettings["ggf_path"]
     vbfPath           = signalSettings["vbf_path"]
-    splits            = signalSettings["splits"] #0 split, 1 means combine. [categories, flavors, years, production modes]
+    splits            = signalSettings["splits"]
+    if splits[0]==1:
+        cats = ["comb"]
+    if splits[1]==1:
+        flavs = ["comb"]
+    if splits[2]==1:
+        years = ["comb"]
+    if splits[3]==1:
+        prods = ["comb"]
+    sampParams = [(a,b,c,d) for a in cats for b in flavs for c in years for d in prods]
+
     shapeConfigFile   = signalSettings["shape_config"]
     logFile           = signalSettings["log_file"]
 
@@ -55,8 +64,6 @@ def performSignalFits():
 
     plotPath = "./Signal_model_preparation/plots/"
 
-
-
     #------------------Combining Histograms--------------------#
     histList = []
     labelList = []
@@ -64,60 +71,32 @@ def performSignalFits():
     for sampParam in sampParams:
         x = ROOT.RooRealVar("x", "mllg", 115, 130)
         x.setBins(int(binFactor*(x.getMax() - x.getMin())))
-        if sampParam[3]=="ggf": sigSample = readRuiROOTSignal(x, ruiInBasePath+ggfPath, sampParam, ggfBins, rangeInfo)
-        elif sampParam[3]=="vbf": sigSample = readRuiROOTSignal(x, ruiInBasePath+vbfPath, sampParam, vbfBins, rangeInfo)
+        sigSample = readRuiROOTSignal(x, ruiInBasePath, ggfPath, vbfPath, sampParam, ggfBins, rangeInfo)
         sigHist = sigSample.catflav
         histList.append(sigHist)
-        labelList.append(sampParam)
-
-
-    newHistList = []
-    newLabelList = []
-    while len(labelList)>1: #this might be some of the saddest code I have ever written. There are definitely better ways
-        labelFirst = labelList[0]
-        histFirst = histList[0]
-        labelList.pop(0)
-        histList.pop(0)
-        myIter = 0
-        newLabel = ""
-        for i in range(len(labelFirst)):
-            newLabel += ("_comb" if splits[i]==1 else ('_'+labelFirst[i]))
-        while len(labelList)>0:
-            match = True
-            for i in range(len(labelList[0])):
-                if (labelList[myIter][i] != labelFirst[i]) and splits[i]==0:
-                    match = False
-
-            if match == True:
-                histFirst.add(histList[myIter])
-                histList.pop(myIter)
-                labelList.pop(myIter)
-            else:
-                myIter+=1
-            if myIter >= len(labelList):
-                break
-        newHistList.append(histFirst)
-        newLabelList.append(newLabel)
+        label = '_'.join([s for s in sampParam])
+        labelList.append(label)
 
     #------------------Fit Histograms in Turn--------------------#
-    for i in range(len(newHistList)):
+    for i in range(len(histList)):
         MH =  ROOT.RooRealVar("MH", "MH", 125, 120, 130)
 
         logging.info("Beginning fit %d"%i)
-        sig_model = DSCB_Class(x, MH,  newLabelList[i], sigmaL_init = 1.5, sigmaR_init = 1.2, nL_init = 8, nL_bond = 18, nR_init = 12, nR_bond = 18, alphaL_init = 1.0, alphaR_init = 1.5, di_sigma = DISIGMA)
-        sig_model.pdf.fitTo(newHistList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
+        sig_model = DSCB_Class(x, MH,  labelList[i], sigmaL_init = 1.5, sigmaR_init = 1.2, nL_init = 8, nL_bond = 18, nR_init = 12, nR_bond = 18, alphaL_init = 1.0, alphaR_init = 1.5, di_sigma = DISIGMA)
+        sig_model.pdf.fitTo(histList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
         sig_model.setStable()
-        res = sig_model.pdf.fitTo(newHistList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
+        res = sig_model.pdf.fitTo(histList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
         res.Print('v')
-        logging.info('nexp_' + newLabelList[i] + ' = %.2f'%newHistList[i].sumEntries())
+        logging.info('nexp_' + labelList[i] + ' = %.2f'%histList[i].sumEntries())
+        sigma_eff_pair = getEffSigma(x, sig_model.pdf)
+        sigma_eff = (sigma_eff_pair[1]-sigma_eff_pair[0])/2.0
         if DISIGMA:
-            note = '#splitline{#splitline{#sigmaL = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+', #sigmaR = ' + '%.2f'%sig_model.sigmaR.getVal() + '#pm%.2f'%sig_model.sigmaR.getError() + '}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
+            note = '#splitline{#splitline{#splitline{#sigma_{eff} = ' + '%.2f'%sigma_eff + '}{#sigmaL = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+', #sigmaR = ' + '%.2f'%sig_model.sigmaR.getVal() + '#pm%.2f'%sig_model.sigmaR.getError() + '}}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
         else:
             note = '#splitline{#splitline{#sigma = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+'}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
-        plotClass(x, newHistList[i], sig_model.pdf, sig_model.pdf, newLabelList[i], plotPath, note=note, CMS = "Simulation", fullRatio = True, leftSpace=True, bins = dispBinFactor)
+        plotClass(x, histList[i], sig_model.pdf, sig_model.pdf, labelList[i], plotPath, note=note, CMS = "Simulation", fullRatio = True, leftSpace=True, bins = dispBinFactor)
 
-        sampleDetails = newLabelList[i].split('_')
-        sampleDetails.pop(0)
+        sampleDetails = labelList[i].split('_')
         logging.info("Ending fit %d"%i)
         logging.info("Parsing output to config json")
 
