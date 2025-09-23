@@ -1,4 +1,12 @@
+<img width="128" height="128" alt="cmslogo" src="https://github.com/user-attachments/assets/6afe9e5a-28cf-4fc4-8bc4-85eec9af0f15" /> <img width="128" height="128" alt="Cornell_University_seal svg" src="https://github.com/user-attachments/assets/d1ddec45-ac40-4fdb-8b39-1129e48fa2fd" />
+<img width="128" height="128" alt="ucsblogo" src="https://github.com/user-attachments/assets/3a03c2ed-9d5d-4552-94f7-adde461db159" />
+
+
 # HtoZg_fitting
+Welcome to the fitting framework of the analysis H ➝ ZΥ (HIG-25-010). ([CADI link](https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=HIG-25-010&tp=an&id=3014&ancode=HIG-25-010))
+
+The fitting sequence is shown in this diagram. And this framework is developed to conduct this sequence.
+<img width="900" height="250" alt="Screenshot 2025-09-18 134804" src="https://github.com/user-attachments/assets/05cb8b48-683c-49e3-8924-efa915211810" />
 
 # Environment
 The code is tested under `CMSSW_14_0_4/` and `CMSSW_14_1_0_pre4`, and `combine v10.1.0`. 
@@ -74,7 +82,8 @@ To add your own background model, follow the steps:
 5. If you want to set the initial values from the config file, you need to edit the config file so that it includes the keys of the parameters.
 
 > [!NOTE]
-> This method will not add your function into `combine`, thus not useable by any `combine` test.
+> This method can **NOT** add your function into `combine`, thus not useable by any `combine` test.
+> To do so, replace the first two steps with the [Option 1](https://github.com/xingchen-fan/HtoZg_fitting/edit/main/README.md#option-1).
    
 ## Signal Functions
 The functions are defined in `Utilities/sig_functions_class.py`. A typical definition of a model is like this:
@@ -283,6 +292,14 @@ Under Review:
 All scripts can also be run by calling the `fitting_pipeline.py` script from the main directory. Status information from the fitting pipeline is stored in `pipeline_logs/signal_fits.log`.
 
 General configuration settings for the pipeline can be found in `Config/pipeline_settings.json`. Most are self explanatory. The configuration parameter splits refers to the ways in which a signal sample may be split, in the form of a list of booleans. The order is [categories, flavors, years, production modes], with 0 denoting splitting, and 1 denoting combination.
+
+## Plotting Features
+In the `Multi_plot/` folder, there are three important plotting scripts:
+* `multi_plot.py`: Plot selected bkg models with data sideband, controlled by the arguments.
+* `money_plot.py`: Plot a combined S+B and data of all categories over a given range (toy only before unblinding).
+* `plot_signal_errorbar.py`: Plot observed signal strength of all categories with errorbars (toy only before unblinding).
+> [!NOTE]
+> When `matplotlib` is called, please use a CMSSW environment where the library is correctly installed. You may need to switch to a different environment from where you are running the rest of the scripts.
 
 ## Reference Log
 I upload some results when I run the scripts so that you can comapre with.
