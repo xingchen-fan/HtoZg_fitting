@@ -67,7 +67,7 @@ if DAT:
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
+        read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94, 0.83, 0.57)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -77,7 +77,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
+        read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81, 0.48)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':

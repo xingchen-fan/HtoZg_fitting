@@ -30,7 +30,7 @@ lowx = setting["Range"][0]
 highx = setting["Range"][1]
 nbins = int(setting["Bins"])
 
-x = ROOT.RooRealVar("x", "mllg", lowx, highx)
+x = ROOT.RooRealVar("x", "x", lowx, highx)
 x.setBins(nbins)
 x.setRange('left', lowx, 120)
 x.setRange('right', 130, highx)
@@ -38,7 +38,7 @@ x.setRange('full', lowx, highx)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
+        read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -48,7 +48,7 @@ if 'ggf' in CAT:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
 elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
+        read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81,0.48)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -61,4 +61,4 @@ elif 'vbf' in CAT:
 print('N data = ', hist_data.sumEntries())
 profile = profileClass(x, mu_gauss, CAT, args.config)
 bkg_list = profile.testSelection(args.test)
-multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = args.best, CMS = "Preliminary", fullRatio = True, bestLabel = args.best > -1)
+multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = args.best, CMS = "Preliminary", fullRatio = False, ratio_range=[0, 4], bestLabel = args.best > -1, leg_text_size = 0.06)

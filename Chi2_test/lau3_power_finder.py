@@ -18,6 +18,7 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 parser = argparse.ArgumentParser()
 parser.add_argument('-hi', '--high', help = 'Higher power')
 parser.add_argument('-lo', '--low', help = 'Lower power')
+parser.add_argument('-mi', '--mid', help = 'Mid power (one take)', default = -2, type=int)
 parser.add_argument('-c', '--cat', help = 'Cat')
 parser.add_argument('-r', '--ranges', help = 'Range')
 parser.add_argument('-NLL', '--NLL', help = 'Use NLL?', type=int, default=1)
@@ -66,7 +67,7 @@ if DAT:
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
+        read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -76,7 +77,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
+        read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81,0.48)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -115,6 +116,30 @@ list_ = []
 chi2_list = []
 stat_list = []
 pv_list = []
+
+ONESHOT = True
+if ONESHOT:
+    lau3_model = Lau3Class(x, mu_gauss, CAT, sigma_init = 3., sigma2_init = 4., step_init = 101, p1 = int(args.low), p2 = int(args.high), p3 = int(args.mid), f1_init = 0.2, f2_init = 0.1, f3_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = args.duo, fix_sigma = args.fix, gc_init = 1)
+    cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
+    n_bins = 220
+    if args.NLL == True:
+        chi2 = ROOT.RooNLLVar('NLL_'+lau3_model.SBpdf.GetName(), 'NLL_'+lau3_model.SBpdf.GetName(), lau3_model.SBpdf, cuthistogram)
+    else:
+        chi2 = ROOT.RooChi2Var('chi2_'+lau3_model.SBpdf.GetName(), 'chi2_'+lau3_model.SBpdf.GetName(), lau3_model.SBpdf, cuthistogram)
+
+    Minimizer_Chi2(chi2, -1, 100, False, 0)
+    res=Minimizer_Chi2(chi2, -1, 0.1, True, 0)
+    lau3_model.checkBond()
+    res.Print('v')
+    chi2_= ROOT.RooChi2Var('chi2_val_'+lau3_model.SBpdf.GetName(), 'chi2_val_'+lau3_model.SBpdf.GetName(), lau3_model.SBpdf, cuthistogram)
+    chi2_val = chi2_.getVal()
+    chi2_pV= ROOT.Math.chisquared_cdf_c(chi2_.getVal(), n_bins - res.floatParsFinal().getSize())
+    print ('Test stat = ', chi2.getVal())
+    print ('Chi2 = ', chi2_val)
+    print ('P-value = ', chi2_pV)
+    plotClass(x, hist_data, lau3_model.pdf, lau3_model.SBpdf, "Lau3_"+CAT, "", True, 'left,right')
+    sys.exit()
+
 for entry in alt_pow:
     if entry[0] == 'hi':
         pow_list = [int(args.high), int(args.low), int(args.high) + entry[1]]

@@ -42,7 +42,7 @@ x.setBins(nbins)
 
 # SST histograms stored in root files
 #file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
-file_open_bkg = ROOT.TFile.Open('~/EOS_space/DY_sample_combine/sst_vbf_hist_811.root', 'READ')
+file_open_bkg = ROOT.TFile.Open('SST_'+CAT[:3]+'_hist_0924.root', 'READ')
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 hist_bkg_TH1 = file_open_bkg.Get(CAT+'_dy_sm')
 #hist_sig_TH1 = file_open_sig.Get('hist_sig_'+CAT)
@@ -55,8 +55,10 @@ MH = ROOT.RooRealVar("MH","MH"       ,125)#, 120., 130.)
 profile = profileClass(x, mu_gauss, CAT, args.configB)
 
 bkg_list = profile.testSelection("Chi2")
-#bkg_list = [profile.lau2_model, profile.lau3_model, profile.lau4_model]
-#bkg_list = [profile.exp3_model]
+#bkg_list = [profile.lau4_model]#, profile.lau3_model, profile.lau4_model]
+#bkg_list = [profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model,profile.pow2_model, profile.lau2_model, profile.lau3_model, lau4]
+bkg_list = [profile.pow2_model]
+#bkg_list = [profile.exp1_model, profile.exp2_model, profile.exp3_model]
 
 # Signal model 
 #x.setRange("signal",110, 132)
@@ -72,7 +74,7 @@ sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
 sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
 c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
 combine_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
-NLL = True
+NLL = False
 
 # Bkg fit
 for bkg_model in bkg_list:
@@ -105,14 +107,14 @@ for bkg_model in bkg_list:
         chi2_ = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
         chi2_val = chi2_.getVal()
         pV = ROOT.Math.chisquared_cdf_c(chi2_val, nbins - res1.floatParsFinal().getSize())
-        note_chi2 = '#Chi^{2} = %.2f'%chi2_val+',P-value = %.2f'%pV
+        note1_chi2 = '#Chi^{2}(P) = %.2f'%chi2_val+', P-value = %.2f'%pV
     else:
         chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Extended(True))
-        chi2_val = chi2_tot.getVal()
         Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
         res1 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
+        chi2_val = chi2_tot.getVal()
         pV = ROOT.Math.chisquared_cdf_c(chi2_val, nbins - res1.floatParsFinal().getSize())
-        note_chi2 = '#Chi^{2} = %.2f'%chi2_val+',P-value = %.2f'%pV
+        note1_chi2 = '#Chi^{2}(P) = %.2f'%chi2_val+', P-value = %.2f'%pV
     bkg_model.checkBond()
     print("Poisson error:")
     res1.Print("V")
@@ -126,17 +128,24 @@ for bkg_model in bkg_list:
         #chi2_tot = ROOT.RooNLLVar('nll', 'nll', tot_model, hist_bkg, ROOT.RooFit.AsymptoticError(True))
         #Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
         #res2 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
+        chi2_ = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Extended(True))
+        chi2_val = chi2_.getVal()
+        pV = ROOT.Math.chisquared_cdf_c(chi2_val, nbins - res2.floatParsFinal().getSize())
+        note2_chi2 = '#Chi^{2}(W) = %.2f'%chi2_val+', P-value = %.2f'%pV
     else:
         chi2_tot = ROOT.RooChi2Var("chi2_tot", "chi2_tot", tot_model, hist_bkg, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Extended(True))
         Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
         res2 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
+        chi2_val = chi2_tot.getVal()
+        pV = ROOT.Math.chisquared_cdf_c(chi2_val, nbins - res2.floatParsFinal().getSize())
+        note2_chi2 = '#Chi^{2}(W) = %.2f'%chi2_val+', P-value = %.2f'%pV
     bkg_model.checkBond()
     print("SumW2 error:")
     res2.Print("V")
     delta_MC = c02.getError()
     print("N signal = ", NS, ", Delta Ns = ", delta_NS, ", Delta MC = ", delta_MC)
 
-    plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_"+tot_model.GetName(), note='#splitline{N_{S} = ' + '%.2f' % NS + ' #zeta_{S} = ' + '%.2f' % max(0., abs(NS) - 2*delta_MC) + '}{#splitline{#Delta_{MC} = '+ '%.2f' % delta_MC + '}{#splitline{#Delta_{N_{S}} = '+ '%.2f' % delta_NS+'}{' + note_chi2 +'}}}', CMS = 'Simulation', fullRatio = True)
+    plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_"+tot_model.GetName(), note='#splitline{N_{S} = ' + '%.2f' % NS + ' #zeta_{S} = ' + '%.2f' % max(0., abs(NS) - 2*delta_MC) + '}{#splitline{#Delta_{MC} = '+ '%.2f' % delta_MC + '}{#splitline{#Delta_{N_{S}} = '+ '%.2f' % delta_NS+'}{#splitline{' + note1_chi2 +'}{'+note2_chi2 + '}}}}', CMS = 'Simulation', fullRatio = True)
 
 
 
