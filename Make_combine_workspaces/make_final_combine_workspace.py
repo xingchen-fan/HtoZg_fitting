@@ -16,6 +16,12 @@ from sig_functions_class import *
 from constants import *
 from multiprocessing import Process
 
+ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
+ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 #ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
@@ -34,8 +40,7 @@ SIGNAL_PROCS = ["Htozg_el", "Htozg_mu", "Htomm"]
 SYSTEMATICS_DATACARD = [("CMS_scale_e", True),
                         ("CMS_res_e", False),
                         ("CMS_scale_g", True),
-                        ("CMS_res_g", False),
-                        ("CMS_scale_m", True)]
+                        ("CMS_res_g", False)]
 
 rng = ROOT.TRandom3()
 
@@ -100,6 +105,8 @@ def write_all_workspaces(datacard_filename, signal_config, background_config):
         category_processes.append(Process(target=write_workspace, args=
             (category, datacard_filename, signal_config, background_config)))
         category_processes[-1].start()
+        #write_workspace(category, datacard_filename, signal_config, 
+        #                background_config)
     for icat in range(len(CATEGORIES)):
         category_processes[icat].join()
     #merge outputs
@@ -109,6 +116,29 @@ def write_all_workspaces(datacard_filename, signal_config, background_config):
     #category_filename = datacard_filename[:-4] + f"_{category}.root"
     #append_nuisances_to_datacard(datacard_filename)
     print("Finished processing all categories")
+
+def fix_config(config_json_in, config_json_out):
+    """Fix divergences in Xingchen's and Anders' function definitions related
+    to double gaussian convolution
+
+    Args:
+        config_json_in: background configuration dictionary input filename
+        config_json_out: background configuration dictionary output filename
+    """
+    config = {}
+    with open(config_json_in, "r") as jfile_:
+        config = json.load(jfile_)
+    for category in CATEGORIES:
+        for affected_fn in ["pow1","pow2","pow3","exp1","exp2","exp3","lau2",
+                            "lau3","lau4"]:
+            if affected_fn in config[category]:
+                if not "sigma2" in config[category][affected_fn]:
+                    config[category][affected_fn]["sigma2"] = (
+                        config[category][affected_fn]["sigma"])
+                if not "gc" in config[category][affected_fn]:
+                    config[category][affected_fn]["gc"] = 1
+    with open(config_json_out, "w") as config_file:
+        config_file.write(json.dumps(config,indent=2))
 
 def write_workspace(category, datacard_filename, signal_config, 
                     background_config, fake_data=False):
@@ -148,7 +178,7 @@ def write_workspace(category, datacard_filename, signal_config,
 
     #save workspace with data
     rawdata_filename = datacard_filename[:-4] + "_rawdata.root"
-    reader = readPico(x, rawdata_filename)
+    reader = readPico(x, rawdata_filename, category, "data_obs")
     #NOTE you MUST open output after initializing readPico
     workspace_filename = datacard_filename[:-4] + f"_{category}.root"
     output_file = ROOT.TFile(workspace_filename, "RECREATE")
@@ -230,7 +260,7 @@ def write_workspace(category, datacard_filename, signal_config,
 
     #save workspace with background
     profile_ = profileClass(x, mu_gauss, category, background_config)
-    profile = profile_.testSelection("FinalTemp")
+    profile = profile_.testSelection("CMSBias")
     stat_list = []
     cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
     error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
@@ -291,6 +321,7 @@ def append_nuisances_to_datacard(datacard_filename):
 def main():
     args = parse_args()
     write_all_workspaces(args.datacard, args.sig_config, args.bak_config)
+    #fix_config("../Config/chi2_config_allcats_fixed.json","../Config/chi2_config_allcats_fixed2.json")
 
 if __name__=="__main__":
     main()

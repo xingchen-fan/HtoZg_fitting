@@ -1,0 +1,5 @@
+*.pdf
+Utilities/*.d
+Utilities/*.so
+Utilities/*.pcm
+*/__pycache__

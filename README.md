@@ -4,22 +4,35 @@
 The code is tested under `CMSSW_14_0_4/` and `CMSSW_14_1_0_pre4`, and `combine v10.1.0`. 
 Should work without `CMSSW` or `combine` but plain `pyroot`, but require an extra step.
 
-Make sure `RooGaussStepBernstein` is properly installed!
+Make sure the custom functions are properly installed!
 
+{::comment}
 ### Option 1: 
   It is installed in the `combine v10.1.0`, specificly in `CMSSW_PATH/src/HiggsAnalysis/CombinedLimit/src/HZGRooPdfs.cxx`.
-
 ### Option 2: 
-  No dependence on `combine` or `CMSSW`. Generate a c++ dictionary `.so` file, `Utilities/HZGRooPdfs_cxx.so` using the following line ([reference](https://root.cern/manual/io_custom_classes/#generating-dictionaries))
+  No dependence on `combine` or `CMSSW`. 
+Depdending on the option, you may or may not need to include the library at the beginning of each python script. Please comment them out if you are using option 1.
+{:/comment}
+
+
+To do this, generate a shared library with the custom functions using the following lines ([reference](https://root.cern/manual/io_custom_classes/#generating-dictionaries)):
   ```
   root[] .L HZGRooPdfs.cxx+
+  root[] .L RooGaussStepBernstein.cxx+
+  root[] .L AsymGenGaussian.cxx+
+  root[] .L EXModGaus.cxx+
   ```
 Please run it with your version of `ROOT` to overwirte the `.so` file. The `.so` and `.d` files in this repo are generated under `ROOT 6.30`, thus not working under other ROOT versions.
 
-Depdending on the option, you may or may not need to include the library at the beginning of each python script. Please comment them out if you are using option 1.
 ```
 ROOT.gInterpreter.AddIncludePath('../Utilities/HZGRooPdfs.h')
 ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/RooGaussStepBernstein.h')
+ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/AsymGenGaussian.h')
+ROOT.gSystem.Load('../Utilities/AsymGenGaussian_cxx.so')
+ROOT.gInterpreter.AddIncludePath('../Utilities/EXModGaus.h')
+ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 ```
 
 Note: On the LXPLUS machine, the ROOT doesn't have the FFT package properly installed and when running the fit, you may see some errors accordingly. I suggest you use the ROOT in any CMSSW environment. 

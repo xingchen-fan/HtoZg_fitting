@@ -6,7 +6,7 @@ class profileClass:
     def __init__(self, x, mu_gauss, cat='', config=''):
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
-        setting = configs_[cat[:4]]
+        setting = configs_[cat]
         self.config_file = config
         self.cat = cat
         self.setting_ = setting
@@ -32,9 +32,9 @@ class profileClass:
         self.lau3_model = Lau3Class(x, mu_gauss, cat, setting["lau3"]['sigma'], setting["lau3"]['sigma2'], setting["lau3"]['step'], setting["lau3"]['p1'], setting["lau3"]['p2'], setting["lau3"]['p3'], setting["lau3"]['f1'], setting["lau3"]['f2'], setting["lau3"]['f3'], setting["lau3"]['xmax'], setting["lau3"]['const_f1'], setting["lau3"]['di_gauss'], setting["lau3"]['fix_sigma'], setting["lau3"]['gc'])
         self.lau4_model = Lau4Class(x, mu_gauss, cat, setting["lau4"]['sigma'], setting["lau4"]['sigma2'], setting["lau4"]['step'], setting["lau4"]['p1'], setting["lau4"]['p2'], setting["lau4"]['p3'], setting["lau4"]['p4'], setting["lau4"]['f1'], setting["lau4"]['f2'], setting["lau4"]['f3'], setting["lau4"]['f4'], setting["lau4"]['xmax'], setting["lau4"]['const_f1'], setting["lau4"]['di_gauss'], setting["lau4"]['fix_sigma'], setting["lau4"]['gc'])
 
-        self.modg_model = ModGausClass(x, cat, x.getMin(), x.getMax(), setting["modg"]['m0'], setting["modg"]['sigmaL'], setting["modg"]['sigmaH'], setting["modg"]['nuL'], setting["modg"]['nuRange'])
-        #self.exmg_model = EXMGClass(x, cat, setting["exmg"]['mu'], setting["exmg"]['sigma'], setting["exmg"]['xsi'])
-        #self.agg_model = AGGClass(x, cat, setting["agg"]['kappa'], setting["agg"]['alpha'], setting["agg"]['zeta'])
+        self.modg_model = ModGausClass(x, cat, x.getMin(), x.getMax(), setting["modg"]['m0'], setting["modg"]['sl'], setting["modg"]['sh'], setting["modg"]['vl'], setting["modg"]['vr'])
+        self.exmg_model = EXMGClass(x, cat, setting["exmg"]['mu'], setting["exmg"]['sigma'], setting["exmg"]['xsi'])
+        self.agg_model = AGGClass(x, cat, setting["agg"]['kappa'], setting["agg"]['alpha'], setting["agg"]['zeta'])
 
     def testSelection(self, test=""):
         profile_ = []
@@ -75,7 +75,7 @@ class profileClass:
             if "lau4" in self.setting_[test]: profile_.append(self.lau4_model)
             if "modg" in self.setting_[test]: profile_.append(self.modg_model)
             if "exmg" in self.setting_[test]: profile_.append(self.exmg_model)
-            if "agg"  in self.setting_[test]: profile_.append(self.agg_model)
+            #if "agg"  in self.setting_[test]: profile_.append(self.agg_model)
         return profile_
 
     #Code to update the JSON file
