@@ -10,14 +10,15 @@
             "range_info":       [340,95,180]
             },
     "bdt_settings":{
-            "ggf_bins":         [0.81,0.64,0.47],
-            "vbf_bins":         [0.489,0.286,0.083]
+            "ggf_bins":         [0.94,0.83,0.57],
+            "vbf_bins":         [0.91,0.81,0.48]
             },
     "signal_settings":{ 
-            "base_path":        "/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/",
-            "ggf_path":         "./",
-            "vbf_path":         "./",
-            "splits":           [0,0,1,1],
+            "base_path":        "/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/",
+            "ggf_path":         "./Output_ggF_rui_redwood_v1_ext_val/",
+            "vbf_path":         "./Output_VBF_rui_redwood_v1_ext_val/",
+	    "fit_combs":        [0,0,0,0],
+	    "disp_combs":       [1,1,1,1],
             "shape_config":     "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Config/config_DSCB_flat_jdg.json",
             "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/signal_fits.log"
             },
