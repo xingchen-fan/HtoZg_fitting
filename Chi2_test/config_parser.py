@@ -28,9 +28,16 @@ for line in log:
         elif len(r) >1:
             setting["bern2"]["sigma"] = float(r[1])
             setting["bern2"]["fix_sigma"] = 0
+    elif "bern2_sigma2_" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern2"]["sigma2"] =  float(r[1])
+        setting["bern2"]["di_gauss"] = 1
     elif "bern2_step" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["bern2"]["step"] = float(r[1])
+    elif "bern2_gc" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern2"]["gc"] = float(r[1])
 
     if "bern3_p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
@@ -49,9 +56,16 @@ for line in log:
         elif len(r) >1:
             setting["bern3"]["sigma"] = float(r[1])
             setting["bern3"]["fix_sigma"] = 0
+    elif "bern3_sigma2_" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern3"]["sigma2"] =  float(r[1])
+        setting["bern3"]["di_gauss"] = 1
     elif "bern3_step" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["bern3"]["step"] = float(r[1])
+    elif "bern3_gc" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern3"]["gc"] = float(r[1])
 
     if "bern4_p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
@@ -73,9 +87,16 @@ for line in log:
         elif len(r) >1:
             setting["bern4"]["sigma"] = float(r[1])
             setting["bern4"]["fix_sigma"] = 0
+    elif "bern4_sigma2_" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern4"]["sigma2"] =  float(r[1])
+        setting["bern4"]["di_gauss"] = 1
     elif "bern4_step" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["bern4"]["step"] = float(r[1])
+    elif "bern4_gc" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern4"]["gc"] = float(r[1])
 
     if "bern5_p1" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
@@ -100,10 +121,17 @@ for line in log:
         elif len(r) >1:
             setting["bern5"]["sigma"] = float(r[1])
             setting["bern5"]["fix_sigma"] = 0
+    elif "bern5_sigma2_" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern5"]["sigma2"] =  float(r[1])
+        setting["bern5"]["di_gauss"] = 1
     elif "bern5_step" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["bern5"]["step"] = float(r[1])
-        
+    elif "bern5_gc" in line:
+        r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
+        setting["bern5"]["gc"] = float(r[1])
+
     if "pow1_t_" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["pow1"]["step"]= float(r[1])
@@ -385,8 +413,8 @@ for line in log:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["modg"]["sigmaH"] = float(r[1])
 
-"""
-     if "agg_kappa" in line:
+
+    if "agg_kappa" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["agg"]["kappa"] = float(r[1])
     elif "agg_alpha" in line:
@@ -406,7 +434,7 @@ for line in log:
     elif "exmg_xsi" in line:
         r = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",line[line.find(CAT)+4:])
         setting["exmg"]["xsi"] = float(r[1])
-"""
+
 jfile_mod =  open(args.config, 'w')
 modify = json.dump(configs, jfile_mod, indent=4)
 #f = open('chi2.log')

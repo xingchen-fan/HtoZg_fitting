@@ -67,7 +67,7 @@ if DAT:
 
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
+        read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94, 0.83, 0.57)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -77,7 +77,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
+        read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81, 0.48)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -96,7 +96,7 @@ stat_list = []
 chi2_list = []
 pv_list = []
 
-ONESHOT = False
+ONESHOT = True
 if ONESHOT:
     lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., sigma2_init = 4., step_init = 101, p1 = int(args.low), p2 = int(args.high), f1_init = 0.2, f2_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = args.duo, fix_sigma = args.fix, gc_init = 1)
     cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
@@ -113,6 +113,7 @@ if ONESHOT:
     chi2_= ROOT.RooChi2Var('chi2_val_'+lau2_model.SBpdf.GetName(), 'chi2_val_'+lau2_model.SBpdf.GetName(), lau2_model.SBpdf, cuthistogram)
     chi2_val = chi2_.getVal()
     chi2_pV= ROOT.Math.chisquared_cdf_c(chi2_.getVal(), n_bins - res.floatParsFinal().getSize())
+    print ('Test stat = ', chi2.getVal())
     print ('Chi2 = ', chi2_val)
     print ('P-value = ', chi2_pV)
     plotClass(x, hist_data, lau2_model.pdf, lau2_model.SBpdf, "Lau2", "", True, 'left,right')
@@ -122,7 +123,7 @@ for i in range(int(args.low), int(args.high) + 1):
         pow_list = []
         pow_list.append(i)
         pow_list.append(j)
-        lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., sigma2_init = 4., step_init = 101, p1 = i, p2 = j, f1_init = 0.2, f2_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = args.duo, fix_sigma = False, gc_init = 1)
+        lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., sigma2_init = 4., step_init = 101, p1 = i, p2 = j, f1_init = 0.2, f2_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = args.duo, fix_sigma = args.fix, gc_init = 1)
         cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
         n_bins = 220
         if args.NLL == True:
