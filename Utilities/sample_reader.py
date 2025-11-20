@@ -709,31 +709,27 @@ class readRuiROOTSignal:
         elif flav == 'mu': lep = 13
         elif flav == 'comb': lep = 11 #placeholder
 
-        chain = ROOT.TChain('outtree')
         yearIn = year
         if year == 'comb':
             yearIn = '*'
 
-
-
         if ('ggf' in cat) or (cat == 'comb'):
             if prod == 'ggf' or prod == 'comb':
                 chain.Add(direct + ggfPath + 'GGF_'+yearIn+'_output.root')
-            elif prod == 'vbf' or prod == 'comb':
+            if prod == 'vbf' or prod == 'comb':
                 chain.Add(direct + ggfPath + 'VBF_'+yearIn+'_output.root')
                 chain.Add(direct + ggfPath + 'ZH_'+yearIn+'_output.root')
                 chain.Add(direct + ggfPath + 'WH_'+yearIn+'_output.root')
                 chain.Add(direct + ggfPath + 'ttH_'+yearIn+'_output.root')
 
         if ('vbf' in cat) or (cat == 'comb'):
-            bdtPath = vbfPath
             if prod == 'ggf' or prod == 'comb':
-                chain.Add(direct + bdtPath + 'GGF_'+yearIn+'_output.root')
-            elif prod == 'vbf' or prod == 'comb':
-                chain.Add(direct + bdtPath + 'VBF_'+yearIn+'_output.root')
-                chain.Add(direct + bdtPath + 'ZH_'+yearIn+'_output.root')
-                chain.Add(direct + bdtPath + 'WH_'+yearIn+'_output.root')
-                chain.Add(direct + bdtPath + 'ttH_'+yearIn+'_output.root')
+                chain.Add(direct + vbfPath + 'GGF_'+yearIn+'_output.root')
+            if prod == 'vbf' or prod == 'comb':
+                chain.Add(direct + vbfPath + 'VBF_'+yearIn+'_output.root')
+                chain.Add(direct + vbfPath + 'ZH_'+yearIn+'_output.root')
+                chain.Add(direct + vbfPath + 'WH_'+yearIn+'_output.root')
+                chain.Add(direct + vbfPath + 'ttH_'+yearIn+'_output.root')
 
         label = cat + '_th1f_' + prod + '_' + flav + '_' + year
         histlabel = 'hist' + label
@@ -745,24 +741,84 @@ class readRuiROOTSignal:
                 continue
             if (cat == 'vbf1' or cat == 'comb') and entry.BDT_score > vbfBins[0] and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif (cat == 'vbf2' or cat == 'comb') and entry.BDT_score > vbfBins[1] and entry.BDT_score < vbfBins[0] and entry.weight_corr < 0.5:
+            elif (cat == 'vbf2' or cat == 'comb') and entry.BDT_score > vbfBins[1] and entry.BDT_score <= vbfBins[0] and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif (cat == 'vbf3' or cat == 'comb') and entry.BDT_score > vbfBins[2] and entry.BDT_score < vbfBins[1] and entry.weight_corr < 0.5:
+            elif (cat == 'vbf3' or cat == 'comb') and entry.BDT_score > vbfBins[2] and entry.BDT_score <= vbfBins[1] and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif (cat == 'vbf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score < vbfBins[2] and entry.weight_corr < 0.5:
+            elif (cat == 'vbf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score <= vbfBins[2] and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
             elif (cat == 'ggf1' or cat == 'comb') and entry.BDT_score > ggfBins[0] and entry.met < metCut and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif (cat == 'ggf2' or cat == 'comb') and entry.BDT_score > ggfBins[1] and entry.BDT_score < ggfBins[0] and entry.met < metCut and entry.weight_corr < 0.5:
+            elif (cat == 'ggf2' or cat == 'comb') and entry.BDT_score > ggfBins[1] and entry.BDT_score <= ggfBins[0] and entry.met < metCut and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif (cat == 'ggf3' or cat == 'comb') and entry.BDT_score > ggfBins[2] and entry.BDT_score < ggfBins[1] and entry.met < metCut and entry.weight_corr < 0.5:
+            elif (cat == 'ggf3' or cat == 'comb') and entry.BDT_score > ggfBins[2] and entry.BDT_score <= ggfBins[1] and entry.met < metCut and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
-            elif (cat == 'ggf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score < ggfBins[2] and entry.met < metCut and entry.weight_corr < 0.5:
+            elif (cat == 'ggf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score <= ggfBins[2] and entry.met < metCut and entry.weight_corr < 0.5:
                 hist_TH1.Fill(entry.llphoton_refit_m, entry.weight_corr)
         self.entries = hist_TH1.GetEntries()
-        self.catflav = ROOT.RooDataHist(histlabel, histlabel, x, hist_TH1)
+        self.wentries = hist_TH1.GetSumOfWeights()
+        self.rdHist = ROOT.RooDataHist(histlabel, histlabel, x, hist_TH1)
 
 
+class readRuiROOTData:
+    def __init__(self, x, direct='', ggfPath = '', vbfPath = '', sampParam = ['ggf1','el','2016APV'], ggfBins=[0,0,0], vbfBins=[0,0,0], rangeInfo=[340,95,180]):
+
+        chain = ROOT.TChain('outtree')
+        
+        cat = sampParam[0]
+        flav = sampParam[1]
+        year = sampParam[2]
+
+        bins  = rangeInfo[0]
+        lower = rangeInfo[1]
+        upper = rangeInfo[2]
+
+        metCut = 90
+        if flav == 'el': lep = 11
+        elif flav == 'mu': lep = 13
+        elif flav == 'comb': lep = 11 #placeholder
+
+        yearIn = year
+        if year == 'comb':
+            yearIn = '*'
+
+
+        if ('ggf' in cat) or (cat == 'comb'):
+            chain.Add(direct + ggfPath + 'data_'+yearIn+'_output.root')
+            print(direct + ggfPath + 'data_'+yearIn+'_output.root')
+
+        if ('vbf' in cat) or (cat == 'comb'):
+            chain.Add(direct + vbfPath + 'data_'+yearIn+'_output.root')
+            print(direct + vbfPath + 'data_'+yearIn+'_output.root')
+
+
+
+        label = cat + '_th1f_' + flav + '_' + year
+        histlabel = 'hist' + label
+        hist_TH1 = ROOT.TH1F(label, label, bins, lower, upper)
+        for entry in chain:
+            if entry.ll_lepid != lep and flav != 'comb':
+                continue
+            if (entry.ll_lepid != 13 and entry.ll_lepid != 11) and flav == 'comb':
+                continue
+            if (cat == 'vbf1' or cat == 'comb') and entry.BDT_score > vbfBins[0]:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'vbf2' or cat == 'comb') and entry.BDT_score > vbfBins[1] and entry.BDT_score < vbfBins[0]:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'vbf3' or cat == 'comb') and entry.BDT_score > vbfBins[2] and entry.BDT_score < vbfBins[1]:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'vbf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score < vbfBins[2]:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'ggf1' or cat == 'comb') and entry.BDT_score > ggfBins[0] and entry.met < metCut:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'ggf2' or cat == 'comb') and entry.BDT_score > ggfBins[1] and entry.BDT_score < ggfBins[0] and entry.met < metCut:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'ggf3' or cat == 'comb') and entry.BDT_score > ggfBins[2] and entry.BDT_score < ggfBins[1] and entry.met < metCut:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            elif (cat == 'ggf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score < ggfBins[2] and entry.met < metCut:
+                hist_TH1.Fill(entry.llphoton_refit_m)
+            self.entries = hist_TH1.GetEntries()
+            self.rdHist = ROOT.RooDataHist(histlabel, histlabel, x, hist_TH1)
 
 class readPico: #draw_pico datacard format
     def __init__(self, x, directory="", cat="", proc="", syst=""):

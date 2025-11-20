@@ -708,7 +708,7 @@ class Lau2Class:
         self.offset = ROOT.RooRealVar("lau2_os_" + cat, "lau2_os_" + cat, 1e-10)
         self.xmax = ROOT.RooRealVar("lau2_xmax_" + cat, "lau2_xmax_" + cat, xmax)
         self.t = ROOT.RooRealVar("lau2_t_" + cat, "t lau2 " + cat, step_init, 90., 118.)
-        self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f1_init, 0, 30.)
+        self.f1 = ROOT.RooRealVar("lau2_f1_" + cat, "f1 lau2 " + cat, f1_init, 0., 30.)
         self.f2 = ROOT.RooRealVar("lau2_f2_" + cat, "f2 lau2 " + cat, f2_init, 0., 30.)
         self.p1 = ROOT.RooRealVar("lau2_p1_" + cat, "p1 lau2 " + cat, p1)
         self.p2 = ROOT.RooRealVar("lau2_p2_" + cat, "p2 lau2 " + cat, p2)
@@ -904,6 +904,77 @@ class Lau5Class:
         self.f3.setVal(self.init_list[7])
         self.f4.setVal(self.init_list[7])
         self.f5.setVal(self.init_list[7])
+        self.sigma.setVal(self.init_list[0])
+
+class LauNClass:
+    #well. N goes up to 5. Needs some more work. 
+    def __init__(self, x, gauss_mu, cat="", sigma_init = 7., step_init = 108., powers=[-1,-2,-3,-4,-5], terms = 1, f_init = [0.1,0.1,0.1,0.1,0.1], xmax = 165., const_f1 = False, fix_sigma = False):
+        self.init_list = [sigma_init, step_init, powers, f_init]
+        self.sigma = ROOT.RooRealVar("lauN_sigma_" + cat, "sigma_lauN_" + cat, sigma_init, 1., 25.)
+        self.sigma.setConstant(fix_sigma)
+        self.xmax = ROOT.RooRealVar("lauN_xmax_" + cat, "xmax_lauN_" + cat, xmax)
+        self.t = ROOT.RooRealVar("lauN_t_" + cat, "t lauN " + cat, step_init, 90., 118.)
+
+        if terms>5:
+            exit("The function is not designed for more than 5 terms. Please rework the LauNClass in bkg_functions_class.py")
+
+        self.f1 = ROOT.RooRealVar("lauN_f1_" + cat, "f1 lau " + str(terms) +"_" + cat, f_init[0], 0., 30.)
+        if terms > 1: self.f2 = ROOT.RooRealVar("lauN_f2_" + cat, "f2 lau " + str(terms) +"_" + cat, f_init[1], 0., 30.)
+        else: self.f2 = ROOT.RooRealVar("lauN_f2_" + cat, "f2 lau " + str(terms) + "_" + cat, 0.)
+        if terms > 2: self.f3 = ROOT.RooRealVar("lauN_f3_" + cat, "f3 lau " + str(terms) +"_" + cat, f_init[2], 0., 30.)
+        else: self.f3 = ROOT.RooRealVar("lauN_f3_" + cat, "f3 lau " + str(terms) + "_" + cat, 0.)
+        if terms > 3: self.f4 = ROOT.RooRealVar("lauN_f4_" + cat, "f4 lau " + str(terms) +"_" + cat, f_init[3], 0., 30.)
+        else: self.f4 = ROOT.RooRealVar("lauN_f4_" + cat, "f4 lau " + str(terms) + "_" + cat, 0.)
+        if terms > 4: self.f5 = ROOT.RooRealVar("lauN_f5_" + cat, "f5 lau " + str(terms) +"_" + cat, f_init[4], 0., 30.)
+        else: self.f5 = ROOT.RooRealVar("lauN_f5_" + cat, "f5 lau " + str(terms) + "_" + cat, 0.)
+
+        self.p1 = ROOT.RooRealVar("lauN_p1_" + cat, "p1 lau " + str(terms) +"_" + cat, powers[0])
+        self.p2 = ROOT.RooRealVar("lauN_p2_" + cat, "p2 lau " + str(terms) +"_" + cat, powers[1])
+        self.p3 = ROOT.RooRealVar("lauN_p3_" + cat, "p3 lau " + str(terms) +"_" + cat, powers[2])
+        self.p4 = ROOT.RooRealVar("lauN_p4_" + cat, "p4 lau " + str(terms) +"_" + cat, powers[3])
+        self.p5 = ROOT.RooRealVar("lauN_p5_" + cat, "p5 lau " + str(terms) +"_" + cat, powers[4])
+
+        self.norm1 = ROOT.RooFormulaVar("lauN_norm1_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p1, self.xmax))
+        self.norm2 = ROOT.RooFormulaVar("lauN_norm2_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p2, self.xmax))
+        self.norm3 = ROOT.RooFormulaVar("lauN_norm3_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p3, self.xmax))
+        self.norm4 = ROOT.RooFormulaVar("lauN_norm4_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p4, self.xmax))
+        self.norm5 = ROOT.RooFormulaVar("lauN_norm5_"+cat, "(@2^(1+@1) - @0^(1+@1))/(1+@1)", ROOT.RooArgList(self.t, self.p5, self.xmax))
+
+        if(terms == 2):
+            self.step = ROOT.RooGenericPdf("lauN_step_" + cat, "lauN_step_" + cat, "( ((@0-@1)*12<0.0) ? 0.0 : (((@0-@1)*12 >1.0) ? 1.0 : ((@0-@1)*12) ) )*((@2/@3)*@0^@4 + (@5/@6)*@0^@7)", ROOT.RooArgList(x,self.t, self.f1, self.norm1, self.p1, self.f2, self.norm2, self.p2))
+        elif(terms == 3):
+            self.step = ROOT.RooGenericPdf("lauN_step_" + cat, "lauN_step_" + cat, "( ((@0-@1)*12<0.0) ? 0.0 : (((@0-@1)*12 >1.0) ? 1.0 : ((@0-@1)*12) ) )*((@2/@3)*@0^@4 + (@5/@6)*@0^@7 + (@8/@9)*@0^@10)", ROOT.RooArgList(x,self.t, self.f1, self.norm1, self.p1, self.f2, self.norm2, self.p2, self.f3, self.norm3, self.p3))
+        elif(terms == 4):
+            self.step = ROOT.RooGenericPdf("lauN_step_" + cat, "lauN_step_" + cat, "( ((@0-@1)*12<0.0) ? 0.0 : (((@0-@1)*12 >1.0) ? 1.0 : ((@0-@1)*12) ) )*((@2/@3)*@0^@4 + (@5/@6)*@0^@7 + (@8/@9)*@0^@10 + (@11/@12)*@0^@13)", ROOT.RooArgList(x,self.t, self.f1, self.norm1, self.p1, self.f2, self.norm2, self.p2, self.f3, self.norm3, self.p3, self.f4, self.norm4, self.p4))
+        elif(terms == 5):
+            self.step = ROOT.RooGenericPdf("lauN_step_" + cat, "lauN_step_" + cat, "( ((@0-@1)*12<0.0) ? 0.0 : (((@0-@1)*12 >1.0) ? 1.0 : ((@0-@1)*12) ) )*((@2/@3)*@0^@4 + (@5/@6)*@0^@7 + (@8/@9)*@0^@10 + (@11/@12)*@0^@13 + (@14/@15)*@0^@16)", ROOT.RooArgList(x,self.t, self.f1, self.norm1, self.p1, self.f2, self.norm2, self.p2, self.f3, self.norm3, self.p3, self.f4, self.norm4, self.p4, self.f5, self.norm5, self.p5))
+
+
+        self.gauss = ROOT.RooGaussian("gaussxlauN_" + cat, "gaussian PDF lauN " + cat, x, gauss_mu, self.sigma)
+        self.f1.setConstant(const_f1)
+        x.setBins(2000, "cache")
+        self.pdf = ROOT.RooFFTConvPdf("lauN_" +cat+ "_model", "step lauN (X) gauss " + cat, x, self.step, self.gauss)
+        self.pdf.setBufferFraction(0.3)
+        self.SBpdf = ROOT.RooGenericPdf("lauN_SB_" +cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
+        self.name = "lauN_"+ cat
+    def checkBond(self):
+        tol = 0.0001
+        par_list = [self.t, self.p1, self.p2, self.p3, self.p4, self.p5, self.f1, self.f2, self.f3, self.f4, self.f5, self.sigma]
+        if any(bondComp(par, tol) for par in par_list):
+            print ("The pdf ", self.pdf.GetName(), " needs refit.")
+
+    def reset(self):
+        self.t.setVal(self.init_list[1])
+        self.p1.setVal(self.init_list[2][0])
+        self.p2.setVal(self.init_list[2][1])
+        self.p3.setVal(self.init_list[2][2])
+        self.p4.setVal(self.init_list[2][3])
+        self.p5.setVal(self.init_list[2][4])
+        self.f1.setVal(self.init_list[3][0])
+        self.f2.setVal(self.init_list[3][1])
+        self.f3.setVal(self.init_list[3][2])
+        self.f4.setVal(self.init_list[3][3])
+        self.f5.setVal(self.init_list[3][4])
         self.sigma.setVal(self.init_list[0])
 
 

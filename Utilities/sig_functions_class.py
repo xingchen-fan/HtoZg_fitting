@@ -172,12 +172,15 @@ class DSCB_Class:
             print("aR = ",  self.alphaR.getVal())
         self.setConst(True)
 
-    def assignValN(self, config, name, debug = False):
+    def assignValN(self, config, name, DISIGMA = True, debug = False):
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
         setting = configs_[name]
         for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:
-            getattr(self, param).setVal(setting[param])
+            if param == "sigmaR" and DISIGMA == False:
+                getattr(self, param).setVal(setting["sigmaL"])
+            else: 
+                getattr(self, param).setVal(setting[param])
         self.nsig = setting["nexp"]
         if debug:
             print("sigmaL = ",  self.sigmaL.getVal())

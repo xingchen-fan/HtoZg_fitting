@@ -26,7 +26,7 @@ def bootstrapper(modLabel, DISIGMA, binFactor, nEvents, shapeConfigFile):
     plotPath = "./Signal_model_preparation/plots/"
 
     initModel = DSCB_Class(x, MH,  modLabel, sigmaL_init = 1.5, sigmaR_init = 1.2, nL_init = 8, nL_bond = 18, nR_init = 12, nR_bond = 18, alphaL_init = 1.0, alphaR_init = 1.5, di_sigma = DISIGMA)
-    initModel.assignValN(shapeConfigFile, modLabel)
+    initModel.assignValN(shapeConfigFile, modLabel, DISIGMA)
     initModelPdf = initModel.pdf
     sigma_eff_pair = getEffSigma(x, initModelPdf)
     trueSigmaEff = (sigma_eff_pair[1]-sigma_eff_pair[0])/2.0
