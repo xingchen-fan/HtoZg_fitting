@@ -1,0 +1,161 @@
+INFO:root:Creating histograms
+/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/./Output_ggF_rui_redwood_v1_ext_val/data_*_output.root
+/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/./Output_ggF_rui_redwood_v1_ext_val/data_*_output.root
+Time elapsed adding chains: 0.01
+Time elapsed adding chains: 23.09
+INFO:root:Finished creating histograms in 23.10 minutes
+INFO:root:Beginning fit on comb_comb_comb with 3 terms
+INFO:root:[(3, 4, 5), (3, 4, 6), (3, 4, 7), (3, 4, 8), (3, 4, 9), (3, 4, 10), (3, 5, 6), (3, 5, 7), (3, 5, 8), (3, 5, 9), (3, 5, 10), (3, 6, 7), (3, 6, 8), (3, 6, 9), (3, 6, 10), (3, 7, 8), (3, 7, 9), (3, 7, 10), (3, 8, 9), (3, 8, 10), (3, 9, 10), (4, 5, 6), (4, 5, 7), (4, 5, 8), (4, 5, 9), (4, 5, 10), (4, 6, 7), (4, 6, 8), (4, 6, 9), (4, 6, 10), (4, 7, 8), (4, 7, 9), (4, 7, 10), (4, 8, 9), (4, 8, 10), (4, 9, 10), (5, 6, 7), (5, 6, 8), (5, 6, 9), (5, 6, 10), (5, 7, 8), (5, 7, 9), (5, 7, 10), (5, 8, 9), (5, 8, 10), (5, 9, 10), (6, 7, 8), (6, 7, 9), (6, 7, 10), (6, 8, 9), (6, 8, 10), (6, 9, 10), (7, 8, 9), (7, 8, 10), (7, 9, 10), (8, 9, 10)]
+INFO:root:Testing [-3, -4, -5] as Laurent powers
+lauN_f1_comb  =  5.975937871584075e-08  hits the bondary ( 0.0 ,  30.0 )
+The pdf  lauN_comb_model  needs refit.
+
+  RooFitResult: minimized FCN value: -0.0594817, estimated distance to minimum: 0.00139215
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+          lauN_p1_comb   -3.0000e+00
+          lauN_p2_comb   -4.0000e+00
+          lauN_p3_comb   -5.0000e+00
+        lauN_xmax_comb    1.8000e+02
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+          lauN_f1_comb    4.8903e-06    5.9759e-08 +/-  2.41e-01  <none>
+          lauN_f2_comb    3.9577e-04    6.9893e-07 +/-  2.30e+00  <none>
+          lauN_f3_comb    2.7600e-01    5.9170e-01 +/-  2.62e+01  <none>
+       lauN_sigma_comb    3.3614e+00    3.3631e+00 +/-  1.16e-02  <none>
+           lauN_t_comb    1.0623e+02    1.0623e+02 +/-  1.22e-02  <none>
+
+INFO:root:Testing [-3, -4, -6] as Laurent powers
+lauN_f1_comb  =  3.243926884760346e-08  hits the bondary ( 0.0 ,  30.0 )
+The pdf  lauN_comb_model  needs refit.
+
+  RooFitResult: minimized FCN value: -0.12019, estimated distance to minimum: 0.000107813
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+          lauN_p1_comb   -3.0000e+00
+          lauN_p2_comb   -4.0000e+00
+          lauN_p3_comb   -6.0000e+00
+        lauN_xmax_comb    1.8000e+02
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+          lauN_f1_comb    4.0533e-05    3.2439e-08 +/-  1.26e-03  <none>
+          lauN_f2_comb    1.3490e-01    1.3440e-01 +/-  3.40e-02  <none>
+          lauN_f3_comb    1.5722e-01    1.5780e-01 +/-  4.07e-02  <none>
+       lauN_sigma_comb    3.3998e+00    3.4008e+00 +/-  1.37e-02  <none>
+           lauN_t_comb    1.0631e+02    1.0631e+02 +/-  1.70e-02  <none>
+
+INFO:root:Testing [-3, -4, -7] as Laurent powers
+lauN_f1_comb  =  1.2435528770463923e-09  hits the bondary ( 0.0 ,  30.0 )
+The pdf  lauN_comb_model  needs refit.
+
+  RooFitResult: minimized FCN value: -0.0232024, estimated distance to minimum: 1.26177e-06
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+          lauN_p1_comb   -3.0000e+00
+          lauN_p2_comb   -4.0000e+00
+          lauN_p3_comb   -7.0000e+00
+        lauN_xmax_comb    1.8000e+02
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+          lauN_f1_comb    4.3676e-06    1.2436e-09 +/-  8.31e-04  <none>
+          lauN_f2_comb    2.5784e-01    2.5747e-01 +/-  4.77e-02  <none>
+          lauN_f3_comb    1.6238e-01    1.6262e-01 +/-  3.13e-02  <none>
+       lauN_sigma_comb    3.4339e+00    3.4352e+00 +/-  1.59e-02  <none>
+           lauN_t_comb    1.0637e+02    1.0638e+02 +/-  2.11e-02  <none>
+
+INFO:root:Testing [-3, -4, -8] as Laurent powers
+lauN_f1_comb  =  2.125023789746605e-12  hits the bondary ( 0.0 ,  30.0 )
+The pdf  lauN_comb_model  needs refit.
+
+  RooFitResult: minimized FCN value: -0.0319644, estimated distance to minimum: 9.74377e-08
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+          lauN_p1_comb   -3.0000e+00
+          lauN_p2_comb   -4.0000e+00
+          lauN_p3_comb   -8.0000e+00
+        lauN_xmax_comb    1.8000e+02
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+          lauN_f1_comb    7.1141e-07    2.1250e-12 +/-  5.43e-04  <none>
+          lauN_f2_comb    3.7179e-01    3.7108e-01 +/-  6.28e-02  <none>
+          lauN_f3_comb    1.6751e-01    1.6783e-01 +/-  2.61e-02  <none>
+       lauN_sigma_comb    3.4649e+00    3.4666e+00 +/-  2.09e-02  <none>
+           lauN_t_comb    1.0644e+02    1.0644e+02 +/-  2.87e-02  <none>
+
+INFO:root:Testing [-3, -4, -9] as Laurent powers
+lauN_f1_comb  =  1.5030347572022457e-10  hits the bondary ( 0.0 ,  30.0 )
+The pdf  lauN_comb_model  needs refit.
+
+  RooFitResult: minimized FCN value: -0.0455673, estimated distance to minimum: 9.73815e-07
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+          lauN_p1_comb   -3.0000e+00
+          lauN_p2_comb   -4.0000e+00
+          lauN_p3_comb   -9.0000e+00
+        lauN_xmax_comb    1.8000e+02
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+          lauN_f1_comb    3.3745e-07    1.5030e-10 +/-  4.48e-04  <none>
+          lauN_f2_comb    4.6077e-01    4.6029e-01 +/-  1.03e-01  <none>
+          lauN_f3_comb    1.6713e-01    1.6730e-01 +/-  3.74e-02  <none>
+       lauN_sigma_comb    3.4945e+00    3.4954e+00 +/-  1.43e-02  <none>
+           lauN_t_comb    1.0650e+02    1.0651e+02 +/-  1.80e-02  <none>
+
+INFO:root:Testing [-3, -4, -10] as Laurent powers
+lauN_f1_comb  =  2.022530133280985e-10  hits the bondary ( 0.0 ,  30.0 )
+The pdf  lauN_comb_model  needs refit.
+
+  RooFitResult: minimized FCN value: -0.00344857, estimated distance to minimum: 1.45767e-05
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+          lauN_p1_comb   -3.0000e+00
+          lauN_p2_comb   -4.0000e+00
+          lauN_p3_comb   -1.0000e+01
+        lauN_xmax_comb    1.8000e+02
+              mu_gauss    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+          lauN_f1_comb    1.6538e-06    2.0225e-10 +/-  7.03e-04  <none>
+          lauN_f2_comb    5.2927e-01    5.2912e-01 +/-  7.60e-02  <none>
+          lauN_f3_comb    1.6444e-01    1.6449e-01 +/-  2.35e-02  <none>
+       lauN_sigma_comb    3.5209e+00    3.5214e+00 +/-  1.52e-02  <none>
+           lauN_t_comb    1.0656e+02    1.0656e+02 +/-  2.00e-02  <none>
+
+INFO:root:Testing [-3, -5, -6] as Laurent powers
+Traceback (most recent call last):
+  File "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Chi2_test/lauN_power_finder.py", line 229, in <module>
+    lauNPowerFinder()
+  File "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Chi2_test/lauN_power_finder.py", line 180, in lauNPowerFinder
+    chi2 = lauN_model.SBpdf.createNLL(cuthistogram)
+  File "/cvmfs/cms.cern.ch/el8_amd64_gcc12/lcg/root/6.30.03-eeaa8ee64e8127bca194ba397d21d514/lib/ROOT/_pythonization/_roofit/_rooabspdf.py", line 116, in createNLL
+    return self._createNLL["RooLinkedList const&"](args[0], _pack_cmd_args(*args[1:], **kwargs))
+KeyboardInterrupt

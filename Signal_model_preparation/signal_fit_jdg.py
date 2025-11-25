@@ -70,15 +70,16 @@ def performSignalFits():
     unweightedEntriesList = []
 
     for fitParam in fitParams:
-        x = ROOT.RooRealVar("x", "mllg", 115, 130)
+        #x = ROOT.RooRealVar("x", "mllg", 115, 135)
+        x = ROOT.RooRealVar("x", "mllg", 95, 180)
         x.setBins(int(binFactor*(x.getMax() - x.getMin())))
-        """
+         
         #Code to load root histograms from Rui
         sigSample = readRuiROOTSignal(x, inBasePath, ggfPath, vbfPath, fitParam, ggfBins, vbfBins, rangeInfo)
         sigHist = sigSample.rdHist
         unweightedEntriesList.append(sigHist.sumEntries())
         logging.info('entries: \n' + str(sigSample.entries) + '\n')
-        logging.info('weighted entries: \n' + str(sigSample.wentries) + '\n')
+        logging.info(str(fitParam) +' weighted entries: \n' + str(sigSample.wentries) + '\n')
         #end
         """
         #Code to load histograms in workspace from Michael
@@ -88,12 +89,13 @@ def performSignalFits():
             exit("Mixed flavor histograms not yet implemented for Michael's workspace")
         if (fitParam[1] == "mu"):
             proc = "Htozg_mu"
-        michaelPath = "/afs/cern.ch/user/m/mioshiro/public/hzg_datacard_v1p1_rawdata.root"
+        michaelPath = "/eos/project/h/htozg-dy-privatemc/mioshiro/datacards/hzg_datacard_v1p2_rawdata.root"
         sigSample = readPico(x, michaelPath, fitParam[0], proc, syst)
         name = f"mcdata_"+proc+"_cat_"+fitParam[0]+"_"+syst
         sigHist = getattr(sigSample,name)
         logging.info('weighted entries: \n' + str(sigHist.sumEntries()) + '\n')
         #end
+        """
         
         histList.append(sigHist)
         label = '_'.join([s for s in fitParam])
@@ -145,8 +147,8 @@ def performSignalFits():
         if DISIGMA:
             note = '#splitline{#splitline{#splitline{#sigma_{eff} = ' + '%.2f'%sigma_eff +'#pm%.2f'%sigma_err + '}{#sigmaL = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+', #sigmaR = ' + '%.2f'%sig_model.sigmaR.getVal() + '#pm%.2f'%sig_model.sigmaR.getError() + '}}{nL = %.2f'%sig_model.nL.getVal() +', nR = %.2f'%sig_model.nR.getVal() +', #mu = %.2f'%(MH.getVal()+sig_model.dMH.getVal()) +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() +', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
         else:
-            note = '#splitline{#splitline{#sigma = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+'}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
-        plotClass(x, histList[i], sig_model.pdf, sig_model.pdf, labelList[i], plotPath, note=note, CMS = "Simulation", fullRatio = True, leftSpace=True, bins = dispBinFactor)
+            note = '#splitline{#splitline{#sigma = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+'}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%(MH.getVal()+sig_model.dMH.getVal()) +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
+        plotClass(x, histList[i], sig_model.pdf, sig_model.pdf, labelList[i], plotPath, note=note, CMS = "Simulation", fullRatio = False, leftSpace=True, bins = dispBinFactor)
 
 
     #--------------------Loading histograms for display------------------#

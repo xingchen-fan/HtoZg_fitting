@@ -104,10 +104,12 @@ def lauNPowerFinder():
         label = '_'.join([s for s in fitParam])
         labelList.append(label)
 
-    logging.info("Finished creating histograms")
+    toc = time.perf_counter()
+    totalTime = ((toc - tic)/60)
+    logging.info("Finished creating histograms in %.2f minutes"%totalTime)
 
     list_ = []
-    powList = [-1,-1,-1,-1,-1]
+    powers = [-1,-1,-1,-1,-1]
 
     #------------------Fit Histograms in Turn--------------------#
     if isTest:
@@ -121,12 +123,12 @@ def lauNPowerFinder():
         for power1 in range(int(lowPower), int(highPower)):
             for power2 in range(power1+1, int(highPower)):
                 logging.info("Beginning test fit on "+labelList[i]+" with powers" + str(power1) + " and " + str(power2))
-                powList[0]=-1*power1
-                powList[1]=-1*power2
+                powers[0]=-1*power1
+                powers[1]=-1*power2
                 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
                 logging.info(str(sampleDetails))
-                lauN_model = LauNClass(x, mu_gauss, sampleDetails[0], sigma_init = 4., step_init = 105, powers=powList, terms = 2, f_init = [0.1,0.1,0.1,0.1,0.1], xmax = startRange+widthRange, const_f1 = False, fix_sigma = False)
-                #lauN_model = Lau2Class(x, mu_gauss, sampleDetails[0], sigma_init = 4., sigma2_init = 5., step_init = 105, p1 = powList[0], p2 = powList[1], f1_init = 0.1, f2_init = 0.1, xmax = startRange+widthRange, const_f1 = False, di_gauss = False, fix_sigma = False, gc_init = 1)
+                lauN_model = LauNClass(x, mu_gauss, sampleDetails[0], sigma_init = 4., step_init = 105, powers=powers, terms = 2, f_init = [0.1,0.1,0.1,0.1,0.1], xmax = startRange+widthRange, const_f1 = False, fix_sigma = False)
+                #lauN_model = Lau2Class(x, mu_gauss, sampleDetails[0], sigma_init = 4., sigma2_init = 5., step_init = 105, p1 = powers[0], p2 = powers[1], f1_init = 0.1, f2_init = 0.1, xmax = startRange+widthRange, const_f1 = False, di_gauss = False, fix_sigma = False, gc_init = 1)
                 cuthistogram = histList[i].reduce(ROOT.RooFit.CutRange('left,right'))
                 if nllBool == True:
                     chi2 = lauN_model.SBpdf.createNLL(cuthistogram)
@@ -143,10 +145,10 @@ def lauNPowerFinder():
                 chi2_pV= ROOT.Math.chisquared_cdf_c(chi2_val, nBins - res.floatParsFinal().getSize())
                 print ('Chi2 = ', chi2_val)
                 print ('P-value = ', chi2_pV)
-                plotClass(x, histList[i], lauN_model.pdf, lauN_model.SBpdf, labelList[i]+"pow"+str(powList[0])+"-"+str(powList[1]), "./Chi2_test/plots/", True, 'left,right')
+                plotClass(x, histList[i], lauN_model.pdf, lauN_model.SBpdf, labelList[i]+"pow"+str(powers[0])+"-"+str(powers[1]), "./Chi2_test/plots/", True, 'left,right')
                 if(counter == 0 or chi2_val < minChi2):
                     minChi2 = chi2_val
-                    powers = [powList[0],powList[1]]
+                    powers = [powers[0],powers[1]]
                 counter+=1
 
  
@@ -185,9 +187,10 @@ def lauNPowerFinder():
 
             #create chi2 for probability checking, but not for fitting
             chi2_ = lauN_model.SBpdf.createChi2(cuthistogram)
+            chi2_dof = chi2_.getVal()/(nBins - res.floatParsFinal().getSize() - 1.0)
             chi2_pV = ROOT.Math.chisquared_cdf_c(chi2_.getVal(), nBins - res.floatParsFinal().getSize())
 
-            chi2_list.append(chi2.getVal())
+            chi2_list.append(chi2_dof)
             pv_list.append(chi2_pV)
         logging.info("The list of powers and chi squared values are: "+ str(powerCombs) + " and " + str(chi2_list))
         logging.info("P values: " + str(pv_list))

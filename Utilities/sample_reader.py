@@ -762,7 +762,6 @@ class readRuiROOTSignal:
 
 class readRuiROOTData:
     def __init__(self, x, direct='', ggfPath = '', vbfPath = '', sampParam = ['ggf1','el','2016APV'], ggfBins=[0,0,0], vbfBins=[0,0,0], rangeInfo=[340,95,180]):
-
         chain = ROOT.TChain('outtree')
         
         cat = sampParam[0]
@@ -791,8 +790,6 @@ class readRuiROOTData:
             chain.Add(direct + vbfPath + 'data_'+yearIn+'_output.root')
             print(direct + vbfPath + 'data_'+yearIn+'_output.root')
 
-
-
         label = cat + '_th1f_' + flav + '_' + year
         histlabel = 'hist' + label
         hist_TH1 = ROOT.TH1F(label, label, bins, lower, upper)
@@ -817,8 +814,8 @@ class readRuiROOTData:
                 hist_TH1.Fill(entry.llphoton_refit_m)
             elif (cat == 'ggf4' or cat == 'comb') and entry.BDT_score > -1 and entry.BDT_score < ggfBins[2] and entry.met < metCut:
                 hist_TH1.Fill(entry.llphoton_refit_m)
-            self.entries = hist_TH1.GetEntries()
-            self.rdHist = ROOT.RooDataHist(histlabel, histlabel, x, hist_TH1)
+        self.entries = hist_TH1.GetEntries()
+        self.rdHist = ROOT.RooDataHist(histlabel, histlabel, x, hist_TH1)
 
 class readPico: #draw_pico datacard format
     def __init__(self, x, directory="", cat="", proc="", syst=""):
