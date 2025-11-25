@@ -30,11 +30,11 @@ nsig_mu = 0
 MH = ROOT.RooRealVar("MH","MH"       ,125)
 
 if 'ggf' in CAT:
-    direct = '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/'
-    reader = readRuiROOTggFSignal(x, direct, 0.91,0.82,0.61)
+    direct = '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/'
+    reader = readRuiROOTggFSignal(x, direct, 0.94, 0.83, 0.57)
 elif 'vbf' in CAT:
-    direct = '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/'
-    reader = readRuiROOTVBFSignal(x, direct, 0.95, 0.91, 0.76)
+    direct = '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/'
+    reader = readRuiROOTVBFSignal(x, direct, 0.91, 0.81, 0.48)
     
 hist_el = getattr(reader, f"{CAT}El")
 hist_mu = getattr(reader, f"{CAT}Mu")

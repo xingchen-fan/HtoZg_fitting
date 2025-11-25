@@ -20,7 +20,7 @@ setting = configs['vbf2']
 
 f = ROOT.TFile(args.input)
 w = f.Get("w")
-lowx = setting["Range"]
+lowx = setting["Range"][0]
 nbins = 65
 binning = ROOT.RooFit.Binning(nbins,lowx,lowx+65)
 

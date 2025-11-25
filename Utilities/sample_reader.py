@@ -532,7 +532,7 @@ class readRuiROOTggFSignalVBF:
 class readRuiROOTVBFSignal:
     def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
         year = ['2016', '2016APV', '2017', '2018', '2022', '2022EE', '2023', '2023BPix']
-        prod = [ 'ZH', 'WH', 'ttH']
+        prod = [ 'GGF', 'VBF', 'ZH', 'WH', 'ttH']
         chain = ROOT.TChain('outtree')
         
         for y in year:

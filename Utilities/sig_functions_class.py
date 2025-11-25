@@ -147,7 +147,7 @@ class DSCB_Class:
         self.alphaR.setConstant(constant)
         self.dMH.setConstant(constant)
 
-    def assignVal(self, config='', year="", cat="", lep="", prod="", sys="nominal", debug = False):
+    def assignVal(self, config='', year="", cat="", lep="", prod="", sys="nominal", hmm = False, debug = False):
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
         if not year in ["2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix", ""]:
@@ -156,8 +156,10 @@ class DSCB_Class:
             raise ValueError("Unknown production mode")
         if (year == "" and prod != "") or (year != "" and prod == ""):
             raise Exception("If separation, need to separate by year and production mode")
-        if year == "" and prod == "":
+        if year == "" and prod == "" and not hmm:
             setting = configs_[f"Htozg_{lep}_cat_{cat}_{sys}"]
+        elif year == "" and prod == "" and hmm:
+            setting = configs_[f"Htomm_cat_{cat}_{sys}"]
         else:
             setting = configs_[f"Htozg_{lep}_{cat}_{year}_{prod}"]
         for param in ["dMH","sigmaL","sigmaR","nL","nR","alphaL","alphaR"]:

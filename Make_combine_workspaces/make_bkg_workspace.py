@@ -34,7 +34,7 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 parser = argparse.ArgumentParser(description = "Make workspace")
 parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-a', '--asimov', help="Asimov", default=0, type=int)
-parser.add_argument('-con', '--config', help = 'Configuration')
+parser.add_argument('-conB', '--config', help = 'Configuration')
 parser.add_argument('-conS', '--configS', help = 'Signal Configuration')
 parser.add_argument('-t', '--test', help = 'What test to build?')
 
@@ -78,6 +78,7 @@ x.setBins(nbins)
 x.setRange('left', lowx, 120)
 x.setRange('right', 130, highx)
 x.setRange('full', lowx, highx)
+
 #ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
 
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
@@ -101,7 +102,7 @@ if DAT:
         hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
+        read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -111,7 +112,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
+        read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91,0.81,0.48)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -123,7 +124,7 @@ else:
 
 
 #print("N sig window= ", N_sig_window)
-
+print ("done reading the data")
 # Assume we have ...... in the profile, the signal model is combined DSCB
 '''
 core_bern2_model = CoreBern2Class(x, cat, 1, 0.3, 10, fileName="ZGCoreShape_01jet_NAFCorr", shapeName="CoreShape_ZG_NAF_cat2")
@@ -146,13 +147,13 @@ MH.setConstant(True)
 #plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
 profile_ = profileClass(x, mu_gauss, CAT, args.config)
 profile = profile_.testSelection(args.test)
-
+print("done profile")
 stat_list = []
 cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
 error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
 for model in profile:
     stat_list.append(ROOT.RooNLLVar("stat_"+model.pdf.GetName(), "stat_"+model.pdf.GetName(), model.SBpdf,  cuthist))
-
+print("stats done")
 eps = 0.1
 strategy = 0
 stat_vals = []
@@ -205,7 +206,7 @@ for model in profile:
 multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 
 # Penalty term
-multipdf.setCorrectionFactor(0.)
+#multipdf.setCorrectionFactor(0.0)
 
 norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N, 0, 3*N)
 if args.asimov == 0:

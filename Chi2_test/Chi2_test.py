@@ -69,7 +69,7 @@ if DAT:
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
 else:
     if 'ggf' in CAT:
-        read_data = readRuiROOTggFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_rui_commonparam/', 0.91,0.82,0.61)
+        read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
         if CAT == 'ggf1':
             hist_data = read_data.ggf1
         elif CAT == 'ggf2':
@@ -79,7 +79,7 @@ else:
         elif CAT == 'ggf4':
             hist_data = read_data.ggf4
     elif 'vbf' in CAT:
-        read_data = readRuiROOTVBFdata(x, '/eos/user/r/rzou/SWAN_projects/Classifier/Output_VBF_rui_commonparam/', 0.95, 0.91,0.76)
+        read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81,0.48)
         if CAT == 'vbf1':
             hist_data = read_data.vbf1
         elif CAT == 'vbf2':
@@ -93,7 +93,9 @@ print('N data = ', hist_data.sumEntries())
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 profile = profileClass(x, mu_gauss, CAT, args.config)
-bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model, profile.exmg_model, profile.agg_model]
+#bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model, profile.agg_model]
+#bkg_list = [profile.pow3_model]
+bkg_list = profile.testSelection('Chi2')
 
 # Sideband Chi^2 fit
 cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
@@ -108,7 +110,7 @@ for func in bkg_list:
         print("Chi2 fit")
         chi2 = ROOT.RooChi2Var('chi2_'+func.SBpdf.GetName(), 'chi2_'+func.SBpdf.GetName(), func.SBpdf, cuthistogram)
     Minimizer_Chi2(chi2, -1, 10, True, 0)
-    res = Minimizer_Chi2(chi2, 1, 0.1, True, 0) 
+    res = Minimizer_Chi2(chi2, -1, 0.1, True, 0) 
     #res=Minimizer_Chi2(chi2, -1, 1, False, 0)
     #res = func.SBpdf.fitTo(cuthistogram, ROOT.RooFit.Save(True),ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(1))
     func.checkBond()
@@ -124,5 +126,5 @@ for func in bkg_list:
         pass_list.append(func)
 print('List has ', len(pass_list), ' models')
 if len(pass_list)>0:
-    multiPlotClass(x, hist_data, pass_list, title="Chi2_lau_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = ("vbf" in CAT))
-    profile.write_config_file(cuthistogram, "All")
+    multiPlotClass(x, hist_data, pass_list, title="Chi2_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = True, leg_text_size = 0.03)
+    #profile.write_config_file(cuthistogram, "All")
