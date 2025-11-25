@@ -15,6 +15,7 @@ from Xc_Minimizer import *
 from plot_utility import *
 from sample_reader import *
 from config_parser_jdg import *
+from bootstrapper import *
 
 def makeCombs(combs):
     genSettings = configs["general_settings"]
@@ -36,13 +37,12 @@ def makeCombs(combs):
 def performSignalFits():
     #------------------Input Parsing--------------------#
     #Inputs are taken from the input json file
-    DISIGMA = True
     genSettings = configs["general_settings"]
     binFactor     = genSettings["bin_factor"]
     dispBinFactor = genSettings["display_bins"]
     rangeInfo     = genSettings["range_info"]
 
-    ruiInBasePath     = signalSettings["base_path"]
+    inBasePath     = signalSettings["base_path"]
     ggfPath           = signalSettings["ggf_path"]
     vbfPath           = signalSettings["vbf_path"]
     fitCombs          = signalSettings["fit_combs"]
@@ -62,37 +62,57 @@ def performSignalFits():
     dispParams = makeCombs(dispCombs)
 
     plotPath = "./Signal_model_preparation/plots/"
-    
+
+
     #------------------Loading Histograms for fit--------------------#
     histList = []
     labelList = []
+    unweightedEntriesList = []
 
     for fitParam in fitParams:
-        x = ROOT.RooRealVar("x", "mllg", 115, 130)
+        #x = ROOT.RooRealVar("x", "mllg", 115, 135)
+        x = ROOT.RooRealVar("x", "mllg", 95, 180)
         x.setBins(int(binFactor*(x.getMax() - x.getMin())))
-        sigSample = readRuiROOTSignal(x, ruiInBasePath, ggfPath, vbfPath, fitParam, ggfBins, vbfBins, rangeInfo)
-        sigHist = sigSample.catflav
+         
+        #Code to load root histograms from Rui
+        sigSample = readRuiROOTSignal(x, inBasePath, ggfPath, vbfPath, fitParam, ggfBins, vbfBins, rangeInfo)
+        sigHist = sigSample.rdHist
+        unweightedEntriesList.append(sigHist.sumEntries())
+        logging.info('entries: \n' + str(sigSample.entries) + '\n')
+        logging.info(str(fitParam) +' weighted entries: \n' + str(sigSample.wentries) + '\n')
+        #end
+        """
+        #Code to load histograms in workspace from Michael
+        syst = "nominal"
+        proc = "Htozg_el"
+        if (fitParam[1] == "comb"):
+            exit("Mixed flavor histograms not yet implemented for Michael's workspace")
+        if (fitParam[1] == "mu"):
+            proc = "Htozg_mu"
+        michaelPath = "/eos/project/h/htozg-dy-privatemc/mioshiro/datacards/hzg_datacard_v1p2_rawdata.root"
+        sigSample = readPico(x, michaelPath, fitParam[0], proc, syst)
+        name = f"mcdata_"+proc+"_cat_"+fitParam[0]+"_"+syst
+        sigHist = getattr(sigSample,name)
+        logging.info('weighted entries: \n' + str(sigHist.sumEntries()) + '\n')
+        #end
+        """
+        
         histList.append(sigHist)
         label = '_'.join([s for s in fitParam])
         labelList.append(label)
-    
+
+
     #------------------Fit Histograms in Turn--------------------#
     for i in range(len(histList)):
         MH =  ROOT.RooRealVar("MH", "MH", 125)
         logging.info("Beginning fit %d"%i)
-        sig_model = DSCB_Class(x, MH,  labelList[i], sigmaL_init = 1.5, sigmaR_init = 1.2, nL_init = 8, nL_bond = 18, nR_init = 12, nR_bond = 18, alphaL_init = 1.0, alphaR_init = 1.5, di_sigma = DISIGMA)
-        sig_model.pdf.fitTo(histList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
-        sig_model.setStable()
-        res = sig_model.pdf.fitTo(histList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
+        sig_model = DSCB_Class(x, MH,  labelList[i], sigmaL_init = 1.5, sigmaR_init = 1.2, nL_init = 8, nL_bond = 15, nR_init = 6, nR_bond = 10, alphaL_init = 1.0, alphaR_init = 1.5, di_sigma = DISIGMA)
+        sig_model.pdf.fitTo(histList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(2))
+        #sig_model.setStable()
+        res = sig_model.pdf.fitTo(histList[i], ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(2))
         res.Print('v')
         logging.info('nexp_' + labelList[i] + ' = %.2f'%histList[i].sumEntries())
-        sigma_eff_pair = getEffSigma(x, sig_model.pdf)
-        sigma_eff = (sigma_eff_pair[1]-sigma_eff_pair[0])/2.0
-        if DISIGMA:
-            note = '#splitline{#splitline{#splitline{#sigma_{eff} = ' + '%.2f'%sigma_eff + '}{#sigmaL = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+', #sigmaR = ' + '%.2f'%sig_model.sigmaR.getVal() + '#pm%.2f'%sig_model.sigmaR.getError() + '}}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
-        else:
-            note = '#splitline{#splitline{#sigma = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+'}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%MH.getVal() +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
-        plotClass(x, histList[i], sig_model.pdf, sig_model.pdf, labelList[i], plotPath, note=note, CMS = "Simulation", fullRatio = True, leftSpace=True, bins = dispBinFactor)
+
 
         sampleDetails = labelList[i].split('_')
         logging.info("Ending fit %d"%i)
@@ -103,15 +123,34 @@ def performSignalFits():
         beg = ftext.find("Beginning fit %d"%i)
         end = ftext.find("Ending fit %d"%i)
         fread.close()
+        fitText = ftext[beg:end]
 
         fwrite = open('test_config.txt', 'w')
-        fwrite.write(ftext[beg:end])
+        fwrite.write(fitText)
         fwrite.write("Data copied")
         fwrite.close()
 
+        val = fitText.find("MINIMIZE")
+        if ("=0" not in fitText[val:val+11]) and ("=1" not in fitText[val:val+11]):
+            logging.info("FIT FAILED")
+
         configParser(shapeConfigFile, 'test_config.txt', sampleDetails[0], sampleDetails[1], sampleDetails[2], sampleDetails[3])
         logging.info("Done: parsed the log file info to the config json")
-    
+
+
+        sigma_eff_pair = getEffSigma(x, sig_model.pdf)
+        sigma_eff = (sigma_eff_pair[1]-sigma_eff_pair[0])/2.0
+        if bootstrap == True:
+            sigma_err = bootstrapper("Htozg_" + labelList[i] + "_nominal", DISIGMA, binFactor, unweightedEntriesList[i], shapeConfigFile)
+        else:
+            sigma_err = float("nan")
+        if DISIGMA:
+            note = '#splitline{#splitline{#splitline{#sigma_{eff} = ' + '%.2f'%sigma_eff +'#pm%.2f'%sigma_err + '}{#sigmaL = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+', #sigmaR = ' + '%.2f'%sig_model.sigmaR.getVal() + '#pm%.2f'%sig_model.sigmaR.getError() + '}}{nL = %.2f'%sig_model.nL.getVal() +', nR = %.2f'%sig_model.nR.getVal() +', #mu = %.2f'%(MH.getVal()+sig_model.dMH.getVal()) +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() +', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
+        else:
+            note = '#splitline{#splitline{#sigma = ' + '%.2f'%sig_model.sigmaL.getVal() + '#pm%.2f'%sig_model.sigmaL.getError()+'}{nL = %.2f'%sig_model.nL.getVal()+', nR = %.2f'%sig_model.nR.getVal()+', #mu = %.2f'%(MH.getVal()+sig_model.dMH.getVal()) +  '}}{#alphaL = %.2f'%sig_model.alphaL.getVal() + ', #alphaR = %.2f'%sig_model.alphaR.getVal()+'}'
+        plotClass(x, histList[i], sig_model.pdf, sig_model.pdf, labelList[i], plotPath, note=note, CMS = "Simulation", fullRatio = False, leftSpace=True, bins = dispBinFactor)
+
+
     #--------------------Loading histograms for display------------------#
     if combineDisp == False:
         exit()
@@ -124,8 +163,8 @@ def performSignalFits():
             break
         x = ROOT.RooRealVar("x", "mllg", 115, 130)
         x.setBins(int(binFactor*(x.getMax() - x.getMin())))
-        sigSample = readRuiROOTSignal(x, ruiInBasePath, ggfPath, vbfPath, dispParam, ggfBins, vbfBins, rangeInfo)
-        sigHist = sigSample.catflav
+        sigSample = readRuiROOTSignal(x, inBasePath, ggfPath, vbfPath, dispParam, ggfBins, vbfBins, rangeInfo)
+        sigHist = sigSample.rdHist
         dispHistList.append(sigHist)
         label = '_'.join([s for s in dispParam])
         dispLabelList.append(label)
@@ -156,10 +195,10 @@ def performSignalFits():
                 if j >= 0:
                     coefList.append(coefDict["coef%d"%j])
 
-        add_model = ROOT.RooAddPdf('multi_model_'+dispLabelList[i], 'multi_model_'+dispLabelList[i], ROOT.RooArgList(pdfList), ROOT.RooArgList(coefList))
+        add_model = ROOT.RooAddPdf('Signal Models', 'Signal Models', ROOT.RooArgList(pdfList), ROOT.RooArgList(coefList))
         add_model.fixCoefNormalization(ROOT.RooArgSet(x)) #what does this do?
-        dispNote = '#splitline{MC combined}{Signal model split}'
-        plotClass(x, dispHistList[i], add_model, add_model, "disp_" + dispLabelList[i], plotPath, note=dispNote, CMS = "Simulation", fullRatio = True, leftSpace=True, bins = dispBinFactor)
+        dispNote = 'Signal model(s)'
+        plotClass(x, dispHistList[i], add_model, add_model, "disp_" + dispLabelList[i], plotPath, note=dispNote, CMS = "Simulation", fullRatio = False, leftSpace=True, bins = dispBinFactor)
 
         logging.info("Finished making display hist %d"%i)
 
@@ -167,6 +206,9 @@ def performSignalFits():
 
 if __name__=="__main__":
     print("Beginning signal fitting. . .")
+    DISIGMA = False
+    bootstrap = False
+    combineDisp = False
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-j', '--jsonIn', help = 'Fitting settings in the form of json file name')
@@ -177,12 +219,10 @@ if __name__=="__main__":
     configs = json.load(jfile)
     signalSettings = configs["signal_settings"]
     logFile = signalSettings["log_file"]
-
     clearing = open(logFile, 'w')
     clearing.close()
 
     logging.basicConfig(level=logging.INFO,stream=sys.stdout)
     ROOT.gSystem.RedirectOutput(logFile)
 
-    combineDisp = True
     performSignalFits()

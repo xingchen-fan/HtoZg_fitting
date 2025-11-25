@@ -6,7 +6,7 @@
             "modes":            ["ggf","vbf"],
 	    "blinding_window":  [120,130],
             "bin_factor":       4,
-            "display_bins":     2,
+            "display_bins":     4,
             "range_info":       [340,95,180]
             },
     "bdt_settings":{
@@ -17,19 +17,25 @@
             "base_path":        "/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/",
             "ggf_path":         "./Output_ggF_rui_redwood_v1_ext_val/",
             "vbf_path":         "./Output_VBF_rui_redwood_v1_ext_val/",
-	    "fit_combs":        [0,0,0,0],
-	    "disp_combs":       [1,1,1,1],
+	    "fit_combs":        [0,0,0,1],
+	    "disp_combs":       [0,1,1,1],
             "shape_config":     "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/Config/config_DSCB_flat_jdg.json",
             "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/signal_fits.log"
             },
     "bkg_settings":{
-            "base_path":        "/eos/user/r/rzou/SWAN_projects/Classifier/Output_ggF_xgb_fixedjet/",
-	    "ggf_path":         "./",
-            "vbf_path":         "./",
-            "splits":           [1,1,0,0]
+            "base_path":        "/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/",
+	    "ggf_path":         "./Output_ggF_rui_redwood_v1_ext_val/",
+            "vbf_path":         "./Output_ggF_rui_redwood_v1_ext_val/",
+            "splits":           [1,1,1]
             },
-    "Chi2_settings":{
-            "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/chi2_step.log"
+    "lau_power_finder_settings":{
+            "log_file":         "/afs/cern.ch/work/j/jgrassi/HtoZg_fitting/pipeline_logs/chi2_step.log",
+	    "lau_terms":        3,
+	    "high_power":       10,
+	    "low_power":	3,
+	    "start_range":      95,
+	    "width":            85,
+	    "nll":              1
             }
      
 }

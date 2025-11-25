@@ -282,16 +282,45 @@ bash$ combine DATACARD_BIAS_CAT.txt -M FitDiagnostics -m 125 --toysFile higgsCom
 
 ## Fitting pipeline
 
-This is a work in progress feature to perform as many aspects of the fitting as possible in an end to end fashion with as few breaks for user input as possible. While scripts are work in progress, they are tagged with `_jdg`. When reviewed, this tag will be removed.
+Heavily work in progress pipeline scripts. These all make use of settings defined in `Config/pipeline_settings.json`. 
 
-Finalized:
+> Signal\_model\_preparation/signal\_fit\_jdg.py
 
-Under Review:
-> signal\_fit\_jdg.py: Run standalone with `python3 signal_fit_jdg.py -j Config/pipeline_settings.json` from the main directory. Signal fit information is stored in `Config/config_DSCB_flat_jdg.json`. 
- 
-All scripts can also be run by calling the `fitting_pipeline.py` script from the main directory. Status information from the fitting pipeline is stored in `pipeline_logs/signal_fits.log`.
+Run standalone with `python3 Signal_model_preparation/signal_fit_jdg.py -j Config/pipeline_settings.json` from the main directory. 
+Signal fit information is stored in `Config/config_DSCB_flat_jdg.json`. 
+This script loads histograms from either Rui's ntuples or Michael's datacard. 
+One must comment out a portion of the code to switch between the two. 
+For Rui's ntuples, one can specify whether to combine or split by category, lepton flavor, year, and production mode. 
+In the file `Config/pipeline_settings.json`, this is a list of 0s and 1s, i.e. [0,0,0,1], with 0 meaning split and 1 meaning combine. 
+The order of these argyments is [cat, flav, year, prod].
+However there is not yet infrastructure for viewing the rare production mode categories. 
+With Michael's datacards, infrastructure has not been developed yet to control splitting or combining. 
+These histograms will be produced split by category, flavor, and merged by year and production mode. 
 
-General configuration settings for the pipeline can be found in `Config/pipeline_settings.json`. Most are self explanatory. The configuration parameter splits refers to the ways in which a signal sample may be split, in the form of a list of booleans. The order is [categories, flavors, years, production modes], with 0 denoting splitting, and 1 denoting combination.
+The set of histograms is then fitted in sequence using the DSCB model, and the output is parsed and stored in `config_DSCB_flat_jdg.json`. 
+Plots are generated for each histogram. 
+Next, if the option combineDisp in `signal_fit_jdg.py` is set to True, plots are generated with multiple signal models added together.
+This option only works with Rui's ntuples currently, and is not yet fully supported for the datacard. 
+
+Details of this process are logged to `pipeline_logs/signal_fits.log`.
+
+> Chi2\_test/lauN\_power\_finder.py
+
+Run standalone with `python3 Chi2_test/lauN_power_finder.py -j Config/pipeline_settings.json` from the main directory.
+General information is stored in `Config/config_DSCB_flat_jdg.json`.
+In particular, this includes the range of negative powers available to be tested with the laurent power finder.
+This script loads data sideband histograms from Rui's ntuples.
+Plan to add ability to read Michael's datacard.
+As with the signal prep, one can specify whether to combine category, flavor, or year. 
+There is a test functionality, which will only perform the power fitting on the first histogram loaded, and will provide plots.
+The main code loops over loaded histograms, and nonrepeating combinations of powers.
+Currently, execution takes about 20-320-320-3seconds per fit.
+An NLL fit is performed, and the chi2 metric is evaluated.
+A chi2 fit can be performed as well, but will not give good results due to bins with few values and the signal blinding region.
+The smallest chi2 value per degree of freedom is reported, and the best powers are returned.
+These values are reported in `pipeline_logs/chi2_step.log`
+Parallelization would be nice perhaps someday.
+
 
 ## Plotting Features
 In the `Multi_plot/` folder, there are three important plotting scripts:
