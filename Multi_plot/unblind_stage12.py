@@ -126,7 +126,7 @@ ROOT.gPad.SetPad(0.0, 0.1, 1.0, 0.35)
 ROOT.gPad.SetTopMargin(0)
 ROOT.gPad.SetBottomMargin(0.38)
 h_hist = show_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(65))
-model_hist = b_model_2.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
+model_hist = b_model_2.generateBinned(x, data.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(65))
 for i in range(0, model_hist.GetNbinsX() + 2):
     model_hist.SetBinError(i, 0.0)
 h_hist.Add(model_hist, -1)
@@ -147,7 +147,7 @@ h_hist.GetYaxis().SetTitle("Data - Postfit")
 minimum = 99999
 for i in range(int(x.getMax() - x.getMin())):
     bincont = h_hist.GetBinContent(i+1)
-    if bincont != 0 and bincont < minimum:
+    if bincont != 0 and bincont < minimum and (x.getMin() + i < 120 or x.getMin() + i > 130) :
         minimum = bincont
 range_ = 1.1 * max(abs(minimum), abs(h_hist.GetBinContent(h_hist.GetMaximumBin())))
 h_hist.GetYaxis().SetRangeUser(-range_, range_)
