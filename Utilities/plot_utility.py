@@ -181,8 +181,6 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
 
     #Create TH1 histogram for ratio plot
     h_hist = show_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(int(x.getMax() - x.getMin())))
-    for i in range(0, h_hist.GetNbinsX() + 2):
-        h_hist.SetBinError(i, 0.0)
     
     block = ROOT.RooFormulaVar("block", "@1 * ((@0 < 120)? 0 :((@0 > 130)? 0:2))", ROOT.RooArgList(x, h_hist.GetMaximum()/2)) 
     #show_hist.plotOn(plot2, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
@@ -211,7 +209,9 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
         model_hist = classList[best_index].SBpdf.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(nbins))
     else:
         model_hist = classList[best_index].pdf.generateBinned(x, show_hist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(nbins))
-    
+    for i in range(0, model_hist.GetNbinsX() + 2):
+        model_hist.SetBinError(i, 0.0)
+
     plot2.Draw()
 
     #plot2.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma} (GeV)")
