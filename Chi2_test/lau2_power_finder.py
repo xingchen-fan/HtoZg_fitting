@@ -24,6 +24,7 @@ parser.add_argument('-lo', '--low', help = 'Lower power')
 parser.add_argument('-NLL', '--NLL', help = 'Use NLL?', type=int, default=1)
 parser.add_argument('-d', '--duo', help = 'Double sigma', type=int, default = 0)
 parser.add_argument('-f', '--fix', help = 'Fix sigma', type=int, default = 0)
+parser.add_argument('-y', '--type', help = 'Data type', default='')
 
 args = parser.parse_args()
 if int(args.high) <= int(args.low):
@@ -58,13 +59,15 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, lowx+65)
 x.setRange('full', lowx, lowx+65)
 
-DAT = False
 # Read samples (dat)
-if DAT:
+if args.type == 'dat':
     read_data = ROOT.RooDataSet.read('data_' +CATNAME+'_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
     data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
-
+    
+elif args.type == 'pico':
+    read_data = readPico(x, '~/EOS_space/michael_files/hzg_datacard_v1p4p0_rawdata.root', CAT, "data_obs")
+    hist_data = getattr(read_data, f"data_obs_cat_{CAT}")
 else:
     if 'ggf' in CAT:
         read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94, 0.83, 0.57)
@@ -96,7 +99,7 @@ stat_list = []
 chi2_list = []
 pv_list = []
 
-ONESHOT = True
+ONESHOT = False
 if ONESHOT:
     lau2_model = Lau2Class(x, mu_gauss, CAT, sigma_init = 3., sigma2_init = 4., step_init = 101, p1 = int(args.low), p2 = int(args.high), f1_init = 0.2, f2_init = 0.1, xmax = lowx+65., const_f1 = True, di_gauss = args.duo, fix_sigma = args.fix, gc_init = 1)
     cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))

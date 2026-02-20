@@ -22,6 +22,8 @@ parser = argparse.ArgumentParser(description = "F test bin and function class")
 #parser.add_argument("method")
 parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-con', '--config', help = 'Configuration')
+parser.add_argument('-y', '--type', help = 'Data type', default='')
+
 args = parser.parse_args()
 jfile = open(args.config, 'r')
 configs = json.load(jfile)
@@ -132,8 +134,8 @@ x.setRange('full', lowx, highx)
 
 #Zebing core func hist
 #ZBreader = readWsp(x, '/afs/cern.ch/user/f/fanx/EOS_space/zebing_sample/HZGamma_data_bkg_workspace_cat2.root', 'data_mass_cat0')
-DAT = False
-if DAT:
+
+if args.type == 'dat':
     if CAT=='ggf1':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
@@ -150,28 +152,16 @@ if DAT:
         read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
         hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
-
+elif args.type == 'pico':
+    read_data = readPico(x, '~/EOS_space/michael_files/hzg_datacard_v1p4p0_rawdata.root', CAT, "data_obs")
+    hist_data = getattr(read_data, f"data_obs_cat_{CAT}")
 else:
     if 'ggf' in CAT:
         read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
-        if CAT == 'ggf1':
-            hist_data = read_data.ggf1
-        elif CAT == 'ggf2':
-            hist_data = read_data.ggf2
-        elif CAT == 'ggf3':
-            hist_data = read_data.ggf3
-        elif CAT == 'ggf4':
-            hist_data = read_data.ggf4
+        hist_data = getattr(read_data, CAT)
     elif 'vbf' in CAT:
         read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81,0.48)
-        if CAT == 'vbf1':
-            hist_data = read_data.vbf1
-        elif CAT == 'vbf2':
-            hist_data = read_data.vbf2
-        elif CAT == 'vbf3':
-            hist_data = read_data.vbf3
-        elif CAT == 'vbf4':
-            hist_data = read_data.vbf4
+        hist_data = getattr(read_data, CAT)
 
 # Define PDF classes
 CORE = False

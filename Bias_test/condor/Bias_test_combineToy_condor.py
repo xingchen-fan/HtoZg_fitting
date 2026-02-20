@@ -48,6 +48,7 @@ parser.add_argument('-c', '--cat', help = "Category")
 parser.add_argument('-conB', '--configB', help = "Configuration Bkg")
 parser.add_argument('-conS', '--configS', help = "Configuration Sig")
 parser.add_argument('-s', '--sig', help = "Signal injection", default = 0)
+parser.add_argument('-t', '--test', help = "Test profile", default = 'FT')
 
 args = parser.parse_args()
 jfile_s = open(args.configS, 'r')
@@ -84,11 +85,11 @@ x.setRange('right', 130, highx)
 x.setRange('full', lowx, highx)
 
 # Signal model (pre-fit)
-MH = ROOT.RooRealVar("MH","MH"       ,125)
+MH = ROOT.RooRealVar("MH","MH"       ,125.38)
 #dscb_model = combineSignal(x, MH, CAT, '../../Config/config_DSCB.json')
-sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
+sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = False)
 sig_model_el.assignVal(args.configS, cat=CAT, lep="el")
-sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
+sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = False)
 sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
 c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
 dscb_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
@@ -273,12 +274,12 @@ for j in range(int(args.Ntoys)):
     scan_list = []      
     #x.setBins(nbins)
     #hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(generator.Poisson(N)))
-    file_ = '../../Make_combine_workspaces/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.123456.root'
+    file_ = '../../Make_combine_workspaces/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.38.123456.root'
     print("file = ", file_)
 
     # Functions to test
     profile_class = profileClass(x, mu_gauss, CAT, args.configB)
-    profile = profile_class.testSelection("CMSBias")
+    profile = profile_class.testSelection(args.test)
     
     hist_toy = ROOT.readToy(file_, cppj)
     list = profileFit(profile, dscb_model, hist_toy)

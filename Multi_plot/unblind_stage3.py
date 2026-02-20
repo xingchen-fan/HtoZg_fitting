@@ -15,6 +15,7 @@ parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-con', '--config', help = 'Configuration', default='../Config/chi2_config_xgboost_nodrop.json')
 #parser.add_argument('-f', '--func', help = 'Function')
 parser.add_argument('-i', '--input', help = 'Input Root File')
+parser.add_argument('-t', '--toy', help = 'Toy hist')
 #parser.add_argument('-l', '--lep', help = 'Lepton', default='')
 
 args = parser.parse_args()
@@ -24,7 +25,11 @@ configs = json.load(jfile)
 setting = configs[CAT]
 
 f = ROOT.TFile(args.input)
+f_h = ROOT.TFile(args.toy)
+
+w_h = f_h.Get("workspace_bkg")
 w = f.Get("w")
+
 lowx = setting["Range"][0]
 highx = setting["Range"][1]
 nbins = int(setting["Bins"])
@@ -35,8 +40,9 @@ x.setRange('left', lowx, 120)
 x.setRange('right', 130, highx)
 
 
-data = w.data("data_obs")
-sb_model = w.pdf('model_s').getPdf(CAT)
+data = w_h.data("hist_toy5_"+CAT)
+#w.data("data_obs")
+sb_model = w.pdf('model_s').getPdf("cat_"+CAT)
 
 # Postfit
 w.loadSnapshot("MultiDimFit")
@@ -44,9 +50,11 @@ w.loadSnapshot("MultiDimFit")
 #print("post fit nbkg = ", nbkg)
 x.setBins(nbins)
 hdata = ROOT.RooDataHist('hdata', 'hdata', x, data)
+"""
 for i in range(nbins):
     hdata.get(i)
-    print(hdata.weight())
+    print(, hdata.weight())
+"""
 #chi2 = ROOT.RooChi2Var('chi2', 'chi2', sb_model, hdata)
 #val_chi2 = chi2.getVal()
 #x.setBins(65)

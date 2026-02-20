@@ -3,7 +3,7 @@ import json
 from bkg_functions_class import *
 
 class profileClass:
-    def __init__(self, x, mu_gauss, cat='', config=''):
+    def __init__(self, x, mu_gauss, cat='', config='', tag=''):
         jfile_ = open(config, 'r')
         configs_ = json.load(jfile_)
         #setting = configs_[cat[:4]]
@@ -12,6 +12,7 @@ class profileClass:
         self.cat = cat
         self.setting_ = setting
         self.configs = configs_
+        cat = cat + tag
         self.bern2_model = Bern2Class(x, mu_gauss, cat, setting["bern2"]['p0'], setting["bern2"]['p1'], setting["bern2"]['p2'], setting["bern2"]['bond'],setting["bern2"]['sigma'],setting["bern2"]['sigma2'], setting["bern2"]['step'], setting["bern2"]['di_gauss'], setting["bern2"]['fix_sigma'], setting["bern2"]['gc'])
         self.bern3_model = Bern3Class(x, mu_gauss, cat, setting["bern3"]['p0'], setting["bern3"]['p1'], setting["bern3"]['p2'], setting["bern3"]['p3'], setting["bern3"]['bond'],setting["bern3"]['sigma'], setting["bern3"]['sigma2'], setting["bern3"]['step'], setting["bern3"]['di_gauss'], setting["bern3"]['fix_sigma'], setting["bern3"]['gc'])
         self.bern4_model = Bern4Class(x, mu_gauss, cat, setting["bern4"]['p0'], setting["bern4"]['p1'], setting["bern4"]['p2'], setting["bern4"]['p3'], setting["bern4"]['p4'], setting["bern4"]['bond'],setting["bern4"]['sigma'], setting["bern4"]['sigma2'], setting["bern4"]['step'], setting["bern4"]['di_gauss'], setting["bern4"]['fix_sigma'], setting["bern4"]['gc'])
@@ -27,7 +28,7 @@ class profileClass:
 
         self.pow1_model = Pow1Class(x, mu_gauss, cat, setting["pow1"]['sigma'], setting["pow1"]['sigma2'], setting["pow1"]['step'], setting["pow1"]['p'], setting["pow1"]['p_low'], setting["pow1"]['p_high'], setting["pow1"]['di_gauss'], setting["pow1"]['fix_sigma'], setting["pow1"]['gc'])
         self.pow2_model = Pow2Class(x, mu_gauss, cat, setting["pow2"]['sigma'], setting["pow2"]['sigma2'], setting["pow2"]['step'], setting["pow2"]['p1'], setting["pow2"]['p1_low'], setting["pow2"]['p1_high'], setting["pow2"]['p2'], setting["pow2"]['p2_low'], setting["pow2"]['p2_high'], setting["pow2"]['f1'], setting["pow2"]['f2'], setting["Range"][1], setting["pow2"]['const_f1'], setting["pow2"]['di_gauss'], setting["pow2"]['fix_sigma'], setting["pow2"]['gc'])
-        self.pow3_model = Pow3Class(x, mu_gauss, cat,setting["pow3"]['sigma'], setting["pow1"]['sigma2'], setting["pow3"]['step'], setting["pow3"]['p1'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1'], setting["pow3"]['f2'], setting["pow3"]['f3'], setting["Range"][1], setting["pow3"]['const_f1'], setting["pow3"]['di_gauss'], setting["pow3"]['fix_sigma'], setting["pow3"]['gc'])
+        self.pow3_model = Pow3Class(x, mu_gauss, cat,setting["pow3"]['sigma'], setting["pow3"]['sigma2'], setting["pow3"]['step'], setting["pow3"]['p1'], setting["pow3"]['p1_low'], setting["pow3"]['p1_high'], setting["pow3"]['p2'], setting["pow3"]['p2_low'], setting["pow3"]['p2_high'], setting["pow3"]['p3'], setting["pow3"]['p3_low'], setting["pow3"]['p3_high'], setting["pow3"]['f1'], setting["pow3"]['f2'], setting["pow3"]['f3'], setting["Range"][1], setting["pow3"]['const_f1'], setting["pow3"]['di_gauss'], setting["pow3"]['fix_sigma'], setting["pow3"]['gc'])
         self.exp1_model = Exp1Class(x, mu_gauss, cat, setting["exp1"]['sigma'], setting["exp1"]['sigma2'], setting["exp1"]['step'], setting["exp1"]['p'], setting["exp1"]['p_low'], setting["exp1"]['p_high'], setting["exp1"]['di_gauss'], setting["exp1"]['fix_sigma'], setting["exp1"]['gc'])
         self.exp2_model = Exp2Class(x, mu_gauss, cat, setting["exp2"]['sigma'], setting["exp2"]['sigma2'], setting["exp2"]['step'], setting["exp2"]['p1'], setting["exp2"]['p1_low'], setting["exp2"]['p1_high'], setting["exp2"]['p2'], setting["exp2"]['p2_low'], setting["exp2"]['p2_high'], setting["exp2"]['f1'], setting["exp2"]['f2'], setting["Range"][1], setting["exp2"]['const_f1'], setting["exp2"]['di_gauss'], setting["exp2"]['fix_sigma'], setting["exp2"]['gc'])
         self.exp3_model = Exp3Class(x, mu_gauss, cat, setting["exp3"]['sigma'], setting["exp3"]['sigma2'], setting["exp3"]['step'], setting["exp3"]['p1'], setting["exp3"]['p1_low'], setting["exp3"]['p1_high'], setting["exp3"]['p2'], setting["exp3"]['p2_low'], setting["exp3"]['p2_high'], setting["exp3"]['p3'], setting["exp3"]['p3_low'], setting["exp3"]['p3_high'], setting["exp3"]['f1'], setting["exp3"]['f2'], setting["exp3"]['f3'], setting["Range"][1], setting["exp3"]['const_f1'], setting["exp3"]['di_gauss'], setting["exp3"]['fix_sigma'], setting["exp3"]['gc'])

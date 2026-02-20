@@ -33,11 +33,11 @@ def get_args():
         Namespace with arguments
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--sampletype', help = 'Sample Type', default='')
+    parser.add_argument('-s', '--sampletype', help = 'Sample Type', default='pico')
     parser.add_argument('-i', '--input_file', help = 'Input File', default='')
     parser.add_argument('-c', '--cat', help = 'Category', default='')
     parser.add_argument('-v', '--variation', help = 'Variation', 
-                        default='nominal')
+                        default='')
     parser.add_argument('-con', '--config', help = 'Configuration', default='')
     return parser.parse_args()
 
@@ -113,12 +113,12 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = False):
     Returns: 
         dictionary of fit parameters
     """
-    dMH = ROOT.RooRealVar("dMH_"+name, "", 0.0, -2.0, 2.0)
+    dMH = ROOT.RooRealVar("dMH_"+name, "", -0.6657, -2.0, 2.0)
     mean_formula = ROOT.RooFormulaVar("mean_formula_"+name, "", "@0+@1", 
         ROOT.RooArgList(MH,dMH))
-    sigmaL = ROOT.RooRealVar("sigmaL_"+name, "", 2, 0.01, 5.0)
+    sigmaL = ROOT.RooRealVar("sigmaL_"+name, "", 1.1673, 0.01, 5.0)
     sigmaR = ROOT.RooRealVar("sigmaR_"+name, "", 2, 0.01, 5.0)
-    sig_model = DSCB_sys_Class(x, mean_formula, sigmaL, sigmaR, dMH, sigmaL, sigmaR, name, di_sigma = False)
+    sig_model = DSCB_sys_Class(x, mean_formula, sigmaL, sigmaR, dMH, sigmaL, sigmaR, name, alphaL_init = 1.1223, alphaR_init = 1.7411, nL_init = 2.3153, nR_init = 5.4716, di_sigma = False)
     """
     sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True), 
         ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
@@ -130,14 +130,16 @@ def perform_signal_model_fit(x, MH, hist, name, asymm_gaussian = False):
         #sig_model = DSCB_Class(x, MH, name,  sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 8, nR_bond = 100, alphaL_init = 1.5, alphaR_init = 1.5, di_sigma = True)
         #sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True),
         #ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
-        nll = ROOT.RooNLLVar("nll_"+ name, "nll_"+ name, sig_model.pdf, hist, ROOT.RooFit.AsymptoticError(True))
-        Minimizer_NLL(nll, -1, 100, False, 0)
-        Minimizer_NLL(nll, -1, 1, True, 0)
-        Minimizer_NLL(nll, -1, 0.001, True, 0)
-        #sig_model.setStable()
-        res = Minimizer_NLL(nll, -1, 0.001, True, 0)
-        #res = sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True),ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
-        res.Print('v')
+    nll = ROOT.RooNLLVar("nll_"+ name, "nll_"+ name, sig_model.pdf, hist)#, ROOT.RooFit.AsymptoticError(True))
+    #nll.applyWeightSquared(True)
+    Minimizer_NLL(nll, -1, 100, False, 0)
+    Minimizer_NLL(nll, -1, 1, True, 0)
+    Minimizer_NLL(nll, -1, 0.001, True, 0)
+    sig_model.setStable()
+    res = Minimizer_NLL(nll, -1, 0.1, True, 0)
+    #sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True),ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
+    #res = sig_model.pdf.fitTo(hist, ROOT.RooFit.AsymptoticError(True),ROOT.RooFit.Save(True),ROOT.RooFit.PrintLevel(-1),ROOT.RooFit.Strategy(0))
+    res.Print('v')
     nexp = hist.sumEntries()
     print(name+'_nexp = %.2f'%nexp)
     
@@ -159,7 +161,7 @@ def do_category_fit(args, queue=None):
       queue: queue to store multiprocessing output
     """
     if args.sampletype=="pico":
-        x = ROOT.RooRealVar("x", "mllg", 118, 130)
+        x = ROOT.RooRealVar("x", "mllg", 115, 135)
         MH = ROOT.RooRealVar("MH", "MH", 125, 120, 130)
         MH.setConstant()
         x.setBins(int(4* (x.getMax() - x.getMin())))
@@ -167,7 +169,7 @@ def do_category_fit(args, queue=None):
         name = f"{args.prod}_cat_{args.cat}_{args.variation}"
         pico_name = f"mcdata_{name}"
         hist = getattr(pico_reader, pico_name)
-        output = perform_signal_model_fit(x, MH, hist, name, True)
+        output = perform_signal_model_fit(x, MH, hist, name, False)
         if queue != None:
           queue.put(output)
         else:
@@ -193,6 +195,9 @@ def perform_all_category_fits(args):
     args_proxy = types.SimpleNamespace()
     args_proxy.sampletype = args.sampletype
     args_proxy.input_file = args.input_file
+    if args.variation == '': systs = ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown"]
+    else: systs = [args.variation]
+    
     cats = ["ggf4","ggf3","ggf2","ggf1","vbf4","vbf3","vbf2","vbf1","vh3l",
             "vhmet","tthhad","tthlep"]
     if args.cat == 'ggf':
@@ -200,7 +205,7 @@ def perform_all_category_fits(args):
     elif args.cat == 'vbf':
         cats = ["vbf4","vbf3","vbf2","vbf1"]
     elif args.cat == 'vhtth':
-        cats = ["vh3l","vhmet","tthhad","tthlep"]
+        cats = ["vh3l","vhmet","tthhad","tthlep","untagged"]
     else:
         cats = [args.cat]
     cat_fit_processes = []
@@ -210,7 +215,7 @@ def perform_all_category_fits(args):
     if args.sampletype == "pico":
         for cat in cats:
             for prod in ["Htozg_el","Htozg_mu","Htomm"]:
-                for syst in ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown"]:
+                for syst in systs:
                     args_proxy.cat = cat
                     args_proxy.prod = prod
                     args_proxy.variation = syst

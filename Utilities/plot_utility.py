@@ -20,7 +20,7 @@ def plotClass (x, datahist, pdf, SBpdf, title="Histogram", output_dir="plots/", 
         datahist = datahist.reduce(ROOT.RooFit.CutRange(fitRange))
         model_hist = SBpdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
     else:
-        model_hist = pdf.generateBinned(x, datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
+        model_hist = pdf.generateBinned(ROOT.RooArgSet(x), datahist.sumEntries(), True).createHistogram("model_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
         
     h_hist = datahist.createHistogram("h_hist", x, ROOT.RooFit.Binning(int(bins * (x.getMax() - x.getMin()))))
     if toy: h_hist.Sumw2(False)
@@ -181,8 +181,10 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
 
     #Create TH1 histogram for ratio plot
     h_hist = show_hist.createHistogram("h_hist", x, ROOT.RooFit.Binning(int(x.getMax() - x.getMin())))
-
-    block = ROOT.RooFormulaVar("block", "@1 * ((@0 < 120)? 0 :((@0 > 130)? 0:1))", ROOT.RooArgList(x, h_hist.GetMaximum()/2)) 
+    for i in range(0, h_hist.GetNbinsX() + 2):
+        h_hist.SetBinError(i, 0.0)
+    
+    block = ROOT.RooFormulaVar("block", "@1 * ((@0 < 120)? 0 :((@0 > 130)? 0:2))", ROOT.RooArgList(x, h_hist.GetMaximum()/2)) 
     #show_hist.plotOn(plot2, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
     if show_hist.isNonPoissonWeighted(): show_hist.plotOn(plot2, ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2), ROOT.RooFit.Name('hist'))
     else: show_hist.plotOn(plot2, ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson), ROOT.RooFit.Name('hist'))

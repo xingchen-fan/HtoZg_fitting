@@ -10,13 +10,14 @@ parser.add_argument('-c', '--cat', help="category")
 parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-s', '--sig', help = 'Signal injected', default='0')
 parser.add_argument('-b', '--bad', help = 'Bad toy heat map?', type=bool, default=False)
+parser.add_argument('-t', '--test', help = 'Test profile', default='FT')
 
 args = parser.parse_args()
 jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
 setting = configs[CAT]
-func_list = setting["CMSBias"]
+func_list = setting[args.test]
 N_func = len(func_list)
 if args.bad:
     keyword = "bad funct"

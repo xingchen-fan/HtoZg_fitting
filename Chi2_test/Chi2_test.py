@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-nll', '--NLL', help = 'NLL', type = int, default = 1)
+parser.add_argument('-y', '--type', help = 'Data type', default='')
 
 args = parser.parse_args()
 CAT = args.cat
@@ -61,41 +62,29 @@ elif CAT == 'ggf4':
     NAMECAT = 'ggF4'
 else:
     NAMECAT = 'WRONG'
+
 # Read samples
-DAT = False
-if DAT:
+if args.type == 'dat':
     read_data = ROOT.RooDataSet.read('../Data/data_'+NAMECAT+'_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
     data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
     hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+elif args.type == 'pico':
+    read_data = readPico(x, '~/EOS_space/michael_files/hzg_datacard_v1p4p0_rawdata.root', CAT, "data_obs")
+    hist_data = getattr(read_data, f"data_obs_cat_{CAT}")
 else:
     if 'ggf' in CAT:
         read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
-        if CAT == 'ggf1':
-            hist_data = read_data.ggf1
-        elif CAT == 'ggf2':
-            hist_data = read_data.ggf2
-        elif CAT == 'ggf3':
-            hist_data = read_data.ggf3
-        elif CAT == 'ggf4':
-            hist_data = read_data.ggf4
+        hist_data = getattr(read_data, CAT)
     elif 'vbf' in CAT:
         read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91, 0.81,0.48)
-        if CAT == 'vbf1':
-            hist_data = read_data.vbf1
-        elif CAT == 'vbf2':
-            hist_data = read_data.vbf2
-        elif CAT == 'vbf3':
-            hist_data = read_data.vbf3
-        elif CAT == 'vbf4':
-            hist_data = read_data.vbf4
+        hist_data = getattr(read_data, CAT)
 print('N data = ', hist_data.sumEntries())
+
 # Bkg funcs
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 
 profile = profileClass(x, mu_gauss, CAT, args.config)
-#bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model, profile.agg_model]
-#bkg_list = [profile.pow3_model]
-bkg_list = profile.testSelection('Chi2')
+bkg_list = [profile.bern2_model, profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model, profile.pow2_model, profile.pow3_model, profile.exp1_model, profile.exp2_model, profile.exp3_model, profile.lau2_model, profile.lau3_model, profile.lau4_model, profile.modg_model]
 
 # Sideband Chi^2 fit
 cuthistogram = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
@@ -127,4 +116,6 @@ for func in bkg_list:
 print('List has ', len(pass_list), ' models')
 if len(pass_list)>0:
     multiPlotClass(x, hist_data, pass_list, title="Chi2_"+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = 0,CMS = "Preliminary", fullRatio = True, leg_text_size = 0.03)
+    
+    # In case of running multiple cats, don't write the config file here.
     #profile.write_config_file(cuthistogram, "All")

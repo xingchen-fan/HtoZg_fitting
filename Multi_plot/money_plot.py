@@ -145,7 +145,7 @@ for i in range(int(4*(highx-lowx))):
 # Plotting starts from here
 ROOT.gStyle.SetOptStat(0)
 CMS = "Internal"
-CMS_lumi.lumi_sqrtS = "137.61 fb^{-1} (13 TeV) + 62.32 fb^{-1} (13.6 TeV)"
+CMS_lumi.lumi_sqrtS = "138 fb^{-1} (13 TeV) + 62 fb^{-1} (13.6 TeV)"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "      " + CMS
 CMS_lumi.cmsTextSize = 0.5

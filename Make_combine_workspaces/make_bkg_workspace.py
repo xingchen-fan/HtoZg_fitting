@@ -37,27 +37,48 @@ parser.add_argument('-a', '--asimov', help="Asimov", default=0, type=int)
 parser.add_argument('-conB', '--config', help = 'Configuration')
 parser.add_argument('-conS', '--configS', help = 'Signal Configuration')
 parser.add_argument('-t', '--test', help = 'What test to build?')
-
+parser.add_argument('-tag', '--tag', help = 'Tag for compatibility test (i.e. el, mu, r2, r3)', default='')
+parser.add_argument('-y', '--type', help = 'Data type', default='')
+parser.add_argument('-n', '--name', help = 'Name for output files')
 args = parser.parse_args()
 jfile = open(args.config, 'r')
 configs = json.load(jfile)
 CAT = args.cat
-setting = configs[CAT]
+CAT_m = CAT
+CAT_merge = args.cat[:4]
+if CAT[:5] == 'vbf12':
+    CAT_merge = 'vbf2'
+elif CAT[:5] == 'ggf12':
+    CAT_merge = 'ggf2'
+else:
+    CAT_merge = CAT
+    
+if CAT == 'untag':
+    CAT_m = 'untagged'
+elif CAT == 'vhptmiss':
+    CAT_m = 'vhmet'
+
+if args.tag == '':
+    TAG = ''
+    setting = configs[CAT]
+else:
+    TAG = '_'+args.tag
+    setting = configs[CAT_merge]
+    
 lowx = setting["Range"][0]
 highx = setting["Range"][1]
 nbins = int(setting["Bins"])
-if not CAT in ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vbf4"]:
+if not CAT[:4] in ["ggf1","ggf2","ggf3","ggf4","vbf1","vbf2","vbf3","vbf4", "vh3l", "tthl", "tthh", "vhpt", "unta"]:
     raise ValueError("Unknown category")
-if not args.test in ["FT", "CMSBias"]:
+if not args.test in ["FT", "CMSBias", "pruneUnstable"]:
     raise ValueError("Wrong test")
 
 # Save all the fit results? Make signal workspace? Read dat files? Do fit?
 LOG = True
-DAT = False
 FIT = True # 'False' to read the post-fit values from config file
 
 # Define variables
-x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT, "CMS_hzg_mass_"+CAT, lowx, highx)
+x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT_merge, "CMS_hzg_mass_"+CAT_merge, lowx, highx)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
 w = ROOT.RooRealVar("w", "w", -40., 40.)
 bdt = ROOT.RooRealVar("bdt", "bdt", -1, 1)
@@ -69,7 +90,7 @@ nlep = ROOT.RooRealVar("nlep", "nlep", 0, 10)
 njet = ROOT.RooRealVar("njet", "njet", 0, 10)
 
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
-MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
+MH = ROOT.RooRealVar("MH","MH"       ,125.38, 120., 130.)
 list = [x, y, w, w_year, bdt, year, lep, ph_eta, nlep, njet]
 
 # Cornell MC and data sample dat reader and make RooDataHist
@@ -83,7 +104,7 @@ x.setRange('full', lowx, highx)
 
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 
-if DAT:
+if args.type == 'dat':
     if CAT=='ggf1':
         read_data = ROOT.RooDataSet.read('../Data/data_ggF1_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
@@ -100,29 +121,18 @@ if DAT:
         read_data = ROOT.RooDataSet.read('../Data/data_ggF4_pinnacles_fix.dat', ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet))
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
         hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
+        
+if args.type == 'pico':
+    read_data = readPico(x, '~/EOS_space/michael_files/hzg_datacard_v1p4p0_rawdata.root', CAT_m, "data_obs")
+    hist_data = getattr(read_data, f"data_obs_cat_{CAT_m}")
 else:
     if 'ggf' in CAT:
         read_data = readRuiROOTggFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/', 0.94,0.83,0.57)
-        if CAT == 'ggf1':
-            hist_data = read_data.ggf1
-        elif CAT == 'ggf2':
-            hist_data = read_data.ggf2
-        elif CAT == 'ggf3':
-            hist_data = read_data.ggf3
-        elif CAT == 'ggf4':
-            hist_data = read_data.ggf4
+        hist_data = getattr(read_data, CAT)
+
     elif 'vbf' in CAT:
         read_data = readRuiROOTVBFdata(x, '/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_VBF_rui_redwood_v1_ext_val/', 0.91,0.81,0.48)
-        if CAT == 'vbf1':
-            hist_data = read_data.vbf1
-        elif CAT == 'vbf2':
-            hist_data = read_data.vbf2
-        elif CAT == 'vbf3':
-            hist_data = read_data.vbf3
-        elif CAT == 'vbf4':
-            hist_data = read_data.vbf4
-
-
+        hist_data = getattr(read_data, CAT)
 #print("N sig window= ", N_sig_window)
 print ("done reading the data")
 # Assume we have ...... in the profile, the signal model is combined DSCB
@@ -145,13 +155,14 @@ MH.setConstant(True)
 '''
 
 #plotClass(x, hist_sig, sig_model.pdf, sig_model.pdf, "Signal_"+CAT, CMS = 'Simulation', output_dir="")
-profile_ = profileClass(x, mu_gauss, CAT, args.config)
+profile_ = profileClass(x, mu_gauss, CAT_merge, args.config, TAG)
 profile = profile_.testSelection(args.test)
 print("done profile")
 stat_list = []
 cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
 error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
 for model in profile:
+    #model.pdf.SetNameTitle(model.pdf.GetName()+TAG,model.pdf.GetName()+TAG)
     stat_list.append(ROOT.RooNLLVar("stat_"+model.pdf.GetName(), "stat_"+model.pdf.GetName(), model.SBpdf,  cuthist))
 print("stats done")
 eps = 0.1
@@ -160,7 +171,7 @@ stat_vals = []
 nFloat = 0
 for ind, stat in enumerate(stat_list):
     if FIT:
-        Minimizer_NLL(stat, -1, 100, False, strategy)
+        Minimizer_NLL(stat, -1, 100, True, strategy)
         #Minimizer_Chi2(stat, -1, 1, False, strategy)
         r = Minimizer_NLL(stat, -1, eps, True, strategy)
         if LOG: r.Print("V")
@@ -170,7 +181,7 @@ for ind, stat in enumerate(stat_list):
         nFloat = profile[ind].pdf.getParameters(hist_data).selectByAttrib('Constant',False).getSize()
     stat_vals.append(stat.getVal() + 0.5*nFloat)
     print (profile[ind].name,' = ', nFloat)
-        
+    print('NLL = ', stat.getVal() + 0.5*nFloat)
 for model in profile:
     model.checkBond()
 
@@ -179,10 +190,10 @@ print ("best is ", profile[best_].name)
 
 # Create Asimov (optional)
 N = hist_data.sumEntries()
-sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
-sig_model_el.assignVal(args.configS, cat=CAT, lep="el")
-sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
-sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
+sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = False)
+sig_model_el.assignVal(args.configS, cat=CAT_merge, lep="el")
+sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = False)
+sig_model_mu.assignVal(args.configS, cat=CAT_merge, lep="mu")
 c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
 combine_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
 N_sig = sig_model_el.nsig + sig_model_mu.nsig
@@ -208,11 +219,11 @@ multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 # Penalty term
 #multipdf.setCorrectionFactor(0.0)
 
-norm = ROOT.RooRealVar("multipdf_"+ CAT +"_norm", "Number of background events", N, 0, 3*N)
+norm = ROOT.RooRealVar("multipdf_"+ CAT + "_norm", "Number of background events", N, 0, 3*N)
 if args.asimov == 0:
-    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_" + CAT + ".root", "RECREATE")
+    f_out2 = ROOT.TFile("workspaces/workspace_bkg_"+ args.name +"_" + CAT + ".root", "RECREATE")
 else:
-    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_asimov_" + CAT + ".root", "RECREATE")
+    f_out2 = ROOT.TFile("workspaces/workspace_bkg_profile_bias_asimov_" +args.name +"_" + CAT + ".root", "RECREATE")
 w_bkg = ROOT.RooWorkspace("workspace_bkg","workspace_bkg")
 getattr(w_bkg, "import")(cate)
 getattr(w_bkg, "import")(norm)
@@ -224,6 +235,7 @@ if args.asimov == 1:
         hist_asimov = tot_model.generateBinned(ROOT.RooArgSet(x), N, ROOT.RooFit.Asimov(True))
         hist_asimov.SetNameTitle('hist_' +  entry.name, 'hist_' + entry.name)
         getattr(w_bkg, "import")(hist_asimov)
+
 w_bkg.Print()
 w_bkg.Write()
 f_out2.Close()
@@ -243,7 +255,7 @@ if CDF:
 #plotClass(x, hist_asimov, tot_model, tot_model, title="Asimov", output_dir="", sideBand = False)
 
 # Plot it
-multiPlotClass(x, hist_data, profile, title="Profile_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = True)
+multiPlotClass(x, hist_data, profile, title="Profile_"+ args.name + "_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = True)
 #profile_.write_config_file(cuthist, "CMSBias")
 
 # Create toy histogram (depreciated)

@@ -26,20 +26,18 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 # Signal model is fitted and fixed.
 ##############################################
 
-CATEGORIES = ["ggf4", "ggf3", "ggf2", "ggf1", "vbf4", "vbf3", "vbf2", "vbf1"]
+DISIGMA = False
 
 #can split according to year, prod mode, whatever, currently just el vs mu
 SIGNAL_PROCS = ["Htozg_el", "Htozg_mu", "Htomm"] 
 
 #stored as (name, is_scale)
-SYSTEMATICS = []
-'''
-[("CMS_scale_e", True),
+SYSTEMATICS = [("CMS_scale_e", True),
                ("CMS_res_e", False),
                ("CMS_scale_g", True),
                ("CMS_res_g", False),
                ("CMS_scale_m", True)]
-'''
+
 rng = ROOT.TRandom3()
 
 def parse_args():
@@ -51,7 +49,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description = "Make workspace")
     parser.add_argument('-s', '--sig_config', help = 'Signal Configuration')
     parser.add_argument('-b', '--bak_config', help = 'Background Configuration')
-    parser.add_argument('-d', '--datacard', help = 'Datacard filename')
+    parser.add_argument('-d', '--datacard', help = 'Datacard filename', default='')
+    parser.add_argument('-c', '--cat', help = 'Categories')
     parser.add_argument('-t', '--threads', type=int, default=1)
     args = parser.parse_args()
     return args
@@ -89,7 +88,7 @@ def round_bins(hist):
             rounded_value= 0.0
         hist.SetBinContent(ibin, rounded_value)
 
-def write_all_workspaces(datacard_filename, signal_config, background_config):
+def write_all_workspaces(datacard_filename, signal_config, background_config, CATEGORIES):
     """Writes workspaces for each fit category
 
     Args:
@@ -101,7 +100,7 @@ def write_all_workspaces(datacard_filename, signal_config, background_config):
     category_processes = []
     for category in CATEGORIES:
         category_processes.append(Process(target=write_workspace, args=
-            (category, datacard_filename, signal_config, background_config, False, False)))
+            (category, datacard_filename, signal_config, background_config, False, True)))
         category_processes[-1].start()
     for icat in range(len(CATEGORIES)):
         category_processes[icat].join()
@@ -114,21 +113,23 @@ def write_all_workspaces(datacard_filename, signal_config, background_config):
     print("Finished processing all categories")
 
 def prepare_sig(x, category, signal_config, datacard_filename):
-    workspace_filename_sig = datacard_filename[:-4] + f"_{category}_sig.root"
+    #workspace_filename_sig = datacard_filename[:-4] + f"_{category}_sig_sys.root"
+    workspace_filename_sig = f"workspaces/workspace_sig_{category}_sys_v1p4.root"
     output_file_sig = ROOT.TFile(workspace_filename_sig, "RECREATE")
     output_file_sig.cd()
     configs_ = {}
     with open(signal_config, "r") as jfile_:
         configs_ = json.load(jfile_)
-    MH = ROOT.RooRealVar("MH","MH"       ,125, 120., 130.)
-    MH.setVal(125)
+    MH = ROOT.RooRealVar("MH","MH"       ,125.38, 120., 130.)
     MH.setConstant(True)
     shape_systematics = []
+    ws_signal = ROOT.RooWorkspace("workspace_sig","workspace_sig")
     for syst_name, is_scale in SYSTEMATICS:
         shape_systematics.append(ROOT.RooRealVar(syst_name, "", 0.0, -5.0,
                                                  5.0))
     for proc in SIGNAL_PROCS:
         proc_name = f"{proc}_cat_{category}"
+        print(proc_name)
         proc_settings = configs_[proc_name+"_nominal"]
         dMH = ROOT.RooRealVar(f"dMH_{proc_name}", "", 0.0, -2.0, 2.0)
         sigmaL = ROOT.RooRealVar(f"sigmaL_{proc_name}", "", 0.0, 0.01, 5.0)
@@ -140,7 +141,8 @@ def prepare_sig(x, category, signal_config, datacard_filename):
         sigmaL_formulastr = "@0"
         sigmaR_formulastr = "@0"
         mu_idx = 2
-        sigma_idx = 1
+        sigmaL_idx = 1
+        sigmaR_idx = 1
         for isyst in range(len(SYSTEMATICS)):
             syst_name = SYSTEMATICS[isyst][0]
             is_scale = SYSTEMATICS[isyst][1]
@@ -156,39 +158,40 @@ def prepare_sig(x, category, signal_config, datacard_filename):
                     mu_formulastr += f"*(1.0+{variation}*@{mu_idx})"
                     mu_idx += 1
             else:
+                variation1 = 0
+                variation2 = 0
                 variation1 = (((abs(proc_settings["sigmaL"]
                     -alt_settings_up["sigmaL"])+abs(proc_settings["sigmaL"]
                     -alt_settings_down["sigmaL"]))/2.0)
                     /abs(proc_settings["sigmaL"]))
-                variation2 = (((abs(proc_settings["sigmaR"]
+                if DISIGMA:
+                    variation2 = (((abs(proc_settings["sigmaR"]
                     -alt_settings_up["sigmaR"])+abs(proc_settings["sigmaR"]
                     -alt_settings_down["sigmaR"]))/2.0)
                     /abs(proc_settings["sigmaR"]))
                 if (variation1 > 0.01):
                     sigmaL_arglist.add(shape_systematics[isyst])
-                    sigmaL_formulastr += (f"*(1.0+{variation1}*@{sigma_idx})")
+                    sigmaL_formulastr += (f"*(1.0+{variation1}*@{sigmaL_idx})")
+                    sigmaL_idx +=1 
                 if (variation2 > 0.01):
                     sigmaR_arglist.add(shape_systematics[isyst])
-                    sigmaR_formulastr += (f"*(1.0+{variation2}*@{sigma_idx})")
+                    sigmaR_formulastr += (f"*(1.0+{variation2}*@{sigmaR_idx})")
+                    sigmaR_idx += 1
 
-                sigma_idx += 1
         mu_formulastr += ")+@0"
-        mu_final = ROOT.RooFormulaVar(f"mu_comb_{proc_name}","",mu_formulastr,
-            mu_arglist)
-        sigmaL_final = ROOT.RooFormulaVar(f"sigmaL_comb_{proc_name}","",
-            sigmaL_formulastr,sigma_arglist)
-        sigmaR_final = ROOT.RooFormulaVar(f"sigmaL_comb_{proc_name}","",
-            sigmaR_formulastr,sigmaR_arglist)
-        signal_model = DSCB_sys_Class(x, mu_final, sigmaL_final, sigmaR_final, dMH, sigmaL, sigmaR, proc_name, di_sigma=True)
+        mu_final = ROOT.RooFormulaVar(f"mu_comb_{proc_name}","",mu_formulastr, mu_arglist)
+        sigmaL_final = ROOT.RooFormulaVar(f"sigmaL_comb_{proc_name}","", sigmaL_formulastr,sigmaL_arglist)
+        sigmaR_final = ROOT.RooFormulaVar(f"sigmaR_comb_{proc_name}","", sigmaR_formulastr,sigmaR_arglist)
+        signal_model = DSCB_sys_Class(x, mu_final, sigmaL_final, sigmaR_final, dMH, sigmaL, sigmaR, proc_name, di_sigma=DISIGMA)
         signal_model.assignValModular(proc_settings)
-        ws_signal = ROOT.RooWorkspace("WS_"+proc_name, "WS_"+proc_name)
+        signal_model.setConst()
         getattr(ws_signal,"import")(signal_model.pdf)
         ws_signal.Write()
     output_file_sig.Close()
         
 def prepare_bkg(x, category, background_config, datacard_filename, fake_data=False):
     mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
-    rawdata_filename = datacard_filename[:-4] + "_rawdata.root"
+    rawdata_filename = "/afs/cern.ch/user/f/fanx/EOS_space/michael_files/"+datacard_filename[:-4] + "_rawdata.root"
     reader = readPico(x, rawdata_filename)
     #NOTE you MUST open output after initializing readPico
     workspace_filename = datacard_filename[:-4] + f"_{category}.root"
@@ -279,7 +282,7 @@ def write_workspace(category, datacard_filename, signal_config,
 
     # Define variables
     # For now use full range, needs to match draw_pico
-    mllg_name = f"mllg_cat_{category}"
+    mllg_name = f"CMS_hzg_mass_{category}"
     x = ROOT.RooRealVar(mllg_name, mllg_name, lowx, highx)
     nbins = int(configs_bkg_[category]["Bins"])
     x.setBinning(ROOT.RooUniformBinning(lowx, highx, nbins),'full')
@@ -292,7 +295,7 @@ def write_workspace(category, datacard_filename, signal_config,
     if not skip_bkg: 
         prepare_bkg(x, category, background_config, datacard_filename, fake_data)
         
-def append_nuisances_to_datacard(datacard_filename):
+def append_nuisances_to_datacard(datacard_filename, CATEGORIES):
     """Appends nuisance parameters to datacard
 
     Args:
@@ -304,7 +307,15 @@ def append_nuisances_to_datacard(datacard_filename):
 
 def main():
     args = parse_args()
-    write_all_workspaces(args.datacard, args.sig_config, args.bak_config)
+    if args.cat == 'ggf':
+        CATEGORIES = ["ggf4", "ggf3", "ggf2", "ggf1"]
+    elif args.cat == 'vbf':
+        CATEGORIES = ["vbf4", "vbf3", "vbf2", "vbf1"]
+    elif args.cat == 'vhtth':
+        CATEGORIES = ["tthlep", "tthhad", "vhptmiss", "vh3l", "untag"]
+    else:
+        CATEGORIES = [args.cat]
+    write_all_workspaces(args.datacard, args.sig_config, args.bak_config, CATEGORIES)
 
 if __name__=="__main__":
     main()

@@ -13,7 +13,7 @@ string to_string_with_precision(const T a_value, const int n = 6)
 }
 
 void read_condor_output(TString func, TString cat, int signal){
-  auto h = new TH1D("h", "h", 80, -4, 4);
+  auto h = new TH1D("h", "h", 200, -10, 10);
   TString nsignal = to_string(signal);
   TString file_name;
   //if (signal  == 0) file_name = "condor/"+func+"_" + cat + "/output";
@@ -85,7 +85,7 @@ void read_condor_output(TString func, TString cat, int signal){
   h->GetXaxis()->SetTitle("Pull");
   h->SetTitle(cat + " " + func +" " +nsignal+"Signal Pull");
   gStyle->SetOptFit(1);
-  latex->DrawLatexNDC(0.15, 0.8, ("Coverage = " + to_string_with_precision(ncovered/h->GetEntries(), 2)).c_str());
+  //latex->DrawLatexNDC(0.15, 0.8, ("Coverage = " + to_string_with_precision(ncovered/h->GetEntries(), 2)).c_str());
   std::cout << "n good = " << h->Integral() << std::endl;
   c->SaveAs("plots/"+func+"_" + cat+ "_pull_"+nsignal+"sig.pdf");
 }

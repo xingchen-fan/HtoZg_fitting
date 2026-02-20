@@ -247,33 +247,84 @@ class readRuiROOTggFdata:
         hist2MU_TH1 = ROOT.TH1F('ggf2mu_th1f', 'ggf2mu_th1f', 340, 95, 180)
         hist3MU_TH1 = ROOT.TH1F('ggf3mu_th1f', 'ggf3mu_th1f', 340, 95, 180)
         hist4MU_TH1 = ROOT.TH1F('ggf4mu_th1f', 'ggf4mu_th1f', 340, 95, 180)
+
+        hist1_TH1_run2 = ROOT.TH1F('ggf1_th1f_run2', 'ggf1_th1f_run2', 360, 90, 180)
+        hist2_TH1_run2 = ROOT.TH1F('ggf2_th1f_run2', 'ggf2_th1f_run2', 360, 90, 180)
+        hist3_TH1_run2 = ROOT.TH1F('ggf3_th1f_run2', 'ggf3_th1f_run2', 360, 90, 180)
+        hist4_TH1_run2 = ROOT.TH1F('ggf4_th1f_run2', 'ggf4_th1f_run2', 360, 90, 180)
+        hist12_TH1_run2 = ROOT.TH1F('ggf12_th1f_run2', 'ggf12_th1f_run2', 360, 90, 180)
+        hist1_TH1_run3 = ROOT.TH1F('ggf1_th1f_run3', 'ggf1_th1f_run3', 360, 90, 180)
+        hist2_TH1_run3 = ROOT.TH1F('ggf2_th1f_run3', 'ggf2_th1f_run3', 360, 90, 180)
+        hist3_TH1_run3 = ROOT.TH1F('ggf3_th1f_run3', 'ggf3_th1f_run3', 360, 90, 180)
+        hist4_TH1_run3 = ROOT.TH1F('ggf4_th1f_run3', 'ggf4_th1f_run3', 360, 90, 180)
+        hist12_TH1_run3 = ROOT.TH1F('ggf12_th1f_run3', 'ggf12_th1f_run3', 360, 90, 180)
         for entry in chain:
             if entry.ll_lepid == 11 and entry.njet < 2:
                 if entry.BDT_score > bdt1 and entry.met < 90:
                     hist1EL_TH1.Fill(entry.llphoton_refit_m)
                     hist1.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist1_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist1_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt2 and entry.BDT_score < bdt1 and entry.met < 90:
                     hist2EL_TH1.Fill(entry.llphoton_refit_m)
                     hist2.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist2_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist2_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt3 and entry.BDT_score < bdt2 and entry.met < 90:
                     hist3EL_TH1.Fill(entry.llphoton_refit_m)
                     hist3.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist3_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist3_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > -1 and entry.BDT_score < bdt3 and entry.met < 90:
                     hist4EL_TH1.Fill(entry.llphoton_refit_m)
                     hist4.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist4_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist4_TH1_run2.Fill(entry.llphoton_refit_m)
             elif entry.ll_lepid == 13 and entry.njet < 2:
                 if entry.BDT_score > bdt1 and entry.met < 90:
                     hist1MU_TH1.Fill(entry.llphoton_refit_m)
                     hist1.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist1_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist1_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt2 and entry.BDT_score < bdt1 and entry.met < 90:
                     hist2MU_TH1.Fill(entry.llphoton_refit_m)
                     hist2.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist2_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist2_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt3 and entry.BDT_score < bdt2 and entry.met < 90:
                     hist3MU_TH1.Fill(entry.llphoton_refit_m)
                     hist3.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist3_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist3_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > -1 and entry.BDT_score < bdt3 and entry.met < 90:
                     hist4MU_TH1.Fill(entry.llphoton_refit_m)
                     hist4.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist4_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist4_TH1_run2.Fill(entry.llphoton_refit_m)
 
         self.ggf1_el = ROOT.RooDataHist('hist_ggf1_data_el', 'hist_ggf1_data_el', x, hist1EL_TH1)
         self.ggf2_el = ROOT.RooDataHist('hist_ggf2_data_el', 'hist_ggf2_data_el', x, hist2EL_TH1)
@@ -289,6 +340,18 @@ class readRuiROOTggFdata:
         self.ggf2 = ROOT.RooDataHist('hist_ggf2_data', 'hist_ggf2_data', x, hist2)
         self.ggf3 = ROOT.RooDataHist('hist_ggf3_data', 'hist_ggf3_data', x, hist3)
         self.ggf4 = ROOT.RooDataHist('hist_ggf4_data', 'hist_ggf4_data', x, hist4)
+
+        self.ggf1_run2 = ROOT.RooDataHist('hist_ggf1_data_run2', 'hist_ggf1_data_run2', x, hist1_TH1_run2)
+        self.ggf2_run2 = ROOT.RooDataHist('hist_ggf2_data_run2', 'hist_ggf2_data_run2', x, hist2_TH1_run2)
+        self.ggf3_run2 = ROOT.RooDataHist('hist_ggf3_data_run2', 'hist_ggf3_data_run2', x, hist3_TH1_run2)
+        self.ggf4_run2 = ROOT.RooDataHist('hist_ggf4_data_run2', 'hist_ggf4_data_run2', x, hist4_TH1_run2)
+        self.ggf12_run2 = ROOT.RooDataHist('hist_ggf12_data_run2', 'hist_ggf12_data_run2', x, hist12_TH1_run2)
+
+        self.ggf1_run3 = ROOT.RooDataHist('hist_ggf1_data_run3', 'hist_ggf1_data_run3', x, hist1_TH1_run3)
+        self.ggf2_run3 = ROOT.RooDataHist('hist_ggf2_data_run3', 'hist_ggf2_data_run3', x, hist2_TH1_run3)
+        self.ggf3_run3 = ROOT.RooDataHist('hist_ggf3_data_run3', 'hist_ggf3_data_run3', x, hist3_TH1_run3)
+        self.ggf4_run3 = ROOT.RooDataHist('hist_ggf4_data_run3', 'hist_ggf4_data_run3', x, hist4_TH1_run3)
+        self.ggf12_run3 = ROOT.RooDataHist('hist_ggf12_data_run3', 'hist_ggf12_data_run3', x, hist12_TH1_run3)
 
 class readRuiROOTVBFdata:
     def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
@@ -318,7 +381,18 @@ class readRuiROOTVBFdata:
         hist3_TH1_mu = ROOT.TH1F('vbf3_th1f_mu', 'vbf3_th1f_mu', 360, 90, 180)
         hist4_TH1_mu = ROOT.TH1F('vbf4_th1f_mu', 'vbf4_th1f_mu', 360, 90, 180)
         hist12_TH1_mu = ROOT.TH1F('vbf12_th1f_mu', 'vbf12_th1f_mu', 360, 90, 180)
-        
+
+        hist1_TH1_run2 = ROOT.TH1F('vbf1_th1f_run2', 'vbf1_th1f_run2', 360, 90, 180)
+        hist2_TH1_run2 = ROOT.TH1F('vbf2_th1f_run2', 'vbf2_th1f_run2', 360, 90, 180)
+        hist3_TH1_run2 = ROOT.TH1F('vbf3_th1f_run2', 'vbf3_th1f_run2', 360, 90, 180)
+        hist4_TH1_run2 = ROOT.TH1F('vbf4_th1f_run2', 'vbf4_th1f_run2', 360, 90, 180)
+        hist12_TH1_run2 = ROOT.TH1F('vbf12_th1f_run2', 'vbf12_th1f_run2', 360, 90, 180)
+        hist1_TH1_run3 = ROOT.TH1F('vbf1_th1f_run3', 'vbf1_th1f_run3', 360, 90, 180)
+        hist2_TH1_run3 = ROOT.TH1F('vbf2_th1f_run3', 'vbf2_th1f_run3', 360, 90, 180)
+        hist3_TH1_run3 = ROOT.TH1F('vbf3_th1f_run3', 'vbf3_th1f_run3', 360, 90, 180)
+        hist4_TH1_run3 = ROOT.TH1F('vbf4_th1f_run3', 'vbf4_th1f_run3', 360, 90, 180)
+        hist12_TH1_run3 = ROOT.TH1F('vbf12_th1f_run3', 'vbf12_th1f_run3', 360, 90, 180)
+
         for entry in chain:
             if entry.ll_lepid == 11 and entry.njet > 1 and entry.nbdfm == 0:
                 if entry.BDT_score > bdt1:
@@ -326,34 +400,74 @@ class readRuiROOTVBFdata:
                     hist1_TH1_el.Fill(entry.llphoton_refit_m)
                     hist12_TH1.Fill(entry.llphoton_refit_m)
                     hist12_TH1_el.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist1_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist1_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt2 and entry.BDT_score < bdt1 :
                     hist2_TH1.Fill(entry.llphoton_refit_m)
                     hist2_TH1_el.Fill(entry.llphoton_refit_m)
                     hist12_TH1.Fill(entry.llphoton_refit_m)
                     hist12_TH1_el.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist2_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist2_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt3 and entry.BDT_score < bdt2 :
                     hist3_TH1.Fill(entry.llphoton_refit_m)
                     hist3_TH1_el.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist3_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist3_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > -1 and entry.BDT_score < bdt3 :
                     hist4_TH1.Fill(entry.llphoton_refit_m)
                     hist4_TH1_el.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist4_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist4_TH1_run2.Fill(entry.llphoton_refit_m)
             if entry.ll_lepid == 13 and entry.njet > 1 and entry.nbdfm == 0:
                 if entry.BDT_score > bdt1:
                     hist1_TH1.Fill(entry.llphoton_refit_m)
                     hist1_TH1_mu.Fill(entry.llphoton_refit_m)
                     hist12_TH1.Fill(entry.llphoton_refit_m)
                     hist12_TH1_mu.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist1_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist1_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt2 and entry.BDT_score < bdt1 :
                     hist2_TH1.Fill(entry.llphoton_refit_m)
                     hist2_TH1_mu.Fill(entry.llphoton_refit_m)
                     hist12_TH1.Fill(entry.llphoton_refit_m)
                     hist12_TH1_mu.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist2_TH1_run3.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist2_TH1_run2.Fill(entry.llphoton_refit_m)
+                        hist12_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > bdt3 and entry.BDT_score < bdt2 :
                     hist3_TH1.Fill(entry.llphoton_refit_m)
                     hist3_TH1_mu.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist3_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist3_TH1_run2.Fill(entry.llphoton_refit_m)
                 elif entry.BDT_score > -1 and entry.BDT_score < bdt3 :
                     hist4_TH1.Fill(entry.llphoton_refit_m)
                     hist4_TH1_mu.Fill(entry.llphoton_refit_m)
+                    if entry.isrun3:
+                        hist4_TH1_run3.Fill(entry.llphoton_refit_m)
+                    else:
+                        hist4_TH1_run2.Fill(entry.llphoton_refit_m)
 
         self.vbf1 = ROOT.RooDataHist('hist_vbf1_data', 'hist_vbf1_data', x, hist1_TH1)
         self.vbf2 = ROOT.RooDataHist('hist_vbf2_data', 'hist_vbf2_data', x, hist2_TH1)
@@ -372,7 +486,19 @@ class readRuiROOTVBFdata:
         self.vbf3_mu = ROOT.RooDataHist('hist_vbf3_data_mu', 'hist_vbf3_data_mu', x, hist3_TH1_mu)
         self.vbf4_mu = ROOT.RooDataHist('hist_vbf4_data_mu', 'hist_vbf4_data_mu', x, hist4_TH1_mu)
         self.vbf12_mu = ROOT.RooDataHist('hist_vbf12_data_mu', 'hist_vbf12_data_mu', x, hist12_TH1_mu)
+
+        self.vbf1_run2 = ROOT.RooDataHist('hist_vbf1_data_run2', 'hist_vbf1_data_run2', x, hist1_TH1_run2)
+        self.vbf2_run2 = ROOT.RooDataHist('hist_vbf2_data_run2', 'hist_vbf2_data_run2', x, hist2_TH1_run2)
+        self.vbf3_run2 = ROOT.RooDataHist('hist_vbf3_data_run2', 'hist_vbf3_data_run2', x, hist3_TH1_run2)
+        self.vbf4_run2 = ROOT.RooDataHist('hist_vbf4_data_run2', 'hist_vbf4_data_run2', x, hist4_TH1_run2)
+        self.vbf12_run2 = ROOT.RooDataHist('hist_vbf12_data_run2', 'hist_vbf12_data_run2', x, hist12_TH1_run2)
         
+        self.vbf1_run3 = ROOT.RooDataHist('hist_vbf1_data_run3', 'hist_vbf1_data_run3', x, hist1_TH1_run3)
+        self.vbf2_run3 = ROOT.RooDataHist('hist_vbf2_data_run3', 'hist_vbf2_data_run3', x, hist2_TH1_run3)
+        self.vbf3_run3 = ROOT.RooDataHist('hist_vbf3_data_run3', 'hist_vbf3_data_run3', x, hist3_TH1_run3)
+        self.vbf4_run3 = ROOT.RooDataHist('hist_vbf4_data_run3', 'hist_vbf4_data_run3', x, hist4_TH1_run3)
+        self.vbf12_run3 = ROOT.RooDataHist('hist_vbf12_data_run3', 'hist_vbf12_data_run3', x, hist12_TH1_run3)
+
 class readRuiROOTggFSignal:
     def __init__(self, x, direct='', bdt1=0, bdt2=0, bdt3=0):
         year = ['2016', '2016APV', '2017', '2018', '2022', '2022EE', '2023', '2023BPix']
