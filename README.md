@@ -294,11 +294,11 @@ All scripts can also be run by calling the `fitting_pipeline.py` script from the
 General configuration settings for the pipeline can be found in `Config/pipeline_settings.json`. Most are self explanatory. The configuration parameter splits refers to the ways in which a signal sample may be split, in the form of a list of booleans. The order is [categories, flavors, years, production modes], with 0 denoting splitting, and 1 denoting combination.
 
 ## Plotting Features
-In the `Multi_plot/` folder, there are three important plotting scripts:
-* `multi_plot.py`: Plot selected bkg models with data sideband, controlled by the arguments.
+In the `Multi_plot/` folder, there are some important plotting scripts:
+* `multi_plot.py`: Plot selected bkg models with data sideband, controlled by the arguments. For example, `final_env_run.sh` plots the final envelopes of all the categories.
 * `money_plot_update.py`: Plot a combined S+B and data of all categories over a given range.
 * `plot_signal_errorbar.py`: Plot observed signal strength of all categories with errorbars.
-* `unblind_stage123.py`: Following the Higgs PAG [guidance](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG), there are three stages in the unblinding procedure. The plotting of each stage is conducted by this script.
+* `unblind_stage123.py`: Following the Higgs PAG [guidance](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG), there are three stages in the unblinding procedure. The plotting of each stage is conducted by this script. For examples, `unblind_run.sh` plots the stages 3 of all the categories.
 > [!NOTE]
 > When `matplotlib` is called, please use a CMSSW environment where the library is correctly installed. You may need to switch to a different environment from where you are running the rest of the scripts.
 
