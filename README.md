@@ -296,11 +296,26 @@ General configuration settings for the pipeline can be found in `Config/pipeline
 ## Plotting Features
 In the `Multi_plot/` folder, there are three important plotting scripts:
 * `multi_plot.py`: Plot selected bkg models with data sideband, controlled by the arguments.
-* `money_plot.py`: Plot a combined S+B and data of all categories over a given range (toy only before unblinding).
-* `plot_signal_errorbar.py`: Plot observed signal strength of all categories with errorbars (toy only before unblinding).
+* `money_plot_update.py`: Plot a combined S+B and data of all categories over a given range.
+* `plot_signal_errorbar.py`: Plot observed signal strength of all categories with errorbars.
+* `unblind_stage123.py`: Following the Higgs PAG [guidance](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG), there are three stages in the unblinding procedure. The plotting of each stage is conducted by this script.
 > [!NOTE]
 > When `matplotlib` is called, please use a CMSSW environment where the library is correctly installed. You may need to switch to a different environment from where you are running the rest of the scripts.
 
+## Impacts and Error Band Toys
+Systematics impact estimations are described in detail [here](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/tutorial2023/parametric_exercise/?h=impact#impacts). Relevant scripts are stored in `Errorbar_toys_and_Impact/Impact`.
+
+Stage 3 of unblinding and combined weighted plot require error bands around post-fit models. These error bands are determined from fit results of toys generated from final best fit. Run `Errorbar_toys_and_Impact/makeToys.py` to get fit results of 5000 toys:
+```
+python3 makeToys.py --inputWSFile ../Make_combine_workspaces/higgsCombine.all.unblind1.MultiDimFit.mH125.38.root --loadSnapshot MultiDimFit --nToys 5000 
+```
+Some directories hard-coded in `makeToys.py` need to be modified. Toy fit results will be saved in root files and used by `money_plot_update.py` and `unblind_stage123.py` when needed.
+
+## HIG-25-010 Final Background Configuration Files
+I put our final config files in `Config/`. For ggF and VBF, it is `config_xgboost_0207.json`. And for associated production channels, it is `config_xgboost_vhtth.json`.
+
+The final envelopes are labeled by `FT` for ggF and VBF categories and `pruneUnstable` for associated production categories.
+
 ## Reference Log
-I upload some results when I run the scripts so that you can comapre with.
+I upload some results when I run the scripts so that you can compare with.
 
