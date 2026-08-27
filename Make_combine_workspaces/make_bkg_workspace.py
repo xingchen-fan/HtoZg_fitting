@@ -24,12 +24,12 @@ ROOT.gSystem.Load('../Utilities/RooGaussStepBernstein_cxx.so')
 #ROOT.gSystem.Load('../Utilities/EXModGaus_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
-##############################################
-# This script prepares the workspaces as input of combine. 
-# Combine is needed and custom classes should be installed in combine instead!!!
-# Each function in the profile needs to be fitted before entering the workspace.
-# Signal model is fitted and fixed.
-##############################################
+#################################################################################
+# This script prepares the workspaces as input of combine.                      #
+# Combine is needed and custom classes should be installed in combine instead!!!#
+# Each function in the profile needs to be fitted before entering the workspace.#
+# Signal model is fitted and fixed.                                             #
+#################################################################################
 
 parser = argparse.ArgumentParser(description = "Make workspace")
 parser.add_argument('-c', '--cat', help="category")
@@ -77,6 +77,9 @@ if not args.test in ["FT", "CMSBias", "pruneUnstable"]:
 LOG = True
 FIT = True # 'False' to read the post-fit values from config file
 
+# Defualt penalty term 0.5
+PENALTY = 0.5
+
 # Define variables
 x = ROOT.RooRealVar("CMS_hzg_mass_"+CAT_merge, "CMS_hzg_mass_"+CAT_merge, lowx, highx)
 y = ROOT.RooRealVar("y", "photon pT", 15., 1000.)
@@ -122,7 +125,7 @@ if args.type == 'dat':
         data = ROOT.RooDataSet('data', 'data', read_data, ROOT.RooArgList(x, y, bdt, w, w_year, year, lep, ph_eta, nlep, njet),'')
         hist_data = ROOT.RooDataHist('hist_data','hist_data', x, data)
         
-if args.type == 'pico':
+elif args.type == 'pico':
     read_data = readPico(x, '~/EOS_space/michael_files/hzg_datacard_v1p4p0_rawdata.root', CAT_m, "data_obs")
     hist_data = getattr(read_data, f"data_obs_cat_{CAT_m}")
 else:
@@ -160,11 +163,13 @@ profile = profile_.testSelection(args.test)
 print("done profile")
 stat_list = []
 cuthist = hist_data.reduce(ROOT.RooFit.CutRange('left,right'))
+
 error = ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson)
 for model in profile:
     #model.pdf.SetNameTitle(model.pdf.GetName()+TAG,model.pdf.GetName()+TAG)
     stat_list.append(ROOT.RooNLLVar("stat_"+model.pdf.GetName(), "stat_"+model.pdf.GetName(), model.SBpdf,  cuthist))
 print("stats done")
+
 eps = 0.1
 strategy = 0
 stat_vals = []
@@ -181,7 +186,7 @@ for ind, stat in enumerate(stat_list):
         nFloat = profile[ind].pdf.getParameters(hist_data).selectByAttrib('Constant',False).getSize()
     stat_vals.append(stat.getVal() + 0.5*nFloat)
     print (profile[ind].name,' = ', nFloat)
-    print('NLL = ', stat.getVal() + 0.5*nFloat)
+    print('NLL = ', stat.getVal() + PENALTY*nFloat)
 for model in profile:
     model.checkBond()
 
@@ -217,7 +222,7 @@ for model in profile:
 multipdf = ROOT.RooMultiPdf("multipdf_"+CAT, "MultiPdf for "+CAT, cate, models)
 
 # Penalty term
-#multipdf.setCorrectionFactor(0.0)
+multipdf.setCorrectionFactor(PENALTY)
 
 norm = ROOT.RooRealVar("multipdf_"+ CAT + "_norm", "Number of background events", N, 0, 3*N)
 if args.asimov == 0:
@@ -252,10 +257,8 @@ if CDF:
     print ('Significance = ', N_sig_window/math.sqrt(N*(cdf_high - cdf_low)))
 
 
-#plotClass(x, hist_asimov, tot_model, tot_model, title="Asimov", output_dir="", sideBand = False)
-
 # Plot it
-multiPlotClass(x, hist_data, profile, title="Profile_"+ args.name + "_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = True)
+multiPlotClass(x, hist_data, profile, title="Profile_"+ args.name + "_" +CAT, output_dir="", sideBand=True, fitRange= 'left,right', best_index = best_, bestLabel = False, fullRatio = False, ratio_range = [0,2])
 #profile_.write_config_file(cuthist, "CMSBias")
 
 # Create toy histogram (depreciated)

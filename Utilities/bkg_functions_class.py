@@ -16,9 +16,9 @@ class AGGClass:
         self.y = ROOT.RooFormulaVar("agg_y_"+cat, "(@1 > 0.01)? -1.0/log(1-@1*(@0-@3)/@2) : (@0-@3)/@2", ROOT.RooArgList(x, self.kappa, self.alpha, self.zeta))
         
         # For HCom check, rewrite it in ROOT.RooGenericPdf
-        #self.pdf = ROOT.RooGenericPdf("agg_" + cat + "_model", "agg_" + cat + "_model", "TMath::Gaus(((-1.0/@1)*TMath::Log(1.0 - @1*(@0 - @3)/@2))*(@1>0.01 || @1<0.01) + (@1<=0.01 && @1>=0.01)*((@0-@3)/@2),1.0)/(@2-@1*(@0-@3))", ROOT.RooArgList(x, self.kappa, self.alpha, self.zeta))
+        self.pdf = ROOT.RooGenericPdf("agg_" + cat + "_model", "agg_" + cat + "_model", "TMath::Gaus(((-1.0/@1)*TMath::Log(1.0 - @1*(@0 - @3)/@2))*(@1>0.01 || @1<0.01) + (@1<=0.01 && @1>=0.01)*((@0-@3)/@2),1.0)/(@2-@1*(@0-@3))", ROOT.RooArgList(x, self.kappa, self.alpha, self.zeta))
 
-        self.pdf = ROOT.AsymGenGaussian("agg_"+cat+"_model", "agg_"+cat, x, self.kappa, self.alpha, self.zeta, x_low, x_high)
+        #self.pdf = ROOT.AsymGenGaussian("agg_"+cat+"_model", "agg_"+cat, x, self.kappa, self.alpha, self.zeta, x_low, x_high)
         self.SBpdf = ROOT.RooGenericPdf("agg_SB_"+cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
         self.name = "agg_"+cat
     def checkBond(self):
@@ -36,9 +36,10 @@ class EXMGClass:
     def __init__(self, x, cat="", mu_init = 110.0, sig_init = 1.0, xsi_init = 0.5, x_low = 100., x_high = 180.):
         self.init_list = [mu_init, sig_init, xsi_init]
         self.mu = ROOT.RooRealVar("exmg_mu_" + cat, "exmg_mu_" + cat, mu_init, 95, 180)
-        self.sig = ROOT.RooRealVar("exmg_sig_" + cat, "exmg_sig_" + cat, sig_init, 0, 10.0)
+        self.sig = ROOT.RooRealVar("exmg_sig_" + cat, "exmg_sig_" + cat, sig_init, 0, 20.0)
         self.xsi = ROOT.RooRealVar("exmg_xsi_" + cat, "exmg_xsi_" + cat, xsi_init, -5.0, 1000.0) #When written this is lambda, did not want to overwrite lambda functionality\
-        self.pdf = ROOT.EXModGaus("exmg_"+cat+"_model", "exmg_"+cat, x, self.mu, self.sig, self.xsi, x_low, x_high)
+        #self.pdf = ROOT.EXModGaus("exmg_"+cat+"_model", "exmg_"+cat, x, self.mu, self.sig, self.xsi, x_low, x_high)
+        self.pdf = ROOT.RooGenericPdf("exmg_" + cat + "_model", "exmg" + cat + "_model", "@3/2.0 * exp( @3/2.0 * (2.0*@1 + @3*@2*@2 - 2.0*@0))*erfc( (@1 + @3*@2*@2 -@0)/(1.41421356237*@2))",ROOT.RooArgList(x, self.mu, self.sig, self.xsi))
         self.SBpdf = ROOT.RooGenericPdf("exmg_SB_"+cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
         self.name = "exmg_"+cat
     def checkBond(self):
@@ -964,9 +965,9 @@ class ModGausClass:
         self.power = ROOT.RooFormulaVar("modg_power_"+cat, "@1 + @2*(@0 - @3)/(@4-@3)", ROOT.RooArgList(x, self.vl, self.vr, self.xlow, self.xhigh))
         
         # For HCom check, rewrite it in ROOT.RooGenericPdf
-        #self.pdf = ROOT.RooGenericPdf("modg_"+cat+"_model", "exp(-1*pow(fabs((@0-@1)/@2), @3))", ROOT.RooArgList(x,self.m0,self.width,self.power))
+        self.pdf = ROOT.RooGenericPdf("modg_"+cat+"_model", "exp(-1*pow(fabs((@0-@1)/@2), @3))", ROOT.RooArgList(x,self.m0,self.width,self.power))
 
-        self.pdf = ROOT.ModGaus("modg_"+cat+"_model","modg_"+cat+"_model", x, self.m0, self.vl, self.vr, self.s0, self.sl, self.sh, lowx, highx)
+        #self.pdf = ROOT.ModGaus("modg_"+cat+"_model","modg_"+cat+"_model", x, self.m0, self.vl, self.vr, self.s0, self.sl, self.sh, lowx, highx)
         self.SBpdf = ROOT.RooGenericPdf("modg_SB_" +cat + "_model", "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", ROOT.RooArgList(x, self.pdf))
         self.name = "modg_"+ cat
     def checkBond(self):

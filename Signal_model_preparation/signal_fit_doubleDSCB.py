@@ -48,7 +48,7 @@ with open(args.config, "r") as config_file:
 for lep in ["el", "mu"]:
     model_name = f"Htozg_{lep}_cat_{CAT}_nominal"
     model_params = {}
-    sig_model = DSCB_Class(x, MH, CAT+'_'+lep,  sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 8, nR_bond = 100, alphaL_init = 1.5, alphaR_init = 1.5, di_sigma = True)
+    sig_model = DSCB_Class(x, MH, CAT+'_'+lep,  sigmaL_init = 1.2, sigmaR_init = 1.2, nL_init = 4, nL_bond = 100, nR_init = 8, nR_bond = 100, alphaL_init = 1.5, alphaR_init = 1.5, di_sigma = False)
     if lep=="el":
         fit_hist = hist_el
     elif lep=="mu":

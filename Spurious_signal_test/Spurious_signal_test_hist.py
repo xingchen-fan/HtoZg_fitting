@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-conB', '--configB', help = 'Bkg configuration')
 parser.add_argument('-conS', '--configS', help = 'Sig configuration')
+
 args = parser.parse_args() 
 jfile = open(args.configB, 'r')
 jfile_s = open(args.configS, 'r')
@@ -35,30 +36,47 @@ lowx = setting["Range"][0]
 highx = setting["Range"][1]
 nbins = int(setting["Bins"])
 
+def sideBandRatio(hist, sst_hist):
+    x_cut = "x < 120 || x > 130"
+    red_hist = hist.reduce(x_cut)
+    #print('data ', hist.sumEntries())
+    #print('data_sb ', red_hist.sumEntries())
+    data_sb = red_hist.sumEntries()
+    bin_low  = sst_hist.GetXaxis().FindBin(120)
+    bin_high = sst_hist.GetXaxis().FindBin(130)
+    sst_sb = sst_hist.Integral(1, bin_low - 1) + sst_hist.Integral(bin_high + 1, sst_hist.GetNbinsX())
+    #print('sst ', sst_hist.Integral())
+    #print('sst_sb ', sst_sb)
+    return data_sb/sst_sb
+
+
 # Define variables
 x = ROOT.RooRealVar("x", "mllg", lowx, highx)
 mu_gauss = ROOT.RooRealVar("mu_gauss","always 0"       ,0.)
 x.setBins(nbins)
+read_data = readPico(x, '~/EOS_space/michael_files/hzg_datacard_v1p4p0_rawdata.root', CAT, "data_obs")
+hist_data = getattr(read_data, f"data_obs_cat_{CAT}")
 
 # SST histograms stored in root files
 #file_open_bkg = ROOT.TFile.Open('../Data/sst_'+CAT[:3]+'_hist_nodrop.root', 'READ')
 file_open_bkg = ROOT.TFile.Open('SST_'+CAT[:3]+'_hist_0924.root', 'READ')
 #file_open_sig = ROOT.TFile.Open('../Data/sst_ggf_sig_hist_drop.root', 'READ')
 hist_bkg_TH1 = file_open_bkg.Get(CAT+'_dy_sm')
-#hist_sig_TH1 = file_open_sig.Get('hist_sig_'+CAT)
+ratio = sideBandRatio(hist_data, hist_bkg_TH1)
+hist_bkg_TH1.Scale(ratio)
+
 
 hist_bkg = ROOT.RooDataHist('hist_bkg', 'hist_bkg', x, hist_bkg_TH1)
 #hist_sig = ROOT.RooDataHist('hist_sig', 'hist_sig', x, hist_sig_TH1)
 
 # Define bkg and sig model
-MH = ROOT.RooRealVar("MH","MH"       ,125)#, 120., 130.)
+MH = ROOT.RooRealVar("MH","MH"       ,125.38)#, 120., 130.)
 profile = profileClass(x, mu_gauss, CAT, args.configB)
 
+# Select bkg models to test
 bkg_list = profile.testSelection("Chi2")
-#bkg_list = [profile.lau4_model]#, profile.lau3_model, profile.lau4_model]
-#bkg_list = [profile.bern3_model, profile.bern4_model, profile.bern5_model, profile.pow1_model,profile.pow2_model, profile.lau2_model, profile.lau3_model, lau4]
-bkg_list = [profile.pow2_model]
-#bkg_list = [profile.exp1_model, profile.exp2_model, profile.exp3_model]
+#bkg_list = [profile.lau3_model, profile.lau4_model]
+
 
 # Signal model 
 #x.setRange("signal",110, 132)
@@ -67,14 +85,13 @@ bkg_list = [profile.pow2_model]
 #res.Print("V")
 #plotClass(x, hist_sig, dscb_model.pdf, bkg_model.SBpdf, "Signal_"+cat)
 
-#combine_model = combineSignal(x, MH, CAT, args.configS)
-sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = True)
+sig_model_el = DSCB_Class(x, MH, CAT+'_el', di_sigma = False)
 sig_model_el.assignVal(args.configS, cat=CAT, lep="el")
-sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = True)
+sig_model_mu = DSCB_Class(x, MH, CAT+'_mu', di_sigma = False)
 sig_model_mu.assignVal(args.configS, cat=CAT, lep="mu")
 c_el = ROOT.RooRealVar('c_el', 'c_el', sig_model_el.nsig/(sig_model_el.nsig + sig_model_mu.nsig))
 combine_model = ROOT.RooAddPdf('duo_sig_model_'+CAT, 'duo_sig_model_'+CAT, sig_model_el.pdf, sig_model_mu.pdf, c_el)
-NLL = False
+NLL = True
 
 # Bkg fit
 for bkg_model in bkg_list:
@@ -94,6 +111,7 @@ for bkg_model in bkg_list:
     bkg_model.checkBond()
     r.Print("V")
     plotClass(x, hist_bkg, bkg_model.pdf, bkg_model.SBpdf, "B_"+bkg_model.name,  note=note_, CMS = 'Simulation', fullRatio = True)
+    
 # S+B fit
     c01 = ROOT.RooRealVar("c1", "c1", hist_bkg.sumEntries(), 0, 3.* hist_bkg.sumEntries())
     c02 = ROOT.RooRealVar("c2", "c2", 0., -1000., 1000)
@@ -120,11 +138,10 @@ for bkg_model in bkg_list:
     res1.Print("V")
     NS = c02.getVal()
     delta_NS = c02.getError()
-    #plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_Poisson_"+tot_model.GetName(), note='', CMS = 'Simulation', fullRatio = True)
-
+    
     if NLL:
-        tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(False), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
-        res2 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))
+        tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(False), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))#, ROOT.RooFit.SumW2Error(True))
+        res2 = tot_model.fitTo(hist_bkg, ROOT.RooFit.Save(True), ROOT.RooFit.AsymptoticError(True), ROOT.RooFit.Strategy(0), ROOT.RooFit.PrintLevel(-1))#, ROOT.RooFit.SumW2Error(True))
         #chi2_tot = ROOT.RooNLLVar('nll', 'nll', tot_model, hist_bkg, ROOT.RooFit.AsymptoticError(True))
         #Minimizer_Chi2(chi2_tot, -1, 100, False, 0)
         #res2 = Minimizer_Chi2(chi2_tot, -1, 0.1, False, 0)
@@ -146,7 +163,7 @@ for bkg_model in bkg_list:
     print("N signal = ", NS, ", Delta Ns = ", delta_NS, ", Delta MC = ", delta_MC)
 
     plotClass(x, hist_bkg, tot_model, bkg_model.pdf, "S+B_"+tot_model.GetName(), note='#splitline{N_{S} = ' + '%.2f' % NS + ' #zeta_{S} = ' + '%.2f' % max(0., abs(NS) - 2*delta_MC) + '}{#splitline{#Delta_{MC} = '+ '%.2f' % delta_MC + '}{#splitline{#Delta_{N_{S}} = '+ '%.2f' % delta_NS+'}{#splitline{' + note1_chi2 +'}{'+note2_chi2 + '}}}}', CMS = 'Simulation', fullRatio = True)
-
+#profile.write_config_file(hist_bkg, "SST")
 
 
 

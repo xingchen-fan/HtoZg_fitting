@@ -195,17 +195,19 @@ def perform_all_category_fits(args):
     args_proxy = types.SimpleNamespace()
     args_proxy.sampletype = args.sampletype
     args_proxy.input_file = args.input_file
-    if args.variation == '': systs = ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown"]
+    if args.variation == '': systs = ["nominal", "CMS_scale_eUp", "CMS_scale_eDown","CMS_res_eUp", "CMS_res_eDown", "CMS_scale_gUp", "CMS_scale_gDown", "CMS_res_gUp", "CMS_res_gDown","CMS_scale_mUp", "CMS_scale_mDown", "CMS_res_mUp", "CMS_res_mDown"]
     else: systs = [args.variation]
     
     cats = ["ggf4","ggf3","ggf2","ggf1","vbf4","vbf3","vbf2","vbf1","vh3l",
-            "vhmet","tthhad","tthlep"]
+            "vhmet","tthhad","tthlep", "untagged"]
     if args.cat == 'ggf':
         cats = ["ggf4","ggf3","ggf2","ggf1"]
     elif args.cat == 'vbf':
         cats = ["vbf4","vbf3","vbf2","vbf1"]
     elif args.cat == 'vhtth':
         cats = ["vh3l","vhmet","tthhad","tthlep","untagged"]
+    elif args.cat == 'all':
+        cats = cats
     else:
         cats = [args.cat]
     cat_fit_processes = []

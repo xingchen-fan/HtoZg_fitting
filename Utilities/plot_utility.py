@@ -224,7 +224,7 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
 
     #Create a box to blind the signal window
     ROOT.gPad.Update()
-    if sideBand:
+    if sideBand or not sideBand:
         box = ROOT.TBox(120,0, 130, ROOT.gPad.GetFrame().GetY2())
         box.SetFillColorAlpha(16, 0.4)
         #box.SetFillStyle(3001)
@@ -234,7 +234,7 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
         hist_name = "MC Sample"
     else:
         hist_name = "Data"
-    leg = ROOT.TLegend(.7,.3,.9,.85)
+    leg = ROOT.TLegend(.75,.3,.9,.85)
     leg.SetBorderSize(1)
     #leg.SetFillColor(0)
     #leg.SetFillStyle(0)
@@ -270,13 +270,13 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     #Ratio plot seetings
     ratio.GetXaxis().SetTitleOffset(0.9)
     ratio.GetXaxis().SetTitleSize(0.2)
-    ratio.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma}/(GeV)")
+    ratio.GetXaxis().SetTitle("m_{#font[12]{ll}\gamma}(GeV)")
     ratio.GetXaxis().SetLabelSize(0.15)
     ratio.GetYaxis().SetLabelSize(0.12)
     ratio.GetYaxis().SetTitleOffset(0.2)
-    ratio.GetYaxis().SetTitleSize(0.2)
+    ratio.GetYaxis().SetTitleSize(0.14)
     ratio.GetYaxis().SetNdivisions(4)
-    ratio.GetYaxis().SetTitle("Ratio")
+    ratio.GetYaxis().SetTitle("Data/B-model")
 
     line = ROOT.TLine( x.getMin(), 1, x.getMax(), 1)
     line.SetLineColor(ROOT.kBlack)
@@ -294,11 +294,12 @@ def multiPlotClass(x, datahist, classList, title="Histogram", output_dir="plots/
     line.Draw("same")
     #Create a box2 to blind the signal window
     ROOT.gPad.Update()
-    if sideBand:
+    if sideBand or not sideBand:
         box2 = ROOT.TBox(120,ROOT.gPad.GetFrame().GetY1(), 130, ROOT.gPad.GetFrame().GetY2())
         box2.SetFillColorAlpha(16, 0.4)
         #box.SetFillStyle(3001)
         box2.Draw("same")
     can2.SaveAs(output_dir + title + ".pdf")
+    can2.SaveAs(output_dir + title + ".root")
     x.setBins(fit_nbins)
     

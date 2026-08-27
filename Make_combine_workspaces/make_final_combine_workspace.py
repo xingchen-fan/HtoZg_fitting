@@ -19,14 +19,16 @@ from multiprocessing import Process
 #ROOT.gSystem.Load('../Utilities/HZGRooPdfs_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
-##############################################
-# This script prepares the workspaces as input of combine. 
-# Combine is needed and custom classes should be installed in combine instead!!!
-# Each function in the profile needs to be fitted before entering the workspace.
-# Signal model is fitted and fixed.
-##############################################
+#################################################################################
+# This script prepares the workspaces as input of combine.                      # 
+# Combine is needed and custom classes should be installed in combine instead!!!#
+# Each function in the profile needs to be fitted before entering the workspace.#
+# Signal model is fitted and fixed.                                             #
+# This script ONLY do signal model with systematcis workspace preparation.      #
+#################################################################################
 
 DISIGMA = False
+SKIP_BKG = True
 
 #can split according to year, prod mode, whatever, currently just el vs mu
 SIGNAL_PROCS = ["Htozg_el", "Htozg_mu", "Htomm"] 
@@ -36,7 +38,8 @@ SYSTEMATICS = [("CMS_scale_e", True),
                ("CMS_res_e", False),
                ("CMS_scale_g", True),
                ("CMS_res_g", False),
-               ("CMS_scale_m", True)]
+               ("CMS_scale_m", True),
+               ("CMS_res_m", False)]
 
 rng = ROOT.TRandom3()
 
@@ -100,7 +103,7 @@ def write_all_workspaces(datacard_filename, signal_config, background_config, CA
     category_processes = []
     for category in CATEGORIES:
         category_processes.append(Process(target=write_workspace, args=
-            (category, datacard_filename, signal_config, background_config, False, True)))
+            (category, datacard_filename, signal_config, background_config, False, SKIP_BKG)))
         category_processes[-1].start()
     for icat in range(len(CATEGORIES)):
         category_processes[icat].join()

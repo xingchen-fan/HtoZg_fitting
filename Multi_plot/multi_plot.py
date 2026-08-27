@@ -21,7 +21,8 @@ parser.add_argument('-c', '--cat', help = 'Category')
 parser.add_argument('-con', '--config', help = 'Configuration')
 parser.add_argument('-t', '--test', help = 'Test name')
 parser.add_argument('-b', '--best', help = 'Best func index', default = -1, type=int)
-parser.add_argument('-y', '--type', help = 'Data type', default='')
+parser.add_argument('-y', '--type', help = 'Data type', default='pico')
+parser.add_argument('-yr', '--yRange', help = 'Ratio y Range', type = float, nargs = 2, default=[0, 2])
 
 args = parser.parse_args()
 CAT = args.cat
@@ -60,4 +61,4 @@ else:
 print('N data = ', hist_data.sumEntries())
 profile = profileClass(x, mu_gauss, CAT, args.config)
 bkg_list = profile.testSelection(args.test)
-multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = True, fitRange = 'left,right',best_index = args.best, CMS = "Preliminary", fullRatio = False, ratio_range=[0, 4], bestLabel = args.best > -1, leg_text_size = 0.05)
+multiPlotClass(x, hist_data, bkg_list, title=args.test+'_'+CAT, output_dir="plots/",sideBand = False, fitRange = 'left,right',best_index = args.best, CMS = "Supplementary", fullRatio = False, ratio_range=args.yRange, bestLabel = args.best > -1, leg_text_size = 0.05)
