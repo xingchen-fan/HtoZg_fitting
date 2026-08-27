@@ -36,6 +36,15 @@ RooDataSet *oneToy  = (RooDataSet *)dir->Get(("toy_" + std::to_string(index)).c_
 return *oneToy;
 }
 """)
+ROOT.gInterpreter.Declare("""
+RooDataSet readPostfitToy(TString filename, int& index){
+auto file_ = new TFile(filename, "READ");
+TDirectoryFile *dir = (TDirectoryFile *)file_->Get("toys");
+RooDataSet *oneToy  = (RooDataSet *)dir->Get(("toy_" + std::to_string(index)).c_str());
+return *(static_cast<RooDataSet*>(oneToy->reduce("CMS_channel==1")));
+}
+""")
+
 ROOT.gInterpreter.AddIncludePath('../../Utilities/RooGaussStepBernstein.h')
 ROOT.gSystem.Load('../../Utilities/RooGaussStepBernstein_cxx.so')
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
@@ -49,6 +58,7 @@ parser.add_argument('-conB', '--configB', help = "Configuration Bkg")
 parser.add_argument('-conS', '--configS', help = "Configuration Sig")
 parser.add_argument('-s', '--sig', help = "Signal injection", default = 0)
 parser.add_argument('-t', '--test', help = "Test profile", default = 'FT')
+parser.add_argument('-p', '--post', help = "Postfit toys?", default = False) 
 
 args = parser.parse_args()
 jfile_s = open(args.configS, 'r')
@@ -274,14 +284,17 @@ for j in range(int(args.Ntoys)):
     scan_list = []      
     #x.setBins(nbins)
     #hist_toy = entry.pdf.generateBinned(x, ROOT.RooFit.NumEvents(generator.Poisson(N)))
-    file_ = '../../Make_combine_workspaces/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.38.123456.root'
+    file_ = '../../Make_combine_workspaces/postfit_toys/higgsCombine.'+str(insig)+'sig.'+args.func+'.'+ CAT+'.GenerateOnly.mH125.38.123456.root'
     print("file = ", file_)
 
     # Functions to test
     profile_class = profileClass(x, mu_gauss, CAT, args.configB)
     profile = profile_class.testSelection(args.test)
-    
-    hist_toy = ROOT.readToy(file_, cppj)
+
+    if args.post:
+        hist_toy = ROOT.readPostfitToy(file_, cppj)
+    else:
+        hist_toy = ROOT.readToy(file_, cppj)
     list = profileFit(profile, dscb_model, hist_toy)
     if list[4][0:3] == "BAD":
         bad += 1
